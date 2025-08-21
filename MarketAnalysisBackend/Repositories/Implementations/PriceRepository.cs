@@ -16,13 +16,13 @@ namespace MarketAnalysisBackend.Repositories.Implementations
         public async Task<IEnumerable<PricePoint>> GetPricesAsync(string symbol, DateTime? from, DateTime? to)
         {
             var query = _context.PricePoints
-                .Include(p => p.Assets)
-                .Where(p => p.Assets.Symbol == symbol);
+                .Include(p => p.Asset)
+                .Where(p => p.Asset.Symbol == symbol);
 
             if (from.HasValue) query = query.Where(p => p.TimestampUtc >= from.Value);
             if (to.HasValue) query = query.Where(p => p.TimestampUtc  <= to.Value);
 
-            return await query.OrderBy(p => p.TimestampUtc).ToListAsync();
+            return await query.ToListAsync();
         }
 
         public async Task DeleteAllAsync()
