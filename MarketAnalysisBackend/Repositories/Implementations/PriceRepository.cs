@@ -1,5 +1,6 @@
 ﻿using MarketAnalysisBackend.Data;
 using MarketAnalysisBackend.Models;
+using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,38 @@ namespace MarketAnalysisBackend.Repositories.Implementations
                 Source = p.Source
             }).ToListAsync();
         }
+        public async Task<IEnumerable<OhlcDto>> GetPricesAsync(string symbol, string timeframe, DateTime? from, DateTime? to)
+        {
+            var query = _context.PricePoints
+                           .Include(p => p.Asset)
+                           .Where(p => p.Asset.Symbol == symbol);
+
+            if (from.HasValue)
+                query = query.Where(p => p.TimestampUtc >= from.Value);
+            if (to.HasValue)
+                query = query.Where(p => p.TimestampUtc <= to.Value);
+
+            var prices = await query
+                .OrderBy(p => p.TimestampUtc)
+                .ToListAsync();
+            var grouped = prices.GroupBy(p => timeframe switch
+            {
+                "1h" => new DateTime(p.TimestampUtc.Year, p.TimestampUtc.Month, p.TimestampUtc.Day, p.TimestampUtc.Hour, 0, 0),
+                "1d" => p.TimestampUtc.Date,
+                _ => p.TimestampUtc,
+            }).Select(g => new OhlcDto
+            {
+                Symbol = symbol,
+                PeriodStart = g.Key,
+                Open = g.First().Open,
+                High = g.Max(x => x.High),
+                Low = g.Min(x => x.Low),
+                Close = g.Last().Close,
+                Volume = g.Sum(x => x.Volume)
+            });
+
+            return grouped;
+        }
 
         public async Task DeleteAllAsync()
         {
@@ -53,5 +86,6 @@ namespace MarketAnalysisBackend.Repositories.Implementations
                     Source = p.Source,
                 }).ToListAsync();
         }
+
     }
 }

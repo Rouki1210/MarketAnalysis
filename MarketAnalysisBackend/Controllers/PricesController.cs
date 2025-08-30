@@ -21,6 +21,13 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(prices);
         }
 
+        [HttpGet("ohlc/{symbol}")]
+        public async Task<IActionResult> GetOhlc(string symbol, string timeframe, DateTime? from = null, DateTime? to = null)
+        {
+            var prices = await _priceService.GetOhlcDtos(symbol, timeframe, from, to);
+            return Ok(prices);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAllPrice()
         {

@@ -1,4 +1,4 @@
-﻿using MarketAnalysisBackend.Models;
+﻿using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Services.Implementations;
 
@@ -15,6 +15,10 @@ namespace MarketAnalysisBackend.Services.Interfaces
         {
             return await _priceRepo.GetPricesAsync(symbol, from, to);
         }
+        public async Task<IEnumerable<OhlcDto>> GetOhlcDtos(string symbol, string timeframe, DateTime? from, DateTime? to)
+        {
+            return await _priceRepo.GetPricesAsync (symbol, timeframe, from, to);
+        }
 
         public async Task DeleteAllAsync()
         {
@@ -25,5 +29,6 @@ namespace MarketAnalysisBackend.Services.Interfaces
         {
             return await _priceRepo.GetAllPricesAsync();
         }
+
     }
 }
