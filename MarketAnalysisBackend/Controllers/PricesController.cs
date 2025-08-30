@@ -24,8 +24,8 @@ namespace MarketAnalysisBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllPrice()
         {
-            var allPrices = await _priceService.GetAllPriceAsync();
-            return Ok(allPrices);
+            var prices = await _priceService.GetAllPriceAsync();
+            return Ok(prices);
         }
 
         [HttpDelete]

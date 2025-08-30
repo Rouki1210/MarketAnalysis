@@ -4,9 +4,9 @@ namespace MarketAnalysisBackend.Services.Implementations
 {
     public interface IPriceService 
     {
-        Task<IEnumerable<PricePoint>> GetPricePointsAsync(string symbol, DateTime? from, DateTime? to);
+        Task<IEnumerable<PricePointDTO>> GetPricePointsAsync(string symbol, DateTime? from, DateTime? to);
 
-        Task<IEnumerable<PricePoint>> GetAllPriceAsync();
+        Task<IEnumerable<PricePointDTO>> GetAllPriceAsync();
         Task DeleteAllAsync();
     }
 }

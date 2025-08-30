@@ -11,7 +11,7 @@ namespace MarketAnalysisBackend.Services.Interfaces
         {
             _priceRepo = priceRepo;
         }
-        public async Task<IEnumerable<PricePoint>> GetPricePointsAsync(string symbol, DateTime? from, DateTime? to)
+        public async Task<IEnumerable<PricePointDTO>> GetPricePointsAsync(string symbol, DateTime? from, DateTime? to)
         {
             return await _priceRepo.GetPricesAsync(symbol, from, to);
         }
@@ -21,9 +21,9 @@ namespace MarketAnalysisBackend.Services.Interfaces
            await _priceRepo.DeleteAllAsync();
         }
 
-        public Task<IEnumerable<PricePoint>> GetAllPriceAsync()
+        public async Task<IEnumerable<PricePointDTO>> GetAllPriceAsync()
         {
-            return _priceRepo.GetAllAsync();
+            return await _priceRepo.GetAllPricesAsync();
         }
     }
 }

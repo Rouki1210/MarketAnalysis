@@ -4,9 +4,12 @@ namespace MarketAnalysisBackend.Repositories.Interfaces
 {
     public interface IPriceRepository : IGenericRepository<PricePoint>
     {
-        Task<IEnumerable<PricePoint>> GetPricesAsync(string symbol, DateTime? from, DateTime? to);
+        Task<IEnumerable<PricePointDTO>> GetPricesAsync(string symbol, DateTime? from, DateTime? to);
+        Task<IEnumerable<PricePointDTO>> GetAllPricesAsync();
         Task DeleteAllAsync();
+
     }
 
 
 }
+ 
