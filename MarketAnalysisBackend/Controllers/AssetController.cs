@@ -29,5 +29,11 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(asset);
         }
 
+        [HttpDelete]
+        public async Task DeleteAsset()
+        {
+            await _assetService.DeleteAllAsync();
+        }
+
     }
 }

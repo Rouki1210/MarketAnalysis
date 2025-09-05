@@ -6,5 +6,6 @@ namespace MarketAnalysisBackend.Services.Implementations
     {
         Task<IEnumerable<Asset>> GetAllAssetsAsync();
         Task AddAssetAsync(Asset asset);
+        Task DeleteAllAsync();
     }
 }

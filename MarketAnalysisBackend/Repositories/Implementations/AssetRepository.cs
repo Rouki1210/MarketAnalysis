@@ -12,5 +12,11 @@ namespace MarketAnalysisBackend.Repositories.Implementations
         {
             _context = context;
         }
+
+        public async Task DeleteAllAsync()
+        {
+            _context.Assets.RemoveRange(_context.Assets);
+            await _context.SaveChangesAsync();
+        }
     }
 }
