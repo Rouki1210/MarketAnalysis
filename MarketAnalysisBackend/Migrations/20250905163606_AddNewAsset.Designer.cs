@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MarketAnalysisBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250813110347_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250905163606_AddNewAsset")]
+    partial class AddNewAsset
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,7 +33,15 @@ namespace MarketAnalysisBackend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Rank")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -91,13 +99,13 @@ namespace MarketAnalysisBackend.Migrations
 
             modelBuilder.Entity("MarketAnalysisBackend.Models.PricePoint", b =>
                 {
-                    b.HasOne("MarketAnalysisBackend.Models.Asset", "Assets")
+                    b.HasOne("MarketAnalysisBackend.Models.Asset", "Asset")
                         .WithMany("PricePoints")
                         .HasForeignKey("AssetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Assets");
+                    b.Navigation("Asset");
                 });
 
             modelBuilder.Entity("MarketAnalysisBackend.Models.Asset", b =>

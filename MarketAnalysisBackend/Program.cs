@@ -25,7 +25,9 @@ builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 
 builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddScoped<IPriceService, PriceService>();
+builder.Services.AddScoped<IAssetImport, AssetImporter>();
 
+builder.Services.AddHostedService<AssetImporterService>();
 builder.Services.AddHostedService<PriceDataCollector>();
 
 var app = builder.Build();

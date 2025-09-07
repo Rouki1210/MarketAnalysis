@@ -1,5 +1,6 @@
 ﻿using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Services.Implementations;
+using MarketAnalysisBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketAnalysisBackend.Controllers
@@ -9,10 +10,12 @@ namespace MarketAnalysisBackend.Controllers
     public class AssetController : ControllerBase
     {
         private readonly IAssetService _assetService;
+        private readonly IAssetImport _assetImport;
 
-        public AssetController(IAssetService assetService)
+        public AssetController(IAssetService assetService, IAssetImport assetImport)
         {
             _assetService = assetService;
+            _assetImport = assetImport;
         }
 
         [HttpGet]
@@ -34,6 +37,30 @@ namespace MarketAnalysisBackend.Controllers
         {
             await _assetService.DeleteAllAsync();
         }
+
+        [HttpPost("import")]
+        public async Task<IActionResult> ImportAssets()
+        {
+            await _assetImport.ImportAssetsAsync();
+            return Ok();
+        }
+
+        [HttpPost("importbyrank")]
+        public async Task<IActionResult> ImportAssetsByRank(
+            int fromRank,
+            int toRank,
+            [FromQuery] bool updateExisting)
+        {
+            var assets = await _assetImport.ImportAssetByRank(fromRank, toRank, updateExisting);
+            return Ok(assets);
+        }
+
+        [HttpGet("rank")]
+        public async Task<IActionResult> GetByRankRange(int from, int to)
+        {
+            var assets = await _assetImport.GetByRankRangeAsync(from, to);
+            return Ok(assets);
+        } 
 
     }
 }

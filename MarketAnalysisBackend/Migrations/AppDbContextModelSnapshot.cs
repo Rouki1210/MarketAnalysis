@@ -30,7 +30,15 @@ namespace MarketAnalysisBackend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Rank")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -88,13 +96,13 @@ namespace MarketAnalysisBackend.Migrations
 
             modelBuilder.Entity("MarketAnalysisBackend.Models.PricePoint", b =>
                 {
-                    b.HasOne("MarketAnalysisBackend.Models.Asset", "Assets")
+                    b.HasOne("MarketAnalysisBackend.Models.Asset", "Asset")
                         .WithMany("PricePoints")
                         .HasForeignKey("AssetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Assets");
+                    b.Navigation("Asset");
                 });
 
             modelBuilder.Entity("MarketAnalysisBackend.Models.Asset", b =>
