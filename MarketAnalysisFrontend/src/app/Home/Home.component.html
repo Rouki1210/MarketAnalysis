@@ -1,0 +1,53 @@
+<div class="container py-5 bg-dark min-vh-100">
+  <div class="row g-4">
+    <div *ngFor="let asset of data" class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100 text-white bg-secondary shadow-lg">
+        
+        <!-- Header -->
+        <div class="card-header d-flex justify-content-between align-items-center bg-dark">
+          <h5 class="mb-0">{{ asset.name }}</h5>
+          <span class="badge bg-primary">{{ asset.symbol }}</span>
+        </div>
+        
+        <!-- Body -->
+        <div class="card-body">
+          <p class="text-muted mb-2">Rank #{{ asset.rank }}</p>
+
+          <!-- Stats -->
+          <div class="row text-center mb-3">
+            <div class="col-6">
+              <div class="p-2 bg-dark rounded">
+                <small class="text-muted d-block">Price</small>
+                <span class="fw-bold">$110,566</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-2 bg-dark rounded">
+                <small class="text-muted d-block">Supply</small>
+                <span class="fw-bold">19,917,284</span>
+              </div>
+            </div>
+            <div class="col-6 mt-3">
+              <div class="p-2 bg-dark rounded">
+                <small class="text-muted d-block">24h Change</small>
+                <span class="fw-bold text-danger">-0.20%</span>
+              </div>
+            </div>
+            <div class="col-6 mt-3">
+              <div class="p-2 bg-dark rounded">
+                <small class="text-muted d-block">Volume</small>
+                <span class="fw-bold">$22.3B</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <p class="small text-light">
+            {{ asset.description }}
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
