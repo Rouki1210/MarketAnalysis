@@ -6,6 +6,7 @@ namespace MarketAnalysisBackend.Services.Implementations
     {
         Task<IEnumerable<Asset>> GetAllAssetsAsync();
         Task AddAssetAsync(Asset asset);
+        Task<IEnumerable<Asset>> RefreshTopAssetAsync(CancellationToken cancellationToken = default);
         Task DeleteAllAsync();
     }
 }

@@ -60,7 +60,18 @@ namespace MarketAnalysisBackend.Controllers
         {
             var assets = await _assetImport.GetByRankRangeAsync(from, to);
             return Ok(assets);
-        } 
+        }
 
+        [HttpPost("refreshTop")]
+        public async Task<IActionResult> RefreshTopAsset(CancellationToken cancellationToken = default)
+        {
+            var assets = await _assetService.RefreshTopAssetAsync(cancellationToken);
+            return Ok(new
+            {
+                Message = "Top asset refreshed successfully",
+                count = assets.Count(),
+                Assets = assets
+            });
+        }
     }
 }

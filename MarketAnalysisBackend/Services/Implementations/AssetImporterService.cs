@@ -87,7 +87,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     _logger.LogError(ex, "Error importing assets from CoinMarketCap");
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+                await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
             }
         }
     }
