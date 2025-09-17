@@ -27,8 +27,13 @@ namespace MarketAnalysisBackend.Repositories.Implementations
             {
                 Id = p.Id,
                 Symbol = p.Asset.Symbol,
-                Close = p.Close,
+                Name = p.Asset.Name,
+                Price = p.Price,
+                MarketCap = p.MarketCap,
                 Volume = p.Volume,
+                PercentChange1h = p.PercentChange1h,
+                PercentChange24h = p.PercentChange24h,
+                PercentChange7d = p.PercentChange7d,
                 TimestampUtc = p.TimestampUtc,
                 Source = p.Source
             }).ToListAsync();
@@ -80,9 +85,14 @@ namespace MarketAnalysisBackend.Repositories.Implementations
                 {
                     Id = p.Id,
                     Symbol = p.Asset.Symbol,
-                    Close = p.Close,
+                    Name = p.Asset.Name,
+                    Price = p.Price,
                     Volume = p.Volume,
                     TimestampUtc = p.TimestampUtc,
+                    MarketCap = p.MarketCap,
+                    PercentChange1h = p.PercentChange1h,
+                    PercentChange24h = p.PercentChange24h,
+                    PercentChange7d = p.PercentChange7d,
                     Source = p.Source,
                 }).ToListAsync();
         }

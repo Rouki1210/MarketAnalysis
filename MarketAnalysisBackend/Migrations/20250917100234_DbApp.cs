@@ -5,25 +5,25 @@
 namespace MarketAnalysisBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class AddNewAsset : Migration
+    public partial class DbApp : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Description",
-                table: "Assets",
-                type: "text",
+            migrationBuilder.AddColumn<decimal>(
+                name: "Price",
+                table: "PricePoints",
+                type: "numeric",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: 0m);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Description",
-                table: "Assets");
+                name: "Price",
+                table: "PricePoints");
         }
     }
 }

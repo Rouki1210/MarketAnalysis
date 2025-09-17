@@ -50,7 +50,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     client.DefaultRequestHeaders.Add("X-CMC_PRO_API_KEY", _apiKey);
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                    var url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?convert=USD";
+                    var url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=100";
                     var response = await client.GetStringAsync(url, stoppingToken);
 
                     var jsonDoc = JsonDocument.Parse(response);
@@ -68,11 +68,16 @@ namespace MarketAnalysisBackend.Services.Implementations
                         {
                             AssetId = matchAsset.Id,
                             TimestampUtc = DateTime.UtcNow,
+                            Price = quote.GetProperty("price").GetDecimal(),
                             Open = quote.GetProperty("price").GetDecimal(),
                             High = quote.GetProperty("price").GetDecimal(),
                             Low = quote.GetProperty("price").GetDecimal(),
                             Close = quote.GetProperty("price").GetDecimal(),
                             Volume = quote.GetProperty("volume_24h").GetDecimal(),
+                            MarketCap = quote.GetProperty("market_cap").GetDecimal(),
+                            PercentChange1h = quote.GetProperty("percent_change_1h").GetDecimal(),
+                            PercentChange24h = quote.GetProperty("percent_change_24h").GetDecimal(),
+                            PercentChange7d = quote.GetProperty("percent_change_7d").GetDecimal(),
                             Source = "CoinMarketCap"
                         };
 
