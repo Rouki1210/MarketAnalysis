@@ -1,19 +1,19 @@
-<div class="container py-5 bg-dark min-vh-100">
-  <div class="row g-4">
-    <div *ngFor="let asset of data" class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100 text-white bg-secondary shadow-lg">
+<div class="container mx-auto py-5 bg-gray-900 min-h-screen">
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div *ngFor="let asset of data" class="flex">
+      <div class="flex flex-col w-full bg-gray-800 text-white rounded-2xl shadow-lg overflow-hidden">
         
         <!-- Header -->
-        <div class="card-header d-flex justify-content-between align-items-center bg-dark">
-          <h5 class="mb-0">{{ asset.name }}</h5>
-          <span class="badge bg-primary">{{ asset.symbol }}</span>
+        <div class="flex justify-between items-center bg-gray-900 px-4 py-2">
+          <h5 class="text-lg font-semibold">{{ asset.name }}</h5>
+          <span class="px-2 py-1 text-xs font-medium rounded bg-blue-600">{{ asset.symbol }}</span>
         </div>
         
         <!-- Body -->
-        <div class="card-body">
-          <p class="text-muted mb-2">Rank #{{ asset.rank }}</p>
+        <div class="flex-1 px-4 py-3">
+          <p class="text-gray-400 text-sm mb-2">Rank #{{ asset.rank }}</p>
           <!-- Description -->
-          <p class="small text-light">
+          <p class="text-gray-200 text-sm">
             {{ asset.description }}
           </p>
         </div>

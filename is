@@ -1,0 +1,59 @@
+[33mcommit 2238b91958dea3af1444d3e69d8cc6b998683c5c[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: Vinh Nguyen <vinh12102004@gmail.com>
+Date:   Mon Sep 15 20:51:40 2025 +0700
+
+    update asset controller
+
+[33mcommit a156eae1bba0a1376551eb965a4953be86d65042[m
+Author: Vinh Nguyen <vinh12102004@gmail.com>
+Date:   Thu Sep 11 08:51:09 2025 +0700
+
+    test endpoint
+
+[33mcommit 5499a7fb43410aa8416a8c9d8e3b51fb35ed5058[m
+Author: Vinh Nguyen <vinh12102004@gmail.com>
+Date:   Sun Sep 7 13:50:47 2025 +0700
+
+    update BE (Get asset by rank)
+
+[33mcommit c26a9a61ffa3112857c4ce388bf6b4b10345078a[m
+Author: Vinh Nguyen <vinh12102004@gmail.com>
+Date:   Fri Sep 5 20:22:56 2025 +0700
+
+    update data DTO
+
+[33mcommit 5ffabe0f08273ccae990648d1e63c128a8ff1eac[m
+Author: Vinh Nguyen <vinh12102004@gmail.com>
+Date:   Sat Aug 30 19:23:12 2025 +0700
+
+    update Ohlc
+
+[33mcommit 21dc8356a76d16ba26f06c0a40fbde0783ad1ffe[m
+Author: Vinh Nguyen <vinh12102004@gmail.com>
+Date:   Sat Aug 30 17:40:58 2025 +0700
+
+    fix bug get data
+
+[33mcommit 98d9642eae8822e40eb8e1306c52588599e45498[m
+Author: Vinh Nguyen <vinh12102004@gmail.com>
+Date:   Thu Aug 21 11:21:58 2025 +0700
+
+    front-end
+
+[33mcommit ff94468d856c5ba0f052518ffb022e952c26535a[m
+Author: Vinh Nguyen <vinh12102004@gmail.com>
+Date:   Thu Aug 21 11:17:58 2025 +0700
+
+    front-end
+
+[33mcommit 55471802fbd04cfd88b6682e949b3601ecf77da1[m
+Author: Vinh Nguyen <vinh12102004@gmail.com>
+Date:   Thu Aug 14 15:29:05 2025 +0700
+
+    Add project files.
+
+[33mcommit 3e564c9ae0de310b06cdd447d4efa2a4da7fa15c[m
+Author: Vinh Nguyen <vinh12102004@gmail.com>
+Date:   Thu Aug 14 15:29:04 2025 +0700
+
+    Add .gitattributes and .gitignore.
