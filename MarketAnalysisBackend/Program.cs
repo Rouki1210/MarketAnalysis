@@ -17,6 +17,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection"))
 );
+//builder.Services.AddScoped<Supabase.Client>(sp =>
+//{
+//    var url = builder.Configuration["Supabase:Url"];
+//    var key = builder.Configuration["Supabase:Key"];
+//    return new Supabase.Client(url, key);
+//});
 builder.Services.AddHttpClient();
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -51,6 +57,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAngular");
+
+app.MapGet("/ping", () => "pong");
 
 app.UseHttpsRedirection();
 

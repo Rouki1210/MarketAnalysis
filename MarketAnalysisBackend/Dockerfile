@@ -1,27 +1,37 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+﻿# syntax=docker/dockerfile:1
+ARG DOTNET_VERSION=8.0
 
-#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
-#For more information, please see https://aka.ms/containercompat
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-1809 AS base
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS builder
 WORKDIR /app
+
+COPY --link MarketAnalysisBackend.csproj ./ 
+RUN --mount=type=cache,target=/root/.nuget/packages \ 
+	--mount=type=cache,target=/root/.cache/msbuild \ 
+	dotnet restore "MarketAnalysisBackend.csproj"
+
+# Đảm bảo có source nuget.org
+RUN dotnet nuget remove source nuget.org || true
+RUN dotnet nuget add source https://api.nuget.org/v3/index.json -n nuget.org
+
+# Restore với no-cache
+RUN dotnet restore "MarketAnalysisBackend.csproj" --no-cache
+
+# Copy toàn bộ source code
+COPY . ./
+
+
+# Build & publish
+RUN dotnet publish "MarketAnalysisBackend.csproj" -c Release -o /app/publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION} AS final
+WORKDIR /app/publish
+
+RUN useradd -m appuser
+USER appuser
+
+COPY --from=builder /app/publish .
+
 EXPOSE 8080
 EXPOSE 8081
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-nanoserver-1809 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["MarketAnalysisBackend.csproj", "."]
-RUN dotnet restore "./MarketAnalysisBackend.csproj"
-COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./MarketAnalysisBackend.csproj" -c %BUILD_CONFIGURATION% -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./MarketAnalysisBackend.csproj" -c %BUILD_CONFIGURATION% -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MarketAnalysisBackend.dll"]
