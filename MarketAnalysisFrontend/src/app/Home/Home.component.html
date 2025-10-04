@@ -14,14 +14,13 @@
 
       <!-- Table Body -->
       <tbody>
-        <tr *ngFor="let asset of data" 
-            class="border-b border-gray-700 hover:bg-gray-800 transition">
-          
+        <tr *ngFor="let asset of data" class="border-b border-gray-700 hover:bg-gray-800 transition">
+
           <!-- Rank -->
           <td class="px-6 py-4 font-medium text-gray-400">
             {{ asset.rank }}
           </td>
-          
+
           <!-- Name + Symbol -->
           <td class="px-6 py-4 flex items-center space-x-2">
             <img [src]="asset.logo" alt="{{ asset.symbol }}" class="w-6 h-6 rounded-full">
@@ -35,8 +34,7 @@
           </td>
 
           <!-- 24h % -->
-          <td class="px-6 py-4 font-medium" 
-              [ngClass]="asset.change24h >= 0 ? 'text-green-500' : 'text-red-500'">
+          <td class="px-6 py-4 font-medium" [ngClass]="asset.change24h >= 0 ? 'text-green-500' : 'text-red-500'">
             {{ asset.change24h | number:'1.2-2' }}%
           </td>
 
@@ -47,5 +45,9 @@
         </tr>
       </tbody>
     </table>
+    <h1>Latest Price</h1>
+    <div *ngIf="latestPrice">
+      {{ latestPrice.asset }}: {{ latestPrice.price | number:'1.2-2' }} USD ({{ latestPrice.change24h | number:'1.2-2' }}%)
+    </div>
   </div>
 </div>

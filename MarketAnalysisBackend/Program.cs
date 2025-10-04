@@ -1,4 +1,5 @@
 using MarketAnalysisBackend.Data;
+using MarketAnalysisBackend.Hubs;
 using MarketAnalysisBackend.Repositories.Implementations;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Services.Implementations;
@@ -11,12 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection"))
 );
+
+builder.Services.AddSignalR();
 //builder.Services.AddScoped<Supabase.Client>(sp =>
 //{
 //    var url = builder.Configuration["Supabase:Url"];
@@ -43,7 +45,8 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("http://localhost:4200") // Angular dev server
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials();
         });
 });
 
@@ -58,7 +61,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAngular");
 
-app.MapGet("/ping", () => "pong");
+app.MapHub<PriceHub>("/pricehub");
 
 app.UseHttpsRedirection();
 

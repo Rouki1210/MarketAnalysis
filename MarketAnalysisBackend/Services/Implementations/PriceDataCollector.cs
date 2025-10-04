@@ -1,5 +1,7 @@
-﻿using MarketAnalysisBackend.Models;
+﻿using MarketAnalysisBackend.Hubs;
+using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Repositories.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
@@ -13,17 +15,20 @@ namespace MarketAnalysisBackend.Services.Implementations
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly string _apiKey;
+        private readonly IHubContext<PriceHub> _hubContext;
 
         public PriceDataCollector(
             ILogger<PriceDataCollector> logger,
             IHttpClientFactory httpClientFactory,
             IServiceScopeFactory serviceScopeFactory,
-            IConfiguration config)
+            IConfiguration config,
+            IHubContext<PriceHub> hubContext)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
             _serviceScopeFactory = serviceScopeFactory;
             _apiKey = config["CoinMarketCap:ApiKey"] ?? throw new Exception("API key missing");
+            _hubContext = hubContext;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -57,11 +62,11 @@ namespace MarketAnalysisBackend.Services.Implementations
                     var dataArray = jsonDoc.RootElement.GetProperty("data").EnumerateArray();
 
                     // Fetch OHLC data for specific symbols
-                    var symbols = string.Join(",", assets.Select(a => a.Symbol));
-                    var urlOhlc = "https://pro-api.coinmarketcap.com/v2/cryptocurrency/ohlcv/latest?symbol={symbols}";
-                    var responseOhlc = await client.GetStringAsync(urlOhlc, stoppingToken);
-                    var jsonDocOhlc = JsonDocument.Parse(responseOhlc);
-                    var ohlcData = jsonDocOhlc.RootElement.GetProperty("data");
+                    //var symbols = string.Join(",", assets.Select(a => a.Symbol));
+                    //var urlOhlc = $"https://pro-api.coinmarketcap.com/v2/cryptocurrency/ohlcv/latest?symbol={symbols}";
+                    //var responseOhlc = await client.GetStringAsync(urlOhlc, stoppingToken);
+                    //var jsonDocOhlc = JsonDocument.Parse(responseOhlc);
+                    //var ohlcData = jsonDocOhlc.RootElement.GetProperty("data");
 
 
                     foreach (var coin in dataArray)
@@ -72,8 +77,9 @@ namespace MarketAnalysisBackend.Services.Implementations
 
                         var quote = coin.GetProperty("quote").GetProperty("USD");
 
-                        if (!ohlcData.TryGetProperty(symbol, out var ohlcEntry)) continue;
-                        var usdOhlc = ohlcEntry.GetProperty("quotes")[0].GetProperty("quote").GetProperty("USD");
+                        //if (!ohlcData.TryGetProperty(symbol, out var ohlcEntry)) continue;
+                        //var usdOhlc = ohlcEntry.GetProperty("quotes")[0].GetProperty("quote").GetProperty("USD");
+                        //var ts = ohlcEntry.GetProperty("quotes")[0].GetProperty("timestamp").GetDateTime();
 
                         var pricePoint = new PricePoint
                         {
@@ -82,10 +88,10 @@ namespace MarketAnalysisBackend.Services.Implementations
                             Price = quote.GetProperty("price").GetDecimal(),
 
                             //using OHLC data from OHLC endpoint
-                            Open = usdOhlc.GetProperty("open").GetDecimal(),
-                            High = quote.GetProperty("high").GetDecimal(),
-                            Low = quote.GetProperty("low").GetDecimal(),
-                            Close = quote.GetProperty("close").GetDecimal(),
+                            //Open = usdOhlc.GetProperty("price").GetDecimal(),
+                            //High = usdOhlc.GetProperty("high").GetDecimal(),
+                            //Low = usdOhlc.GetProperty("low").GetDecimal(),
+                            //Close = usdOhlc.GetProperty("close").GetDecimal(),
 
                             //using quotes endpoint
                             Volume = quote.GetProperty("volume_24h").GetDecimal(),
@@ -97,6 +103,25 @@ namespace MarketAnalysisBackend.Services.Implementations
                         };
 
                         await priceRepo.AddAsync(pricePoint);
+
+                        var message = new
+                        {
+                            type = "price_update",
+                            data = new
+                            {
+                                asset = symbol,
+                                timestamp = DateTime.UtcNow,
+                                price = pricePoint.Price,
+                                open = pricePoint.Open,
+                                high = pricePoint.High,
+                                low = pricePoint.Low,
+                                close = pricePoint.Close,
+                                change24h = pricePoint.PercentChange24h,
+                                marketCap = pricePoint.MarketCap,
+                                volume = pricePoint.Volume
+                            }
+                        };
+                        await _hubContext.Clients.Group(symbol).SendAsync("ReceiveMessage", message, stoppingToken);
                     }
 
                     await priceRepo.SaveChangesAsync();
@@ -107,7 +132,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     _logger.LogError(ex, "Error collecting data from CoinMarketCap");
                 }
 
-                await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
     }

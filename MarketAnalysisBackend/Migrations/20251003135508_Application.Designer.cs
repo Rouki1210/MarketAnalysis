@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MarketAnalysisBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250917100234_DbApp")]
-    partial class DbApp
+    [Migration("20251003135508_Application")]
+    partial class Application
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,7 +77,19 @@ namespace MarketAnalysisBackend.Migrations
                     b.Property<decimal>("Low")
                         .HasColumnType("numeric");
 
+                    b.Property<decimal>("MarketCap")
+                        .HasColumnType("numeric");
+
                     b.Property<decimal>("Open")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PercentChange1h")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PercentChange24h")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PercentChange7d")
                         .HasColumnType("numeric");
 
                     b.Property<decimal>("Price")
