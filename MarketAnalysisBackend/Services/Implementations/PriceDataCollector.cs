@@ -86,6 +86,8 @@ namespace MarketAnalysisBackend.Services.Implementations
                             AssetId = matchAsset.Id,
                             TimestampUtc = DateTime.UtcNow,
                             Price = quote.GetProperty("price").GetDecimal(),
+                            CirculatingSupply = coin.GetProperty("circulating_supply").GetDecimal(),
+                           
 
                             //using OHLC data from OHLC endpoint
                             //Open = usdOhlc.GetProperty("price").GetDecimal(),
@@ -132,7 +134,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     _logger.LogError(ex, "Error collecting data from CoinMarketCap");
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
             }
         }
     }

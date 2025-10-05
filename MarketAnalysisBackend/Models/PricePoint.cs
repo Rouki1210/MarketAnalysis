@@ -18,6 +18,8 @@
         public decimal PercentChange7d { get; set; }
         public decimal MarketCap { get; set; }
         public decimal Volume { get; set; }
+
+        public decimal CirculatingSupply { get; set; } 
         public string Source { get; set; } = string.Empty;
 
     }

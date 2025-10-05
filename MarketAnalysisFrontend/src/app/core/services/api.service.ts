@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 import { Coin, CoinDetail } from '../models/coin.model';
 import { Market, MarketOverview } from '../models/market.model';
 import { ChartData } from '../models/common.model';
@@ -9,11 +9,53 @@ import { ChartData } from '../models/common.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly apiUrl = 'https://api.coincap.io/v2'; // Placeholder API
+  private readonly apiUrl = 'https://localhost:7175'; // Placeholder API
 
   constructor(private http: HttpClient) {}
 
   // Mock data for development
+  // getAssets(): Observable<Coin[]> {
+  //   return this.http.get<Coin[]>(`${this.apiUrl}/api/assets`);
+  // }
+
+
+getPrices(): Observable<Coin[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/api/Prices`).pipe(
+    map(coins => coins.map(c => {
+      const formatNumber = (num: number, digits: number = 2) =>
+        num?.toLocaleString(undefined, {
+          minimumFractionDigits: digits,
+          maximumFractionDigits: digits
+        }) ?? '0';
+
+      const formatPercent = (val: number) => {
+        const sign = val >= 0 ? '+' : '';
+        return `${sign}${val.toFixed(2)}%`;
+      };
+
+      return {
+        rank: Number(c.rank),
+        name: c.name,
+        symbol: c.symbol,
+        price: `$${formatNumber(c.price)}`,
+        change1h: formatPercent(c.percentChange1h),
+        change24h: formatPercent(c.percentChange24h),
+        change7d: formatPercent(c.percentChange7d),
+        marketCap: `$${formatNumber(c.marketCap, 0)}`,
+        volume: `$${formatNumber(c.volume, 0)}`,
+        supply: `${formatNumber(c.supply, 0)} ${c.symbol}`,
+        isPositive1h: c.percentChange1h >= 0,
+        isPositive24h: c.percentChange24h >= 0,
+        isPositive7d: c.percentChange7d >= 0,
+        icon: c.symbol.charAt(0),
+        network: c.source,
+        sparklineData: []
+      } as Coin;
+    }))
+  );
+}
+
+
   private getMockCoins(): Coin[] {
     return [
       {
@@ -51,150 +93,6 @@ export class ApiService {
         icon: "Ξ",
         network: "Ethereum",
         sparklineData: [4200, 4350, 4280, 4450, 4380, 4532]
-      },
-      {
-        rank: 3,
-        name: "XRP",
-        symbol: "XRP",
-        price: "$3.06",
-        change1h: "+0.65%",
-        change24h: "+2.56%",
-        change7d: "+11.97%",
-        marketCap: "$183,482,317,122",
-        volume: "$7,525,359,406",
-        supply: "59.87B XRP",
-        isPositive1h: true,
-        isPositive24h: true,
-        isPositive7d: true,
-        icon: "◊",
-        network: "XRP",
-        sparklineData: [2.75, 2.85, 2.90, 2.95, 3.00, 3.06]
-      },
-      {
-        rank: 4,
-        name: "Tether",
-        symbol: "USDT",
-        price: "$1.00",
-        change1h: "+0.01%",
-        change24h: "+0.00%",
-        change7d: "+0.01%",
-        marketCap: "$176,348,919,218",
-        volume: "$156,974,737,304",
-        supply: "176.24B USDT",
-        isPositive1h: true,
-        isPositive24h: true,
-        isPositive7d: true,
-        icon: "₮",
-        network: "Ethereum",
-        sparklineData: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      },
-      {
-        rank: 5,
-        name: "BNB",
-        symbol: "BNB",
-        price: "$1,160.22",
-        change1h: "+1.62%",
-        change24h: "+9.85%",
-        change7d: "+23.05%",
-        marketCap: "$161,486,412,832",
-        volume: "$5,231,011,228",
-        supply: "139.18M BNB",
-        isPositive1h: true,
-        isPositive24h: true,
-        isPositive7d: true,
-        icon: "◈",
-        network: "BSC",
-        sparklineData: [950, 1020, 1050, 1100, 1130, 1160]
-      },
-      {
-        rank: 6,
-        name: "Solana",
-        symbol: "SOL",
-        price: "$234.68",
-        change1h: "+1.76%",
-        change24h: "+3.33%",
-        change7d: "+19.60%",
-        marketCap: "$127,960,364,289",
-        volume: "$8,972,935,402",
-        supply: "545.23M SOL",
-        isPositive1h: true,
-        isPositive24h: true,
-        isPositive7d: true,
-        icon: "◎",
-        network: "Solana",
-        sparklineData: [195, 210, 215, 225, 230, 234]
-      },
-      {
-        rank: 7,
-        name: "USDC",
-        symbol: "USDC",
-        price: "$0.9998",
-        change1h: "+0.00%",
-        change24h: "+0.00%",
-        change7d: "+0.00%",
-        marketCap: "$74,584,965,087",
-        volume: "$19,404,888,617",
-        supply: "74.59B USDC",
-        isPositive1h: true,
-        isPositive24h: true,
-        isPositive7d: true,
-        icon: "$",
-        network: "Base",
-        sparklineData: [1.0, 0.9999, 1.0, 0.9998, 1.0, 0.9998]
-      },
-      {
-        rank: 8,
-        name: "Dogecoin",
-        symbol: "DOGE",
-        price: "$0.2607",
-        change1h: "+1.29%",
-        change24h: "+2.25%",
-        change7d: "+14.67%",
-        marketCap: "$39,422,571,022",
-        volume: "$3,060,157,456",
-        supply: "151.19B DOGE",
-        isPositive1h: true,
-        isPositive24h: true,
-        isPositive7d: true,
-        icon: "Ð",
-        network: "Dogecoin",
-        sparklineData: [0.23, 0.24, 0.245, 0.25, 0.255, 0.2607]
-      },
-      {
-        rank: 9,
-        name: "TRON",
-        symbol: "TRX",
-        price: "$0.3435",
-        change1h: "+0.31%",
-        change24h: "+0.38%",
-        change7d: "+2.39%",
-        marketCap: "$32,520,939,263",
-        volume: "$706,136,611",
-        supply: "94.66B TRX",
-        isPositive1h: true,
-        isPositive24h: true,
-        isPositive7d: true,
-        icon: "⊥",
-        network: "TRON",
-        sparklineData: [0.335, 0.338, 0.340, 0.341, 0.342, 0.3435]
-      },
-      {
-        rank: 10,
-        name: "Cardano",
-        symbol: "ADA",
-        price: "$0.8720",
-        change1h: "+1.29%",
-        change24h: "+2.24%",
-        change7d: "+12.50%",
-        marketCap: "$31,236,017,752",
-        volume: "$1,260,474,932",
-        supply: "35.81B ADA",
-        isPositive1h: true,
-        isPositive24h: true,
-        isPositive7d: true,
-        icon: "₳",
-        network: "Cardano",
-        sparklineData: [0.775, 0.800, 0.820, 0.845, 0.860, 0.872]
       }
     ];
   }

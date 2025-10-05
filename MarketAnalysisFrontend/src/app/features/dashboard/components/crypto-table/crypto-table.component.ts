@@ -33,7 +33,7 @@ export class CryptoTableComponent implements OnInit {
   }
 
   loadCoins(): void {
-    this.apiService.getCoins().subscribe(coins => {
+    this.apiService.getPrices().subscribe(coins => {
       this.coins = coins;
       this.applyFilter();
     });
