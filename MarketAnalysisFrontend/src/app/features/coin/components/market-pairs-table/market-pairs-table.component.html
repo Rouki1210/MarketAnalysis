@@ -1,0 +1,54 @@
+<app-card>
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <h2 class="text-lg lg:text-xl font-bold text-foreground">Bitcoin Markets</h2>
+    <div class="flex items-center space-x-2 overflow-x-auto scrollbar-hide w-full sm:w-auto">
+      <app-button 
+        *ngFor="let filter of filters"
+        [variant]="selectedFilter === filter ? 'default' : 'ghost'"
+        size="sm"
+        class="whitespace-nowrap"
+        (click)="selectFilter(filter)">
+        {{ filter }}
+      </app-button>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[600px]">
+      <thead>
+        <tr class="border-b border-border">
+          <th class="text-left px-2 lg:px-3 py-3 text-xs lg:text-sm text-muted-foreground font-medium">#</th>
+          <th class="text-left px-2 lg:px-3 py-3 text-xs lg:text-sm text-muted-foreground font-medium">Exchange</th>
+          <th class="text-left px-2 lg:px-3 py-3 text-xs lg:text-sm text-muted-foreground font-medium">Pair</th>
+          <th class="text-right px-2 lg:px-3 py-3 text-xs lg:text-sm text-muted-foreground font-medium">Price</th>
+          <th class="text-right px-2 lg:px-3 py-3 text-xs lg:text-sm text-muted-foreground font-medium">Volume</th>
+          <th class="text-right px-2 lg:px-3 py-3 text-xs lg:text-sm text-muted-foreground font-medium hidden sm:table-cell">Confidence</th>
+          <th class="text-right px-2 lg:px-3 py-3 text-xs lg:text-sm text-muted-foreground font-medium hidden md:table-cell">Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr 
+          *ngFor="let market of markets; let i = index"
+          class="border-b border-border hover:bg-muted/30 transition-colors">
+          <td class="px-2 lg:px-3 py-3 text-sm lg:text-base text-foreground">{{ i + 1 }}</td>
+          <td class="px-2 lg:px-3 py-3">
+            <div class="flex items-center space-x-2">
+              <div class="w-5 h-5 lg:w-6 lg:h-6 bg-primary rounded-full flex-shrink-0"></div>
+              <span class="text-sm lg:text-base text-foreground">{{ market.exchange }}</span>
+            </div>
+          </td>
+          <td class="px-2 lg:px-3 py-3 text-sm lg:text-base text-foreground">{{ market.pair }}</td>
+          <td class="px-2 lg:px-3 py-3 text-right text-sm lg:text-base text-foreground">{{ market.price }}</td>
+          <td class="px-2 lg:px-3 py-3 text-right text-sm lg:text-base text-foreground">{{ market.volume }}</td>
+          <td class="px-2 lg:px-3 py-3 text-right hidden sm:table-cell">
+            <app-badge [variant]="market.confidence === 'High' ? 'success' : 'default'">
+              {{ market.confidence }}
+            </app-badge>
+          </td>
+          <td class="px-2 lg:px-3 py-3 text-right text-xs lg:text-sm text-muted-foreground hidden md:table-cell">{{ market.updated }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</app-card>
+

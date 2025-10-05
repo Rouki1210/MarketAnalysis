@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* CoinMarketCap Dark Theme Colors */
+  --background: 222 15% 8%;          /* Dark slate background */
+  --foreground: 0 0% 98%;            /* White text */
+  --card: 222 15% 12%;               /* Dark blue card background */
+  --card-foreground: 0 0% 98%;       /* White text on cards */
+  --popover: 222 15% 12%;            /* Dark popover */
+  --popover-foreground: 0 0% 98%;    /* White popover text */
+  --primary: 216 100% 45%;           /* Blue for primary elements */
+  --primary-foreground: 0 0% 98%;    /* White text on primary */
+  --secondary: 142 76% 65%;          /* Green for positive changes */
+  --secondary-foreground: 0 0% 98%;  /* White text on green */
+  --muted: 222 15% 35%;              /* Muted gray-blue */
+  --muted-foreground: 215 16% 65%;   /* Lighter muted text */
+  --accent: 0 84% 60%;               /* Red for negative changes */
+  --accent-foreground: 0 0% 98%;     /* White text on red */
+  --destructive: 0 84% 60%;          /* Red for alerts */
+  --destructive-foreground: 0 0% 98%; /* White text on destructive */
+  --border: 222 15% 25%;             /* Medium gray borders */
+  --input: 222 15% 15%;              /* Dark input background */
+  --ring: 142 76% 65%;               /* Green focus ring */
+  --chart-1: 142 76% 65%;            /* Green chart line */
+  --chart-2: 0 84% 60%;              /* Red chart line */
+  --chart-3: 210 100% 65%;           /* Blue chart line */
+  --chart-4: 48 100% 67%;            /* Yellow chart line */
+  --chart-5: 280 67% 65%;            /* Purple chart line */
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222 15% 8%;
+  --foreground: 0 0% 98%;
+  --card: 222 15% 12%;
+  --card-foreground: 0 0% 98%;
+  --popover: 222 15% 12%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 216 100% 45%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 142 76% 65%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 222 15% 35%;
+  --muted-foreground: 215 16% 65%;
+  --accent: 0 84% 60%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 222 15% 25%;
+  --input: 222 15% 15%;
+  --ring: 142 76% 65%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
