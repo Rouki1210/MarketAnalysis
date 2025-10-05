@@ -1,59 +1,142 @@
-# MarketAnalysisFrontend
+# Crypto Dashboard - Angular
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.0.
+A modern cryptocurrency market dashboard built with Angular 18, inspired by CoinMarketCap.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- 📊 Real-time cryptocurrency price tracking
+- 📈 Interactive price charts
+- 🎨 Dark theme UI matching CoinMarketCap design
+- 🔍 Search and filter cryptocurrencies
+- 💱 Multiple currency support (USD, VND, BTC, ETH)
+- 📱 Responsive design
+- ⚡ Fast and optimized with Angular Signals
+- 🎯 Standalone components architecture
 
-```bash
-ng serve
+## Tech Stack
+
+- **Framework**: Angular 18 (Standalone Components)
+- **Styling**: TailwindCSS
+- **State Management**: Angular Signals
+- **HTTP**: Angular HttpClient
+- **Routing**: Angular Router
+- **Icons**: Lucide Angular
+- **Charts**: Chart.js
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── core/                    # Singleton services & infrastructure
+│   │   ├── services/            # API, Theme, Currency, Realtime services
+│   │   ├── models/              # TypeScript interfaces & types
+│   │   └── interceptors/        # HTTP interceptors
+│   ├── shared/                  # Reusable components & utilities
+│   │   ├── components/          # Button, Card, Badge, etc.
+│   │   └── pipes/               # Format pipes
+│   ├── layout/                  # App shell & layout components
+│   │   ├── shell/
+│   │   ├── header/
+│   │   ├── topbar-market-strip/
+│   │   └── footer/
+│   ├── features/                # Feature modules (lazy loaded)
+│   │   ├── dashboard/           # Main crypto table page
+│   │   └── coin/                # Coin detail page
+│   ├── app.routes.ts
+│   └── app.config.ts
+├── styles/
+│   └── global.scss
+└── index.html
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Getting Started
 
-## Code scaffolding
+### Prerequisites
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Node.js 18+ and npm
+- Angular CLI 18+
 
-```bash
-ng generate component component-name
-```
+### Installation
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+1. Clone the repository
+2. Install dependencies:
 
-```bash
-ng generate --help
-```
+\`\`\`bash
+npm install
+\`\`\`
 
-## Building
+3. Start the development server:
 
-To build the project run:
+\`\`\`bash
+npm start
+\`\`\`
 
-```bash
-ng build
-```
+4. Open your browser and navigate to `http://localhost:4200`
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Available Scripts
 
-## Running unit tests
+- `npm start` - Start development server
+- `npm run build` - Build for production
+- `npm test` - Run tests
+- `npm run watch` - Build in watch mode
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Key Features Implementation
 
-```bash
-ng test
-```
+### 1. Dashboard (Main Page)
+- Crypto table with sorting and filtering
+- Network filters (Bitcoin, Ethereum, BSC, Solana, etc.)
+- Tab navigation (Top, Trending, Most Visited, etc.)
+- Sparkline charts for 7-day price trends
+- Real-time price updates
 
-## Running end-to-end tests
+### 2. Coin Detail Page
+- Comprehensive coin statistics
+- Interactive price charts with multiple timeframes
+- Market pairs table showing trading data from exchanges
+- Links to website and whitepaper
 
-For end-to-end (e2e) testing, run:
+### 3. Layout Components
+- **Header**: Navigation, search, portfolio, and watchlist links
+- **Topbar Market Strip**: Global market stats (Market Cap, Volume, Dominance, Fear & Greed Index)
+- **Footer**: Copyright and attribution
 
-```bash
-ng e2e
-```
+### 4. Core Services
+- **ApiService**: Handles all API calls (currently using mock data)
+- **ThemeService**: Dark/light theme management
+- **CurrencyService**: Multi-currency support and conversion
+- **RealtimeService**: WebSocket/real-time price updates
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Styling
 
-## Additional Resources
+The application uses TailwindCSS with a custom color palette matching CoinMarketCap's dark theme:
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Primary: Blue (#3861FB)
+- Secondary: Green (for positive price changes)
+- Accent: Red (for negative price changes)
+- Background: Dark slate (#14171F)
+- Card: Darker blue (#1A1D28)
+
+## API Integration
+
+Currently using mock data. To integrate with real APIs:
+
+1. Update `ApiService` in `src/app/core/services/api.service.ts`
+2. Replace mock data with actual API calls to services like:
+   - CoinGecko API
+   - CoinMarketCap API
+   - Binance API
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is for educational purposes.
+
+## Acknowledgments
+
+- Design inspired by [CoinMarketCap](https://coinmarketcap.com/)
+- Icons from [Lucide](https://lucide.dev/)
+
