@@ -1,21 +1,34 @@
 export interface Coin {
-  rank: number;
+  // Asset basic info
+  id: string;
   name: string;
   symbol: string;
-  price: string;
-  change1h: string;
-  change24h: string;
-  change7d: string;
-  marketCap: string;
-  volume: string;
-  supply: string;
+  description?: string;
+
+  // Market data
+  rank?: string;
+  price?: string;
+  change1h?: string;
+  change24h?: string;
+  change7d?: string;
+  marketCap?: string;
+  volume?: string;
+  supply?: string;
+
+  // Additional properties
   isPositive1h: boolean;
   isPositive24h: boolean;
   isPositive7d: boolean;
-  icon: string;
-  network: string;
+
+  // Metadata
+  icon?: string;
+  network?: string;
   sparklineData?: number[];
+
+  // For real-time updates
+  highlightClass?: string;
 }
+
 
 export interface CoinDetail {
   coin: Coin;

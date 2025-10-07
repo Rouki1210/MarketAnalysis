@@ -4,7 +4,7 @@ import { BehaviorSubject, map, Observable, of } from 'rxjs';
 import { Coin, CoinDetail } from '../models/coin.model';
 import { Market, MarketOverview } from '../models/market.model';
 import { ChartData } from '../models/common.model';
-import * as singalR from '@microsoft/signalr';
+import * as signalR from '@microsoft/signalr';
 
 @Injectable({
   providedIn: 'root'
@@ -12,97 +12,141 @@ import * as singalR from '@microsoft/signalr';
 export class ApiService {
   private readonly apiUrl = 'https://localhost:7175'; // Placeholder API
 
+  private hubConnection!: signalR.HubConnection;
+  private coinsSource = new BehaviorSubject<Coin[]>([]);
+  public coins$ = this.coinsSource.asObservable();
+  private realtimeData: Record<string, any> = {};
+
   constructor(private http: HttpClient) {}
 
-  // Mock data for development
-  // getAssets(): Observable<Coin[]> {
-  //   return this.http.get<Coin[]>(`${this.apiUrl}/api/assets`);
-  // }
+  getCoins(): Observable<Coin[]> {
+    this.http.get<any[]>(`${this.apiUrl}/api/Asset`).subscribe({
+      next: (assets) => {
+        const coins: Coin[] = assets.map(a => ({
+          id: a.id,
+          name: a.name,
+          symbol: a.symbol,
+          description: a.description,
+          price: "0",
+          change1h: "0",
+          change7d: "0",
+          change24h: "0",
+          marketCap: "0",
+          volume: "0",
+          supply: "0",
+          rank: a.rank,
+          isPositive1h: true,
+          isPositive24h: true,
+          isPositive7d: true,
+          icon: 'Icon',
+          network: 'Unknown',
+          sparklineData: []
+        }));
+
+        this.coinsSource.next(coins);
+        this.startSignalR(coins.map(c => c.symbol));
+      },
+      error: (err) => console.error('❌ Error loading assets:', err)
+    });
+
+    return this.coins$;
+  }
 
   // SignalR connection for real-time updates (not fully implemented)
-  private hubConnection!: singalR.HubConnection;
-  private priceUpdateSource = new BehaviorSubject<Coin | null>(null);
-  priceUpdates$ = this.priceUpdateSource.asObservable();
-  private realtimeData: Record<string, Coin> = {};
 
-  startSignalR(){
-    if (this.hubConnection) return; // tránh connect nhiều lần
+  startSignalR(symbols: string[]){
+    if (this.hubConnection) return;
 
-  this.hubConnection = new singalR.HubConnectionBuilder()
+  this.hubConnection = new signalR.HubConnectionBuilder()
     .withUrl(`${this.apiUrl}/pricehub`)
-    .withAutomaticReconnect()
+    .withAutomaticReconnect([0, 2000, 5000, 10000])
     .build();
 
   this.hubConnection
     .start()
-    .then(() => {
+    .then(async() => {
       console.log('✅ SignalR Connected');
-      this.hubConnection.invoke('JoinAssetGroup', 'BTC');
-      this.hubConnection.invoke('JoinAssetGroup', 'ETH');
+      for (const symbol of symbols) {
+        await this.hubConnection.invoke('JoinAssetGroup', symbol);
+      }
     })
     .catch((err) => console.error('❌ SignalR Error:', err));
 
-  // Khi backend gửi dữ liệu
   this.hubConnection.on('ReceiveMessage', (message: any) => {
       const data = message.data;
       if (!data || !data.asset) return;
 
       console.log('📡 Realtime update:', data);
-
-      // Lưu giá theo symbol
-      this.realtimeData[data.asset] = data;
-
-      // Đẩy dữ liệu cho component subscribe
-      this.priceUpdateSource.next(data);
+      this.realtimeData[data.asset] = data;   
+      this.updateCoinRealTime(data);
     });
   }
 
-  getRealtimePrice(symbol: string): Coin | undefined {
-    return this.realtimeData[symbol];
+  private updateCoinRealTime(update: any) {
+    const coins = this.coinsSource.value;
+    const index = coins.findIndex(c => c.symbol === update.asset.toUpperCase());
+    if (index === -1) return;
+
+    const coin = coins[index];
+    const oldPrice = parseFloat(coin.price?.replace(/[^0-9.-]+/g, '') || '0');
+    const newPrice = update.price;
+
+    // Format helper
+    const formatNumber = (num: number, digits: number = 2) =>
+      num?.toLocaleString(undefined, {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      }) ?? '0';
+
+    const formatPercent = (val: number) => {
+      const sign = val >= 0 ? '+' : '';
+      return `${sign}${val.toFixed(2)}%`;
+    };
+
+    coin.price = `$${formatNumber(newPrice)}`;
+    coin.change1h = formatPercent(update.change1h);
+    coin.change24h = formatPercent(update.change24h);
+    coin.change7d = formatPercent(update.change7d);
+    coin.marketCap = `$${formatNumber(update.marketCap, 0)}`;
+    coin.volume = `$${formatNumber(update.volume, 0)}`;
+    coin.supply = `${formatNumber(update.supply, 0)} ${coin.symbol}`;
+
+    coin.isPositive1h = Number(update.change1h) >= 0;
+    coin.isPositive24h = Number(update.change24h) >= 0;
+    coin.isPositive7d = Number(update.change7d) >= 0;
+
+    // ✅ Set highlight class based on price change
+    const isPriceUp = newPrice > oldPrice;
+    coins[index].highlightClass = isPriceUp ? 'flash-green' : 'flash-red';
+    
+    // ✅ Remove highlight after animation
+    setTimeout(() => {
+      coins[index].highlightClass = '';
+      this.coinsSource.next([...coins]);
+    }, 1500);
+
+    this.coinsSource.next([...coins]);
   }
 
+  loadCoins(): void {
+    this.getCoins().subscribe(coins => {
+      this.coinsSource.next(coins);
+      console.log('💾 Loaded assets:', coins);
 
-getPrices(): Observable<Coin[]> {
-  return this.http.get<any[]>(`${this.apiUrl}/api/Prices`).pipe(
-    map(coins => coins.map(c => {
-      const formatNumber = (num: number, digits: number = 2) =>
-        num?.toLocaleString(undefined, {
-          minimumFractionDigits: digits,
-          maximumFractionDigits: digits
-        }) ?? '0';
-
-      const formatPercent = (val: number) => {
-        const sign = val >= 0 ? '+' : '';
-        return `${sign}${val.toFixed(2)}%`;
-      };
-
-      return {
-        rank: Number(c.rank),
-        name: c.name,
-        symbol: c.symbol,
-        price: `$${formatNumber(c.price)}`,
-        change1h: formatPercent(c.percentChange1h),
-        change24h: formatPercent(c.percentChange24h),
-        change7d: formatPercent(c.percentChange7d),
-        marketCap: `$${formatNumber(c.marketCap, 0)}`,
-        volume: `$${formatNumber(c.volume, 0)}`,
-        supply: `${formatNumber(c.supply, 0)} ${c.symbol}`,
-        isPositive1h: c.percentChange1h >= 0,
-        isPositive24h: c.percentChange24h >= 0,
-        isPositive7d: c.percentChange7d >= 0,
-        icon: c.symbol.charAt(0),
-        network: c.source,
-        sparklineData: []
-      } as Coin;
-    }))
-  );
-}
-
+      // Auto join tất cả coin có trong DB
+      coins.forEach(c => {
+        if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
+          this.hubConnection.invoke('JoinAssetGroup', c.symbol);
+        }
+      });
+    });
+  }
 
   private getMockCoins(): Coin[] {
     return [
       {
-        rank: 1,
+        id: "1",
+        rank: "1",
         name: "Bitcoin",
         symbol: "BTC",
         price: "$122,234.07",
@@ -120,7 +164,8 @@ getPrices(): Observable<Coin[]> {
         sparklineData: [111000, 112500, 111800, 113200, 112100, 122234]
       },
       {
-        rank: 2,
+        id: "2",
+        rank: "2",
         name: "Ethereum",
         symbol: "ETH",
         price: "$4,532.81",
@@ -140,11 +185,6 @@ getPrices(): Observable<Coin[]> {
     ];
   }
 
-  getCoins(params?: any): Observable<Coin[]> {
-    // In production, use: return this.http.get<Coin[]>(`${this.apiUrl}/assets`, { params });
-    return of(this.getMockCoins());
-  }
-
   getCoinBySymbol(symbol: string): Observable<CoinDetail> {
     const coins = this.getMockCoins();
     const coin = coins.find(c => c.symbol === symbol);
@@ -156,12 +196,12 @@ getPrices(): Observable<Coin[]> {
     const detail: CoinDetail = {
       coin,
       stats: {
-        marketCap: { value: coin.marketCap, change: coin.change24h, isPositive: coin.isPositive24h },
-        volume24h: { value: coin.volume, change: "+7.94%", isPositive: true },
+        marketCap: { value: coin.marketCap ?? "", change: coin.change24h, isPositive: coin.isPositive24h },
+        volume24h: { value: coin.volume ?? "", change: "+7.94%", isPositive: true },
         volumeMarketCapRatio: "2.03%",
         maxSupply: "21M BTC",
-        circulatingSupply: coin.supply,
-        totalSupply: coin.supply
+        circulatingSupply: coin.supply ?? "",
+        totalSupply: coin.supply ?? "",
       },
       links: {
         website: "https://bitcoin.org",

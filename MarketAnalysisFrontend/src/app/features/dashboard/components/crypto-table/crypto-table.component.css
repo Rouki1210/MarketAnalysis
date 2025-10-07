@@ -1,2 +1,18 @@
 /* Crypto table specific styles */
-
+.flash-green {
+    animation: flashGreen 0.8s ease;
+  }
+  .flash-red {
+    animation: flashRed 0.8s ease;
+  }
+  
+  @keyframes flashGreen {
+    0% { background-color: rgba(0, 255, 0, 0.2); }
+    100% { background-color: transparent; }
+  }
+  
+  @keyframes flashRed {
+    0% { background-color: rgba(255, 0, 0, 0.2); }
+    100% { background-color: transparent; }
+  }
+  

@@ -56,7 +56,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                     // Fetch latest listings
-                    var url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=100";
+                    var url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=10";
                     var response = await client.GetStringAsync(url, stoppingToken);
                     var jsonDoc = JsonDocument.Parse(response);
                     var dataArray = jsonDoc.RootElement.GetProperty("data").EnumerateArray();
@@ -118,9 +118,12 @@ namespace MarketAnalysisBackend.Services.Implementations
                                 high = pricePoint.High,
                                 low = pricePoint.Low,
                                 close = pricePoint.Close,
+                                change1h = pricePoint.PercentChange1h,
                                 change24h = pricePoint.PercentChange24h,
+                                change7d = pricePoint.PercentChange7d,
                                 marketCap = pricePoint.MarketCap,
-                                volume = pricePoint.Volume
+                                volume = pricePoint.Volume,
+                                supply = pricePoint.CirculatingSupply,
                             }
                         };
                         await _hubContext.Clients.Group(symbol).SendAsync("ReceiveMessage", message, stoppingToken);
@@ -134,7 +137,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     _logger.LogError(ex, "Error collecting data from CoinMarketCap");
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
         }
     }
