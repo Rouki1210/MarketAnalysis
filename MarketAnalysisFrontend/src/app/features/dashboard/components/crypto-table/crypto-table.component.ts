@@ -30,6 +30,19 @@ export class CryptoTableComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCoins();
+    this.apiService.startSignalR();
+    this.apiService.priceUpdates$.subscribe((update) => {
+    if (!update) return;
+
+    const index = this.coins.findIndex(c => c.symbol === update.symbol);
+    if (index !== -1) {
+      this.coins[index].price = update.price;
+      this.coins[index].change24h = update.change24h;
+      this.coins[index].isPositive24h = Number(update.change24h) >= 0;
+    }
+  });
+
+  this.loadCoins();
   }
 
   loadCoins(): void {

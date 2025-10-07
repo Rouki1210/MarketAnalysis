@@ -19,4 +19,3 @@ import { FooterComponent } from '../footer/footer.component';
   styleUrls: ['./shell.component.css']
 })
 export class ShellComponent {}
-

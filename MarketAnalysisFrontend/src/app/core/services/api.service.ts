@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { map, Observable, of } from 'rxjs';
+import { BehaviorSubject, map, Observable, of } from 'rxjs';
 import { Coin, CoinDetail } from '../models/coin.model';
 import { Market, MarketOverview } from '../models/market.model';
 import { ChartData } from '../models/common.model';
+import * as singalR from '@microsoft/signalr';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,48 @@ export class ApiService {
   // getAssets(): Observable<Coin[]> {
   //   return this.http.get<Coin[]>(`${this.apiUrl}/api/assets`);
   // }
+
+  // SignalR connection for real-time updates (not fully implemented)
+  private hubConnection!: singalR.HubConnection;
+  private priceUpdateSource = new BehaviorSubject<Coin | null>(null);
+  priceUpdates$ = this.priceUpdateSource.asObservable();
+  private realtimeData: Record<string, Coin> = {};
+
+  startSignalR(){
+    if (this.hubConnection) return; // tránh connect nhiều lần
+
+  this.hubConnection = new singalR.HubConnectionBuilder()
+    .withUrl(`${this.apiUrl}/pricehub`)
+    .withAutomaticReconnect()
+    .build();
+
+  this.hubConnection
+    .start()
+    .then(() => {
+      console.log('✅ SignalR Connected');
+      this.hubConnection.invoke('JoinAssetGroup', 'BTC');
+      this.hubConnection.invoke('JoinAssetGroup', 'ETH');
+    })
+    .catch((err) => console.error('❌ SignalR Error:', err));
+
+  // Khi backend gửi dữ liệu
+  this.hubConnection.on('ReceiveMessage', (message: any) => {
+      const data = message.data;
+      if (!data || !data.asset) return;
+
+      console.log('📡 Realtime update:', data);
+
+      // Lưu giá theo symbol
+      this.realtimeData[data.asset] = data;
+
+      // Đẩy dữ liệu cho component subscribe
+      this.priceUpdateSource.next(data);
+    });
+  }
+
+  getRealtimePrice(symbol: string): Coin | undefined {
+    return this.realtimeData[symbol];
+  }
 
 
 getPrices(): Observable<Coin[]> {
