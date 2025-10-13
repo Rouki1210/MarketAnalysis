@@ -67,9 +67,15 @@
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
         </app-button>
-        <app-button size="sm">Log In</app-button>
+        <app-button size="sm" (click)="openAuthModal()">Log In</app-button>
       </div>
     </div>
   </div>
 </header>
+
+<!-- Auth Modal -->
+<app-auth-modal 
+  *ngIf="authService.showAuthModal()" 
+  (close)="authService.closeAuthModal()"
+></app-auth-modal>
 
