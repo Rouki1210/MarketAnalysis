@@ -10,7 +10,7 @@ import * as signalR from '@microsoft/signalr';
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly apiUrl = 'https://localhost:7175'; // Placeholder API
+  private readonly apiUrl = 'http://localhost:5071'; // Placeholder API
 
   private hubConnection!: signalR.HubConnection;
   private coinsSource = new BehaviorSubject<Coin[]>([]);
