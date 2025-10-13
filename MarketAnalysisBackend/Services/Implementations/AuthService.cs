@@ -1,25 +1,45 @@
-﻿using System.Security.Cryptography;
+﻿using MarketAnalysisBackend.Models;
+using MarketAnalysisBackend.Models.DTO;
+using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Services.Interfaces;
+using System.Security.Cryptography;
 
 namespace MarketAnalysisBackend.Services.Implementations
 {
     public class AuthService : IAuthService
     {
-        public string HashPassword(string plainPassword, int workFactor = 10)
+        private readonly IUserRepository _userRepo;
+        public AuthService( IUserRepository userRepo)
         {
-            return BCrypt.Net.BCrypt.HashPassword(plainPassword, workFactor);
+            _userRepo = userRepo;
+        }
+        public async Task<User?> LoginAsync(LoginDTO dto)
+        {
+            var user = await _userRepo.GetByEmailOrUsernameAsync(dto.UsernameOrEmail);
+            if (user == null) return null;
+
+            bool isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+            return isValid ? user : null;
         }
 
-        public bool VerifyPassword(string plainPassword, string hashedPassword)
+        public async Task<User> RegisterAsync(RegisterDTO dto)
         {
-            return BCrypt.Net.BCrypt.Verify(hashedPassword, plainPassword);
-        }
+            var existingUser = await _userRepo.GetByEmailOrUsernameAsync(dto.Email);
+            if (existingUser != null)
+                throw new Exception("Email or username already in use.");
 
-        public string GenerateRandomUsername(string prefix = "user")
-        {
-            byte[] bytes = RandomNumberGenerator.GetBytes(4);
-            string hex = BitConverter.ToString(bytes).Replace("-", "").ToLower();
-            return $"{prefix}_{hex}";
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+            var newUser = new User
+            {
+                Email = dto.Email,
+                Username = string.IsNullOrEmpty(dto.Username)
+                            ? $"user_{Guid.NewGuid().ToString().Substring(0, 6)}"
+                            : dto.Username,
+                PasswordHash = hashedPassword,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _userRepo.CreateAsync(newUser);
+            return newUser;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using MarketAnalysisBackend.Data;
+using MarketAnalysisBackend.Migrations;
 using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -12,19 +13,16 @@ namespace MarketAnalysisBackend.Repositories.Implementations
         {
             _context = context;
         }
-        public void Add(User user)
+        public async Task CreateAsync(User user)
         {
+            
             _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public User? GetByUsername(string username)
+        public async Task<User?> GetByEmailOrUsernameAsync(string emailOrUsername)
         {
-            return _context.Users.AsNoTracking().FirstOrDefault(u => u.Username == username);
-        }
-        public User? GetByEmail(string email)
-        {
-            return _context.Users.AsNoTracking().FirstOrDefault(u => u.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == emailOrUsername || u.Username == emailOrUsername);
         }
     }
 }

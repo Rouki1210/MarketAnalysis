@@ -6,32 +6,28 @@ namespace MarketAnalysisBackend.Controllers
 {
     public class AuthController : ControllerBase
     {
-        private readonly IUserService _userService;
-        public AuthController(IUserService userService)
+        private readonly IAuthService _authService;
+        public AuthController(IAuthService userService)
         {
-            _userService = userService;
+            _authService = userService;
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterDTO dto)
+        public async Task<IActionResult> Register([FromBody] RegisterDTO dto)
         {
-            try
-            {
-                var user = _userService.Register(dto.Email, dto.Username, dto.Password);
-                return Ok(new { message = "User registered", username = user.Username });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+           var user = await _authService.RegisterAsync(dto);
+           return Ok(new { message = "Register success", user.Username });
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDTO dto)
+        public async Task<IActionResult> Login([FromBody] LoginDTO dto)
         {
-            var success = _userService.Login(dto.Username, dto.Password);
-            if (!success) return Unauthorized("Invalid username or password.");
-            return Ok(new { message = "Login successful" });
+           var user = await _authService.LoginAsync(dto);
+           if (user == null)
+           {
+                return Unauthorized(new { message = "Invalid credentials" });
+           }
+           return Ok(new { message = "Login success", user.Username });
         }
 
     }

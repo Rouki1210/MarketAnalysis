@@ -1,10 +1,11 @@
-﻿namespace MarketAnalysisBackend.Services.Interfaces
+﻿using MarketAnalysisBackend.Models;
+using MarketAnalysisBackend.Models.DTO;
+
+namespace MarketAnalysisBackend.Services.Interfaces
 {
     public interface IAuthService
     {
-        string HashPassword(string plainPassword, int workFactor = 10);
-        bool VerifyPassword(string plainPassword, string hashedPassword);
-
-        string GenerateRandomUsername(string prefix = "user");
+        Task<User> RegisterAsync(RegisterDTO dto);
+        Task<User?> LoginAsync(LoginDTO dto);
     }
 }
