@@ -12,6 +12,7 @@ namespace MarketAnalysisBackend.Data
         }
         public DbSet<Asset> Assets { get; set; }
         public DbSet<PricePoint> PricePoints { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

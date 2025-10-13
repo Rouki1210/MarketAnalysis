@@ -65,18 +65,18 @@ export class ApiService {
   this.hubConnection
     .start()
     .then(async() => {
-      console.log('✅ SignalR Connected');
+      console.log('SignalR Connected');
       for (const symbol of symbols) {
         await this.hubConnection.invoke('JoinAssetGroup', symbol);
       }
     })
-    .catch((err) => console.error('❌ SignalR Error:', err));
+    .catch((err) => console.error('SignalR Error:', err));
 
   this.hubConnection.on('ReceiveMessage', (message: any) => {
       const data = message.data;
       if (!data || !data.asset) return;
 
-      console.log('📡 Realtime update:', data);
+      console.log('Realtime update:', data);
       this.realtimeData[data.asset] = data;   
       this.updateCoinRealTime(data);
     });
@@ -115,11 +115,11 @@ export class ApiService {
     coin.isPositive24h = Number(update.change24h) >= 0;
     coin.isPositive7d = Number(update.change7d) >= 0;
 
-    // ✅ Set highlight class based on price change
+    // Set highlight class based on price change
     const isPriceUp = newPrice > oldPrice;
     coins[index].highlightClass = isPriceUp ? 'flash-green' : 'flash-red';
     
-    // ✅ Remove highlight after animation
+    // Remove highlight after animation
     setTimeout(() => {
       coins[index].highlightClass = '';
       this.coinsSource.next([...coins]);

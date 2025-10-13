@@ -1,8 +1,8 @@
 .flash-green {
-    animation: flashGreen 0.8s ease;
+    animation: flashGreen 1.5s ease;
   }
   .flash-red {
-    animation: flashRed 0.8s ease;
+    animation: flashRed 1.5s ease;
   }
   
   @keyframes flashGreen {
