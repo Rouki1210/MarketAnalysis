@@ -29,17 +29,51 @@ namespace MarketAnalysisBackend.Services.Implementations
                 throw new Exception("Email or username already in use.");
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+            var username = string.IsNullOrEmpty(dto.Username) ? GenerateRandomUsername() : dto.Username;
             var newUser = new User
             {
                 Email = dto.Email,
-                Username = string.IsNullOrEmpty(dto.Username)
-                            ? $"user_{Guid.NewGuid().ToString().Substring(0, 6)}"
-                            : dto.Username,
+                Username = username,
                 PasswordHash = hashedPassword,
                 CreatedAt = DateTime.UtcNow
             };
             await _userRepo.CreateAsync(newUser);
             return newUser;
         }
+
+        private string GenerateRandomUsername()
+        {
+            const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            var randomPart = new string(Enumerable.Repeat(chars, 6)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            // ví dụ: sep = tháng 9 (September)
+            string month = DateTime.UtcNow.ToString("MMM").ToLower();
+            string day = DateTime.UtcNow.Day.ToString();
+
+            return $"{randomPart}{month}{day}";
+        }
+
+        public async Task<User?> GoogleLoginAsync(string email, string name)
+        {
+            var user = await _userRepo.GetByEmailOrUsernameAsync(email);
+            if (user != null) return user;
+
+            var newUser = new User
+            {
+                Email = email,
+                Username = $"google_{Guid.NewGuid().ToString().Substring(0, 6)}",
+                CreatedAt = DateTime.UtcNow
+            };
+            await _userRepo.CreateAsync(newUser);
+            return newUser;
+        }
+
+        public async Task DeleteAllUsersAsync()
+        {
+            await _userRepo.DeleteAllAsync();
+        }
+
     }
 }

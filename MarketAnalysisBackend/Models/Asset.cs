@@ -7,6 +7,7 @@
         public string Name { get; set; } = string.Empty;
         public string Rank { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string LogoUrl { get; set; } = string.Empty;
 
         public ICollection<PricePoint> PricePoints { get; set; } = new List<PricePoint>();
     }

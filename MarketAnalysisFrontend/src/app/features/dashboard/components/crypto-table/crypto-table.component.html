@@ -95,7 +95,7 @@
             <td class="px-3 lg:px-4 py-3 lg:py-4">
               <div class="flex items-center space-x-2 lg:space-x-3">
                 <div class="w-6 h-6 lg:w-8 lg:h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-xs lg:text-sm font-bold flex-shrink-0">
-                  {{ coin.icon }}
+                  <img [src]="coin.icon" alt="{{ coin.name }}" class="w-full h-full object-cover rounded-full">
                 </div>
                 <div class="min-w-0">
                   <div class="font-medium text-sm lg:text-base text-foreground truncate">{{ coin.name }}</div>

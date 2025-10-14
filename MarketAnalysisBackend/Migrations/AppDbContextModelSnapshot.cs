@@ -34,6 +34,10 @@ namespace MarketAnalysisBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("LogoUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -126,6 +130,14 @@ namespace MarketAnalysisBackend.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.PrimitiveCollection<string[]>("FavoriteStocks")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.PrimitiveCollection<string[]>("Notication")
+                        .IsRequired()
+                        .HasColumnType("text[]");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

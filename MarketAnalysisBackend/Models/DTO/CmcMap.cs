@@ -21,6 +21,7 @@
     public class CmcInfoData
     {
         public string Description { get; set; } = "";
+        public string Logo { get; set; } = "";
     }
 
 }

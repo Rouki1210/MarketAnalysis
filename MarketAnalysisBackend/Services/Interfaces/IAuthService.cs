@@ -7,5 +7,8 @@ namespace MarketAnalysisBackend.Services.Interfaces
     {
         Task<User> RegisterAsync(RegisterDTO dto);
         Task<User?> LoginAsync(LoginDTO dto);
+
+        Task<User?> GoogleLoginAsync(string email, string username);
+        Task DeleteAllUsersAsync();
     }
 }

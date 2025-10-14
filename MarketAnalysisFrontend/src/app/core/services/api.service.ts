@@ -38,7 +38,7 @@ export class ApiService {
           isPositive1h: true,
           isPositive24h: true,
           isPositive7d: true,
-          icon: 'Icon',
+          icon: a.logoUrl,
           network: 'Unknown',
           sparklineData: []
         }));
@@ -131,9 +131,7 @@ export class ApiService {
   loadCoins(): void {
     this.getCoins().subscribe(coins => {
       this.coinsSource.next(coins);
-      console.log('💾 Loaded assets:', coins);
 
-      // Auto join tất cả coin có trong DB
       coins.forEach(c => {
         if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
           this.hubConnection.invoke('JoinAssetGroup', c.symbol);

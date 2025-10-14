@@ -57,13 +57,15 @@ namespace MarketAnalysisBackend.Services.Implementations
                             if (!exists)
                             {
                                 // Step 2: get description từ info API
-                                var infoUrl = $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/info?id={cmc.Id}";
+                                var infoUrl = $"https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id={cmc.Id}";
                                 var infoResponse = await client.GetFromJsonAsync<CmcInfoResponse>(infoUrl, stoppingToken);
 
                                 var description = "";
+                                var logo = "";
                                 if (infoResponse != null && infoResponse.Data.ContainsKey(cmc.Id.ToString()))
                                 {
                                     description = infoResponse.Data[cmc.Id.ToString()].Description;
+                                    logo = infoResponse.Data[cmc.Id.ToString()].Logo;
                                 }
 
                                 var newAsset = new Asset
@@ -71,6 +73,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                                     Symbol = cmc.Symbol,
                                     Name = cmc.Name,
                                     Rank = cmc.Rank.ToString(),
+                                    LogoUrl = logo,
                                     Description = description
                                 };
 

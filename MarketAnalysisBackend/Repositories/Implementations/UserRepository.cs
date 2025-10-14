@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MarketAnalysisBackend.Repositories.Implementations
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : GenericRepository<User>, IUserRepository
     {
         private readonly AppDbContext _context;
-        public UserRepository(AppDbContext context)
+        public UserRepository(AppDbContext context) : base(context)
         {
             _context = context;
         }
@@ -20,9 +20,17 @@ namespace MarketAnalysisBackend.Repositories.Implementations
             await _context.SaveChangesAsync();
         }
 
+        public Task DeleteAllAsync()
+        {
+            _context.RemoveRange(_context.Users);
+            return _context.SaveChangesAsync();
+        }
+
         public async Task<User?> GetByEmailOrUsernameAsync(string emailOrUsername)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == emailOrUsername || u.Username == emailOrUsername);
         }
+
+       
     }
 }

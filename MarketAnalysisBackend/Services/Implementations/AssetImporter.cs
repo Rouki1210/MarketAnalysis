@@ -37,6 +37,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     Symbol = a.Symbol,
                     Name = a.Name,
                     Rank = a.Rank,
+                    LogoUrl = a.LogoUrl,
                     Description = a.Description
                 });
         }
@@ -71,14 +72,16 @@ namespace MarketAnalysisBackend.Services.Implementations
                 var name = d.GetProperty("name").GetString() ?? "";
                 var price = d.GetProperty("quote").GetProperty("USD").GetProperty("price").GetDecimal();
                 var description = "";
+                var logoUrl = "";
                 try
                 {
-                    var infoUrl = $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/info?id={id}";
+                    var infoUrl = $"https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id={id}";
                     var infoResponse = await client.GetFromJsonAsync<CmcInfoResponse>(infoUrl, cancellationToken);
 
                     if (infoResponse != null && infoResponse.Data.ContainsKey(id.ToString()))
                     {
                         description = infoResponse.Data[id.ToString()].Description ?? "";
+                        logoUrl = infoResponse.Data[id.ToString()].Logo ?? "";
                     }
                 }
                 catch (Exception ex)
@@ -95,7 +98,8 @@ namespace MarketAnalysisBackend.Services.Implementations
                         Symbol = symbol,
                         Name = name,
                         Rank = rank.ToString(),
-                        Description = description,
+                        LogoUrl = logoUrl,
+                        Description = description
                     };
                     await _assetRepo.AddAsync(asset);
                 }
@@ -105,6 +109,8 @@ namespace MarketAnalysisBackend.Services.Implementations
                     // cập nhật
                     asset.Name = name;
                     asset.Rank = rank.ToString();
+                    if (!string.IsNullOrWhiteSpace(logoUrl))
+                        asset.LogoUrl = logoUrl;
                     if (!string.IsNullOrWhiteSpace(description))
                         asset.Description = description;
                     else if (updateExisting)
@@ -112,6 +118,8 @@ namespace MarketAnalysisBackend.Services.Implementations
                         // cập nhật
                         asset.Name = name;
                         asset.Rank = rank.ToString();
+                        if (!string.IsNullOrWhiteSpace(logoUrl))
+                            asset.LogoUrl = logoUrl;
                         if (!string.IsNullOrWhiteSpace(description))
                             asset.Description = description;
 
@@ -152,14 +160,17 @@ namespace MarketAnalysisBackend.Services.Implementations
 
                 // gọi thêm info để lấy description
                 string description = "";
+                string logo = "";
                 try
                 {
-                    var infoUrl = $"https://pro-api.coinmarketcap.com/v1/cryptocurrency/info?id={cmc.Id}";
+                    var infoUrl = $"https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id={cmc.Id}";
                     var infoResponse = await client.GetFromJsonAsync<CmcInfoResponse>(infoUrl, cancellationToken);
 
                     if (infoResponse != null && infoResponse.Data.ContainsKey(cmc.Id.ToString()))
                     {
                         description = infoResponse.Data[cmc.Id.ToString()].Description ?? "";
+                        logo = infoResponse.Data[cmc.Id.ToString()].Logo ?? "";
+
                     }
                 }
                 catch (Exception ex)
@@ -172,6 +183,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     Symbol = cmc.Symbol,
                     Name = cmc.Name,
                     Rank = cmc.Rank.ToString(),
+                    LogoUrl = logo,
                     Description = description
                 };
 
