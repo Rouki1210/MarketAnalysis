@@ -368,5 +368,11 @@ FodyWeavers.xsd
 #Mac
 .DS_Store
 
-appsettings.json
-appsetting.*.json
+# Ignore appsettings for ASP.NET backend
+MarketAnalysisBackend/appsettings.json
+MarketAnalysisBackend/appsettings.Development.json
+MarketAnalysisBackend/appsettings.Production.json
+
+# Ignore environment config for Angular frontend
+MarketAnalysisFrontend/src/app/environments/environment.ts
+MarketAnalysisFrontend/src/app/environments/environment.prod.ts
