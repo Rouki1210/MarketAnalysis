@@ -19,6 +19,10 @@ export const routes: Routes = [
         loadChildren: () => import('./features/coin/coin.routes').then(m => m.coinRoutes)
       },
       {
+        path: 'profile',
+        loadChildren: () => import('./features/profile/profile.routes').then(m => m.profileRoutes)
+      },
+      {
         path: '**',
         redirectTo: ''
       }

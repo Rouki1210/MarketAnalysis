@@ -8,15 +8,52 @@ import { first, firstValueFrom } from 'rxjs';
 
 export class AuthService {
   private readonly apiUrl = 'https://localhost:7175/api/Auth'; // Placeholder API
-  constructor(private http: HttpClient) {}
-  showAuthModal = signal(false);
+  constructor(private http: HttpClient) {
+    // Check if user is already logged in
+    this.checkAuthStatus();
+  }
   
-  openAuthModal(): void {
+  showAuthModal = signal(false);
+  authModalTab = signal<'login' | 'signup'>('login');
+  isAuthenticated = signal(false);
+  currentUser = signal<{ email: string; name?: string } | null>(null);
+  
+  private checkAuthStatus(): void {
+    const token = localStorage.getItem('token');
+    const userEmail = localStorage.getItem('userEmail');
+    if (token && userEmail) {
+      this.isAuthenticated.set(true);
+      this.currentUser.set({ 
+        email: userEmail,
+        name: userEmail.split('@')[0] // Use email prefix as display name
+      });
+    }
+  }
+  
+  openAuthModal(tab: 'login' | 'signup' = 'login'): void {
+    this.authModalTab.set(tab);
     this.showAuthModal.set(true);
   }
   
   closeAuthModal(): void {
     this.showAuthModal.set(false);
+  }
+  
+  setUser(email: string, token: string): void {
+    localStorage.setItem('token', token);
+    localStorage.setItem('userEmail', email);
+    this.isAuthenticated.set(true);
+    this.currentUser.set({
+      email,
+      name: email.split('@')[0]
+    });
+  }
+  
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userEmail');
+    this.isAuthenticated.set(false);
+    this.currentUser.set(null);
   }
   
   // TODO: Implement actual authentication methods

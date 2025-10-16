@@ -1,2 +1,23 @@
 /* Header specific styles if needed */
 
+/* Settings Menu Animation */
+.settings-menu-container {
+  position: relative;
+}
+
+/* Smooth dropdown animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.settings-menu-container > div {
+  animation: slideDown 0.2s ease-out;
+}
+
