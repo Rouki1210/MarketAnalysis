@@ -1,6 +1,8 @@
 <div class="min-h-screen flex flex-col bg-background">
   <app-header></app-header>
-  <app-topbar-market-strip></app-topbar-market-strip>
+  @if (showTopbarMarketStrip()) {
+    <app-topbar-market-strip></app-topbar-market-strip>
+  }
   <main class="flex-1">
     <router-outlet></router-outlet>
   </main>

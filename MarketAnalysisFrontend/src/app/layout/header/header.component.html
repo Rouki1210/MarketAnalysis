@@ -67,7 +67,161 @@
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
         </app-button>
-        <app-button size="sm" (click)="openAuthModal()">Log In</app-button>
+        
+        <!-- Show Login button if not authenticated -->
+        <app-button 
+          *ngIf="!authService.isAuthenticated()" 
+          size="sm" 
+          (click)="openAuthModal('login')"
+        >
+          Log In
+        </app-button>
+        
+        <!-- Settings Menu Button (always visible) -->
+        <div class="relative settings-menu-container">
+          <app-button 
+            variant="ghost" 
+            size="icon" 
+            (click)="toggleSettingsMenu()"
+            class="flex"
+          >
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m-2 2l-4.2 4.2m13.2-5.2l-6 0m-6 0l-6 0m13.2 5.2l-4.2-4.2m-2-2l-4.2-4.2"></path>
+            </svg>
+          </app-button>
+
+          <!-- Settings Dropdown Menu -->
+          <div 
+            *ngIf="showSettingsMenu()" 
+            class="absolute right-0 top-full mt-2 w-96 bg-card border border-border rounded-lg shadow-lg overflow-hidden z-50"
+          >
+            <!-- User Info Section (if authenticated) -->
+            <div *ngIf="authService.isAuthenticated()" class="p-4 border-b border-border">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-primary-foreground font-semibold text-lg">
+                    {{ (authService.currentUser()?.name || 'U').charAt(0).toUpperCase() }}
+                  </span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-foreground truncate">
+                    Hi, {{ authService.currentUser()?.name || 'User' }}
+                  </div>
+                  <div class="text-sm text-muted-foreground truncate">
+                    {{ authService.currentUser()?.email }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Auth Buttons Section (if not authenticated) -->
+            <div *ngIf="!authService.isAuthenticated()" class="p-5 border-b border-border">
+              <div class="flex items-center space-x-3">
+                <button 
+                  (click)="openAuthModal('login')"
+                  class="flex-1 px-5 py-2.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Log In
+                </button>
+                <button 
+                  (click)="openAuthModal('signup')"
+                  class="flex-1 px-5 py-2.5 border border-border rounded-md text-sm font-medium hover:bg-muted/40 transition-colors"
+                >
+                  Sign Up
+                </button>
+              </div>
+            </div>
+
+            <!-- Language Section -->
+            <button class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors rounded-lg">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-muted-foreground">Language</span>
+                <div class="flex items-center text-sm text-foreground">
+                  <span>{{ selectedLanguage() }}</span>
+                  <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </button>
+
+            <!-- Currency Section -->
+            <button class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors rounded-lg">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-muted-foreground">Currency</span>
+                <div class="flex items-center text-sm text-foreground">
+                  <div class="flex items-center">
+                    <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
+                      <span class="text-white text-xs font-bold">$</span>
+                    </div>
+                    <span>{{ currencyService.currency() }}</span>
+                  </div>
+                  <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </button>
+
+            <!-- Theme Section -->
+            <div class="px-5 py-4">
+              <div class="flex items-center justify-between gap-4">
+                <span class="text-sm text-muted-foreground whitespace-nowrap">Theme</span>
+                <div class="flex items-center bg-muted/50 rounded-md p-1 gap-1">
+                  <button 
+                    (click)="selectTheme('light')"
+                    [class.bg-card]="themeService.theme() === 'light' && !isSystemTheme()"
+                    [class.shadow-sm]="themeService.theme() === 'light' && !isSystemTheme()"
+                    [class.text-foreground]="themeService.theme() === 'light' && !isSystemTheme()"
+                    [class.text-muted-foreground]="!(themeService.theme() === 'light' && !isSystemTheme())"
+                    class="px-4 py-1.5 rounded text-sm font-medium transition-all"
+                  >
+                    Light
+                  </button>
+                  <button 
+                    (click)="selectTheme('dark')"
+                    [class.bg-card]="themeService.theme() === 'dark' && !isSystemTheme()"
+                    [class.shadow-sm]="themeService.theme() === 'dark' && !isSystemTheme()"
+                    [class.text-foreground]="themeService.theme() === 'dark' && !isSystemTheme()"
+                    [class.text-muted-foreground]="!(themeService.theme() === 'dark' && !isSystemTheme())"
+                    class="px-4 py-1.5 rounded text-sm font-medium transition-all"
+                  >
+                    Dark
+                  </button>
+                  <button 
+                    (click)="selectSystemTheme()"
+                    [class.bg-card]="isSystemTheme()"
+                    [class.shadow-sm]="isSystemTheme()"
+                    [class.text-foreground]="isSystemTheme()"
+                    [class.text-muted-foreground]="!isSystemTheme()"
+                    class="px-4 py-1.5 rounded text-sm font-medium transition-all"
+                  >
+                    System
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Settings (if authenticated) -->
+            <button 
+              *ngIf="authService.isAuthenticated()"
+              (click)="goToProfile()"
+              class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors text-left"
+            >
+              <span class="text-sm text-foreground">Settings</span>
+            </button>
+
+            <!-- Log Out (if authenticated) -->
+            <button 
+              *ngIf="authService.isAuthenticated()"
+              (click)="logout()"
+              class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors text-left border-t border-border"
+            >
+              <span class="text-sm text-foreground">Log Out</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

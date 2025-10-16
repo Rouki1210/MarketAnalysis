@@ -11,7 +11,10 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrls: ['./auth-modal.component.css']
 })
 export class AuthModalComponent {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) {
+    // Set activeTab based on authService signal
+    this.activeTab.set(this.authService.authModalTab());
+  }
 
   @Output() close = new EventEmitter<void>();
   
@@ -46,7 +49,9 @@ export class AuthModalComponent {
       const response = await this.authService.login(this.loginEmail, this.loginPassword);
       console.log('Login response:', response);
 
-      if (response.success) {
+      if (response && response.token) {
+        // Save user info
+        this.authService.setUser(this.loginEmail, response.token);
         this.onClose();
       } else {
         alert('❌ Login failed. Please check your credentials.');
@@ -69,7 +74,9 @@ export class AuthModalComponent {
       const response = await this.authService.signup(this.signupEmail, this.signupPassword);
       console.log('Signup response:', response);
   
-      if (response.success) {
+      if (response && response.token) {
+        // Save user info
+        this.authService.setUser(this.signupEmail, response.token);
         alert('✅ Signup successful!');
         this.onClose();
       } else {
@@ -84,7 +91,13 @@ export class AuthModalComponent {
   async handleCredentialResponse(response: any) {
     const idToken = response.credential;
     console.log('Google ID Token:', idToken);
-    await this.authService.GoogleAuth(idToken);
+    const authResponse = await this.authService.GoogleAuth(idToken);
+    if (authResponse && authResponse.success) {
+      // Extract email from Google token or use a default
+      const email = 'google-user@gmail.com'; // You should decode the idToken to get real email
+      this.authService.setUser(email, localStorage.getItem('token') || '');
+      this.onClose();
+    }
   }
   
   onSocialAuth(provider: string): void {
