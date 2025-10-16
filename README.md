@@ -193,8 +193,8 @@ MIT © 2025 Vinh Nguyen (Rouki1210)
 
 ## 📧 Contact
 
-**Main Developer:** Vinh Nguyen  
-**GitHub:** [Rouki1210](https://github.com/Rouki1210)  
+**Main Developer:** Vinh Nguyen || Pham Huu Anh Vu
+**GitHub:** [Rouki1210](https://github.com/Rouki1210) || [25thnovvv](https://github.com/25thnovvv)
 **Email:** vinh12102004@gmail.com  
 
 ---
@@ -204,7 +204,7 @@ MIT © 2025 Vinh Nguyen (Rouki1210)
 | Avatar | Name | Role | GitHub |
 |--------|------|------|---------|
 | <img src="https://github.com/Rouki1210.png" width="50" height="50" style="border-radius:50%;"> | **Vinh Nguyen (Rouki1210)** | Full-Stack Developer / Project Owner | [Rouki1210](https://github.com/Rouki1210) |
-| <img src="https://github.com/25thnovvv.png" width="50" height="50" style="border-radius:50%;"> | **Pham Huu Anh Vu (25thnovvv)** | Backend Developer | [25thnovvv](https://github.com/25thnovvv) |
+| <img src="https://github.com/25thnovvv.png" width="50" height="50" style="border-radius:50%;"> | **Pham Huu Anh Vu (25thnovvv)** | Frontend Developer | [25thnovvv](https://github.com/25thnovvv) |
 | <img src="https://github.com/Kim2k4.png" width="50" height="50" style="border-radius:50%;"> | **Kim2k4** | Frontend Developer | [Kim2k4](https://github.com/Kim2k4) |
 
 ---
