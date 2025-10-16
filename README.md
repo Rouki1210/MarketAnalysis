@@ -193,8 +193,8 @@ MIT © 2025 Vinh Nguyen (Rouki1210)
 
 ## 📧 Contact
 
-**Main Developer:** Vinh Nguyen | Pham Huu Anh Vu
-**GitHub:** [Rouki1210](https://github.com/Rouki1210) | [25thnovvv](https://github.com/25thnovvv)
+**Main Developer:** Vinh Nguyen && Pham Huu Anh Vu
+**GitHub:** [Rouki1210](https://github.com/Rouki1210) && [25thnovvv](https://github.com/25thnovvv)
 **Email:** vinh12102004@gmail.com  
 
 ---
