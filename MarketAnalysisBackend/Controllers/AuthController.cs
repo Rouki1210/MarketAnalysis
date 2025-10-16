@@ -2,6 +2,7 @@
 using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace MarketAnalysisBackend.Controllers
 {
@@ -11,10 +12,14 @@ namespace MarketAnalysisBackend.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IJwtService _jwtService;
-        public AuthController(IAuthService userService, IJwtService jwtService)
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _config;
+        public AuthController(IAuthService userService, IJwtService jwtService, IHttpClientFactory httpClientFactory, IConfiguration config)
         {
             _authService = userService;
             _jwtService = jwtService;
+            _httpClientFactory = httpClientFactory;
+            _config = config;
         }
 
         [HttpPost("register")]
@@ -38,26 +43,53 @@ namespace MarketAnalysisBackend.Controllers
         }
 
         [HttpPost("google")]
-        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO dto)
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO request)
         {
-            try
+            var clientId = _config["Authentication:Google:ClientId"];
+            var clientSecret = _config["Authentication:Google:ClientSecret"];
+            var redirectUri = _config["Authentication:Google:RedirectUri"];
+
+            var tokenRequestBody = new List<KeyValuePair<string, string>>
             {
-                var payload = await GoogleJsonWebSignature.ValidateAsync(dto.IdToken, new GoogleJsonWebSignature.ValidationSettings());
+                new("code", request.Code),
+                new("client_id", clientId),
+                new("client_secret", clientSecret),
+                new("redirect_uri", redirectUri),  
+                new("grant_type", "authorization_code")
+            };
 
-                // Check user exists or not
-                var user = await _authService.GoogleLoginAsync(payload.Email, payload.Name);
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.PostAsync("https://oauth2.googleapis.com/token", new FormUrlEncodedContent(tokenRequestBody));
+            var responseContent = await response.Content.ReadAsStringAsync();
 
-                // Generate JWT
-                var token = _jwtService.GenerateToken(user);
 
-                return Ok(new { token, user });
-            }
-            catch (Exception ex)
+            if (!response.IsSuccessStatusCode)
             {
-                return BadRequest(new { message = ex.Message });
+                Console.WriteLine($"❌ Google token exchange failed: {responseContent}");
+                return BadRequest(new { error = responseContent });
             }
 
+            var tokenResult = JsonSerializer.Deserialize<JsonElement>(responseContent);
+            var idToken = tokenResult.GetProperty("id_token").GetString();
+
+            // Validate and decode ID token (using Google.Apis.Auth)
+            var payload = await GoogleJsonWebSignature.ValidateAsync(idToken);
+            var email = payload.Email;
+            var name = payload.Name;
+
+            var user = await _authService.GoogleLoginAsync(email, name);
+            var token = _jwtService.GenerateToken(user);
+
+            // TODO: Create or update user in your database, issue your JWT token, etc.
+            return Ok(new
+            {
+                success=true,
+                user = new { user.Id, user.Email, user.Username },
+                token
+            });
         }
+
+        
         [HttpDelete]
         public async Task DeleteAllUsers()
         {

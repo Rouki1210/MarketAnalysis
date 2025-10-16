@@ -88,21 +88,12 @@ export class AuthModalComponent {
     }
   }
 
-  async handleCredentialResponse(response: any) {
-    const idToken = response.credential;
-    console.log('Google ID Token:', idToken);
-    const authResponse = await this.authService.GoogleAuth(idToken);
-    if (authResponse && authResponse.success) {
-      // Extract email from Google token or use a default
-      const email = 'google-user@gmail.com'; // You should decode the idToken to get real email
-      this.authService.setUser(email, localStorage.getItem('token') || '');
-      this.onClose();
-    }
-  }
-  
   onSocialAuth(provider: string): void {
     console.log('Social auth:', provider);
     // TODO: Implement social authentication
-    
+    if (provider === 'google') {
+      this.authService.requestGoogleCode();
+      this.onClose();
+    }
   }
 }
