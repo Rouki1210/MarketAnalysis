@@ -1,5 +1,7 @@
 ﻿using Google.Apis.Auth;
+using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Models.DTO;
+using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -14,12 +16,30 @@ namespace MarketAnalysisBackend.Controllers
         private readonly IJwtService _jwtService;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _config;
-        public AuthController(IAuthService userService, IJwtService jwtService, IHttpClientFactory httpClientFactory, IConfiguration config)
+        private readonly IUserRepository _userRepository;
+        private readonly ILogger<AuthController> _logger;
+        public AuthController(
+            IAuthService userService, 
+            IJwtService jwtService, 
+            IHttpClientFactory httpClientFactory, 
+            IConfiguration config, 
+            IUserRepository userRepository,
+            ILogger<AuthController> logger
+            )
         {
             _authService = userService;
             _jwtService = jwtService;
             _httpClientFactory = httpClientFactory;
             _config = config;
+            _userRepository = userRepository;
+            _logger = logger;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllUser()
+        {
+            var user = await _userRepository.GetAllAsync();
+            return Ok(user);
         }
 
         [HttpPost("register")]
@@ -78,6 +98,18 @@ namespace MarketAnalysisBackend.Controllers
             var name = payload.Name;
 
             var user = await _authService.GoogleLoginAsync(email, name);
+            var existingUser = await _userRepository.GetByEmailOrUsernameAsync(email);
+            if (existingUser == null)
+            {
+                existingUser = new User
+                {
+                    Email = email,
+                    Username = name,
+                    AuthProvider = "Google",
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _userRepository.CreateAsync(existingUser);
+            }
             var token = _jwtService.GenerateToken(user);
 
             // TODO: Create or update user in your database, issue your JWT token, etc.
@@ -85,11 +117,75 @@ namespace MarketAnalysisBackend.Controllers
             {
                 success=true,
                 user = new { user.Id, user.Email, user.Username },
+                AuthProvider = "Google",
                 token
             });
         }
 
-        
+        [HttpPost("wallet/request-nonce")]
+        public async Task<IActionResult> RequestNonce([FromBody] NonceRequestDTO request)
+        {
+            try
+            {
+                var response = await _authService.RequestNonceAsync(request.WalletAddress);
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error requesting nonce");
+                return StatusCode(500, new { error = "Internal server error" });
+            }
+        }
+
+        [HttpPost("wallet/login")]
+        public async Task<IActionResult> MetaMaskLogin([FromBody] MetaMaskLoginDTO request)
+        {
+            try
+            {
+                var user = await _authService.MetaMaskLoginAsync(request);
+                var token = _jwtService.GenerateToken(user);
+
+                var response = new AuthResponseDTO
+                {
+                    Success = true,
+                    Token = token,
+                    User = new UserDTO
+                    {
+                        Id = user.Id,
+                        Username = user.Username,
+                        Email = user.Email,
+                        WalletAddress = user.WalletAddress,
+                        AuthType = user.AuthProvider
+                    }
+                };
+
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, error = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during MetaMask login");
+                return StatusCode(500, new { success = false, error = "Internal server error" });
+            }
+        }
+
+
+
         [HttpDelete]
         public async Task DeleteAllUsers()
         {
