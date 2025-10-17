@@ -29,6 +29,12 @@ export class AuthModalComponent {
   signupEmail = '';
   signupPassword = '';
   signupConfirmPassword = '';
+
+  //Wallet form
+  isLoading = false;
+  errorMessage = '';
+  successMessage = '';
+  connectedAccount: string | null = null;
   
   switchTab(tab: 'login' | 'signup'): void {
     this.activeTab.set(tab);
@@ -88,12 +94,91 @@ export class AuthModalComponent {
     }
   }
 
+  async checkConnectedAccount(): Promise<void> {
+    this.connectedAccount = await this.authService.getCurrentAccount();
+  }
+
+  async handleMetaMaskLogin(): Promise<void> {
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.isLoading = true;
+
+    try {
+      if (!this.authService.isMetaMaskInstalled()) {
+        throw new Error('MetaMask is not installed. Please install MetaMask and try again.');
+      }
+
+      const accounts = await this.authService.connectMetaMask();
+      const walletAddress = accounts[0];
+      this.connectedAccount = walletAddress;
+
+      console.log('Connected wallet address:', walletAddress);
+
+      this.authService.requestNonce(walletAddress).subscribe(
+        async (nonceResponse: any) => {
+          try {
+            const message = nonceResponse.message;
+            console.log('Message to sign:', message);
+
+            // Step 4: Sign message with MetaMask
+            const signature = await this.authService.signMessage(
+              message,
+              walletAddress
+            );
+            console.log('Signature:', signature);
+
+            // Step 5: Send signature to backend for verification
+            this.authService
+              .metaMaskLogin(walletAddress, signature, message)
+              .subscribe(
+                (response: any) => {
+                  if (response.success) {
+                    this.successMessage = 'Login successful!';
+                    
+                    // Store token
+                    localStorage.setItem('token', response.token);
+                    localStorage.setItem('user', JSON.stringify(response.user));
+
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                      this.onClose();
+                      this.authService.setUser(response.user.email, response.token);
+                    }, 1000);
+                  }
+                },
+                (error: any) => {
+                  this.errorMessage =
+                    error.error?.error || 'Login failed. Please try again.';
+                  this.isLoading = false;
+                }
+              );
+          } catch (error: any) {
+            this.errorMessage = error.message || 'Failed to sign message';
+            this.isLoading = false;
+          }
+        },
+        (error: any) => {
+          this.errorMessage =
+            error.error?.error || 'Failed to request nonce';
+          this.isLoading = false;
+        }
+      );
+    } catch (error: any) {
+      this.errorMessage = error.message || 'An error occurred';
+      this.isLoading = false;
+    }
+  }
+
   onSocialAuth(provider: string): void {
     console.log('Social auth:', provider);
     // TODO: Implement social authentication
     if (provider === 'google') {
       this.authService.requestGoogleCode();
       this.onClose();
+    }
+    if (provider === 'wallet') {
+      // Implement wallet-based social authentication
+      this.handleMetaMaskLogin();
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { first, firstValueFrom } from 'rxjs';
+import { first, firstValueFrom, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 declare const google: any; // For Google Identity Services
@@ -78,7 +78,7 @@ export class AuthService {
     this.currentUser.set(null);
   }
   
-  // TODO: Implement actual authentication methods
+  // Login with email and password
   async login(email: string, password: string): Promise<any> {
     const body = { usernameOrEmail: email, password };
     return await firstValueFrom(this.http.post(`${this.apiUrl}/login`, body));
@@ -89,6 +89,7 @@ export class AuthService {
     return await firstValueFrom(this.http.post(`${this.apiUrl}/register`, body));
   }
 
+    // Initiate Google OAuth login
     requestGoogleCode() {
     if (!this.codeClient) {
       console.error('Google code client not initialized yet');
@@ -110,6 +111,73 @@ export class AuthService {
         },
         error: (err) => console.error('Login failed', err)
       });
+  }
+
+  // Wallet-based social authentication
+  isMetaMaskInstalled(): boolean {
+    return typeof (window as any).ethereum !== 'undefined' && (window as any).ethereum.isMetaMask;
+  }
+
+  async connectMetaMask(): Promise<string[]> {
+    if (!this.isMetaMaskInstalled()){
+      throw new Error('MetaMask is not installed');
+    }
+
+    try{
+      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+      return accounts;
+    } catch (error) {
+      console.error('Error connecting to MetaMask:', error);
+      throw error;
+    }
+  }
+
+  requestNonce(walletAddress: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/wallet/request-nonce`, { walletAddress });
+  }
+
+  async signMessage(walletAddress: string, message: string): Promise<string> {
+    if (!this.isMetaMaskInstalled()){
+      throw new Error('MetaMask is not installed');
+    }
+
+    try{
+      const signature = await (window as any).ethereum.request({
+        method: 'personal_sign',
+        params: [message, walletAddress],
+      });
+      return signature;
+    } catch (error) {
+      console.error('Error signing message:', error);
+      throw error;
+    }
+  }
+
+  metaMaskLogin(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/wallet/login`, {
+      walletAddress,
+      signature,
+      message
+    });
+  }
+
+  async getCurrentAccount(): Promise<string | null> {
+    if (!this.isMetaMaskInstalled()) {
+      return null;
+    }
+
+    try {
+      const accounts = await (window as any).ethereum.request({
+        method: 'eth_accounts'
+      });
+      return accounts.length > 0 ? accounts[0] : null;
+    } catch (error) {
+      return null;
+    }
   }
   
   socialAuth(provider: string): Promise<any> {
