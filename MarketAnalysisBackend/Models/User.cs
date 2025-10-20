@@ -12,8 +12,15 @@ namespace MarketAnalysisBackend.Models
         public string PasswordHash { get; set; } = string.Empty;
         [Required]
         public string Email { get; set; } = string.Empty;
+        [MaxLength(200)]
+        public string? WalletAddress { get; set; }
+        [MaxLength(50)]
+        public string AuthProvider { get; set; } = "Local"; // Local || Google || MetaMask || Other
+
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
+
 
         //public string[] Notication { get; set; }
         //public string[] FavoriteStocks { get; set; }

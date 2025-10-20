@@ -9,9 +9,19 @@ namespace MarketAnalysisBackend.Services.Implementations
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepo;
-        public AuthService( IUserRepository userRepo)
+        private readonly IWalletService _walletService;
+        private readonly ILogger<AuthService> _logger;
+        private readonly INonceRepository _nonceRepo;
+        public AuthService( 
+            IUserRepository userRepo,
+            IWalletService walletService,
+            INonceRepository nonceRepo,
+            ILogger<AuthService> logger)
         {
             _userRepo = userRepo;
+            _walletService = walletService;
+            _nonceRepo = nonceRepo;
+            _logger = logger;
         }
         public async Task<User?> LoginAsync(LoginDTO dto)
         {
@@ -35,10 +45,100 @@ namespace MarketAnalysisBackend.Services.Implementations
                 Email = dto.Email,
                 Username = username,
                 PasswordHash = hashedPassword,
+                CreatedAt = DateTime.UtcNow,
+                AuthProvider = "Local"
+            };
+            await _userRepo.CreateAsync(newUser);
+            return newUser;
+        }
+        public async Task<User?> GoogleLoginAsync(string email, string name)
+        {
+            var user = await _userRepo.GetByEmailOrUsernameAsync(email);
+            if (user != null) return user;
+
+            var newUser = new User
+            {
+                Email = email,
+                Username = $"google_{Guid.NewGuid().ToString().Substring(0, 6)}",
                 CreatedAt = DateTime.UtcNow
             };
             await _userRepo.CreateAsync(newUser);
             return newUser;
+        }
+
+        public async Task<NonceResponseDTO> RequestNonceAsync(string walletAddress)
+        {
+            if (!_walletService.IsValidWalletAddress(walletAddress))
+                throw new ArgumentException("Invalid Ethereum address");
+
+            var nonce = Guid.NewGuid().ToString();
+            var message = _walletService.GenerateNonceMessage(walletAddress, nonce);
+
+            var nonceEntity = new Nonce
+            {
+                WalletAddress = walletAddress.ToLower(),
+                NonceValue = nonce,
+                CreateAt = DateTime.UtcNow,
+                ExpireAt = DateTime.UtcNow.AddMinutes(10),
+                IsUsed = false
+            };
+
+            await _nonceRepo.CreateAsync(nonceEntity);
+
+            return new NonceResponseDTO
+            {
+                Nonce = nonce,
+                Message = message,
+                ExpiresAt = nonceEntity.ExpireAt
+            };
+        }
+
+        public async Task<User> MetaMaskLoginAsync(MetaMaskLoginDTO dto)
+        {
+            if (!_walletService.IsValidWalletAddress(dto.WalletAddress))
+            {
+                throw new ArgumentException("Invalid wallet address format");
+            }
+            var nonceFromMessage = ExtractNonceFromMessage(dto.Message);
+            if (string.IsNullOrEmpty(nonceFromMessage))
+                throw new ArgumentException("Invalid message format");
+
+            var nonce = await _nonceRepo.GetByWalletAndNonceAsync(dto.WalletAddress, nonceFromMessage);
+
+            if (nonce == null)
+                throw new InvalidOperationException("Nonce not found. Request a new nonce first.");
+
+            if (nonce.IsUsed)
+                throw new InvalidOperationException("Nonce already used");
+
+            if (nonce.ExpireAt < DateTime.UtcNow)
+                throw new InvalidOperationException("Nonce expired. Request a new nonce.");
+
+            var isValidSignature = await _walletService.VerifySignatureAsync(dto.Message, dto.Signature, dto.WalletAddress);
+
+            if (!isValidSignature)
+                throw new UnauthorizedAccessException("Invalid signature");
+
+            nonce.IsUsed = true;
+            await _nonceRepo.UpdateAsync(nonce);
+
+            var user = await _userRepo.GetByWalletAddressAsync(dto.WalletAddress);
+
+            if (user == null) 
+            {
+                user = new User
+                {
+                    WalletAddress = dto.WalletAddress.ToLower(),
+                    Username = GenerateWalletUsername(),
+                    Email = $"wallet_{Guid.NewGuid().ToString().Substring(0, 8)}@metamask.local",
+                    CreatedAt = DateTime.UtcNow,
+                    AuthProvider = "MetaMask"
+                };
+                await _userRepo.CreateAsync(user);
+                _logger.LogInformation($"Created new user for wallet {dto.WalletAddress}");
+            }
+            
+            return user;
         }
 
         private string GenerateRandomUsername()
@@ -55,19 +155,26 @@ namespace MarketAnalysisBackend.Services.Implementations
             return $"{randomPart}{month}{day}";
         }
 
-        public async Task<User?> GoogleLoginAsync(string email, string name)
+        private string GenerateWalletUsername()
         {
-            var user = await _userRepo.GetByEmailOrUsernameAsync(email);
-            if (user != null) return user;
+            return $"wallet_{Guid.NewGuid().ToString().Substring(0, 8)}";
+        }
 
-            var newUser = new User
+        private string? ExtractNonceFromMessage(string message)
+        {
+            try
             {
-                Email = email,
-                Username = $"google_{Guid.NewGuid().ToString().Substring(0, 6)}",
-                CreatedAt = DateTime.UtcNow
-            };
-            await _userRepo.CreateAsync(newUser);
-            return newUser;
+                var lines = message.Split('\n');
+                var nonceLine = lines.FirstOrDefault(l => l.StartsWith("Nonce:"));
+                if (string.IsNullOrEmpty(nonceLine))
+                    return null;
+
+                return nonceLine.Replace("Nonce:", "").Trim();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task DeleteAllUsersAsync()

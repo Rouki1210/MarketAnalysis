@@ -9,6 +9,9 @@ namespace MarketAnalysisBackend.Services.Interfaces
         Task<User?> LoginAsync(LoginDTO dto);
 
         Task<User?> GoogleLoginAsync(string email, string username);
+
+        Task<NonceResponseDTO> RequestNonceAsync(string walletAddress);
+        Task<User?> MetaMaskLoginAsync(MetaMaskLoginDTO dto);
         Task DeleteAllUsersAsync();
     }
 }

@@ -31,6 +31,12 @@ namespace MarketAnalysisBackend.Repositories.Implementations
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == emailOrUsername || u.Username == emailOrUsername);
         }
 
-       
+        public async Task<User?> GetByWalletAddressAsync(string walletAddress)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.WalletAddress == walletAddress.ToLower());
+        }
+
+
     }
 }
