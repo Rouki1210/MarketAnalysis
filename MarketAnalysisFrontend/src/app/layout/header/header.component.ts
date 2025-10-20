@@ -20,6 +20,7 @@ export class HeaderComponent implements OnDestroy {
   // UI State
   searchQuery = '';
   showSettingsMenu = signal(false);
+  showCryptoMenu = signal(false);
   selectedLanguage = signal('English');
   systemTheme = signal(false);
 
@@ -61,10 +62,26 @@ export class HeaderComponent implements OnDestroy {
   // Settings Menu
   toggleSettingsMenu(): void {
     this.showSettingsMenu.update(value => !value);
+    this.showCryptoMenu.set(false);
   }
 
   private closeSettingsMenu(): void {
     this.showSettingsMenu.set(false);
+  }
+
+  // Crypto Menu
+  toggleCryptoMenu(): void {
+    this.showCryptoMenu.update(value => !value);
+    this.showSettingsMenu.set(false);
+  }
+
+  openCryptoMenu(): void {
+    this.showCryptoMenu.set(true);
+    this.showSettingsMenu.set(false);
+  }
+
+  closeCryptoMenu(): void {
+    this.showCryptoMenu.set(false);
   }
 
   // Navigation
@@ -124,6 +141,7 @@ export class HeaderComponent implements OnDestroy {
     if (!target.closest('.settings-menu-container')) {
       this.closeSettingsMenu();
     }
+    // Removed crypto menu click outside handler since we use hover now
   }
 }
 
