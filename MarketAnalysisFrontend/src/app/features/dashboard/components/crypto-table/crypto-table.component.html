@@ -1,5 +1,5 @@
 <div class="mx-auto px-3 lg:px-4 xl:px-6 py-6 lg:py-8">
-  <!-- Navigation Tabs -->
+  <!-- ==================== TAB NAVIGATION ==================== -->
   <div class="flex items-center space-x-3 lg:space-x-4 mb-6 overflow-x-auto scrollbar-hide border-b border-border">
     <app-button 
       *ngFor="let tab of tabs"
@@ -15,21 +15,42 @@
     </app-button>
   </div>
 
-  <!-- Network Filters and Table Controls - Same Row -->
+  <!-- ==================== FILTERS & CONTROLS ==================== -->
   <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
-    <!-- Network Filter Buttons -->
-    <div class="flex items-center space-x-2 overflow-x-auto scrollbar-hide">
-      <app-button
-        *ngFor="let network of networks"
-        [variant]="selectedNetwork === network ? 'default' : 'ghost'"
-        size="sm"
-        class="whitespace-nowrap"
-        (click)="selectNetwork(network)">
-        {{ network }}
-      </app-button>
+    <!-- Network Filters -->
+    <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-2 overflow-x-auto scrollbar-hide">
+        <!-- Primary Network Buttons -->
+        <app-button
+          *ngFor="let network of networks"
+          [variant]="selectedNetwork === network ? 'default' : 'ghost'"
+          size="sm"
+          class="whitespace-nowrap"
+          (click)="selectNetwork(network)">
+          {{ network }}
+        </app-button>
+        
+        <!-- More Networks Button -->
+        <button
+          #moreButton
+          (click)="toggleNetworkMenu()"
+          class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground whitespace-nowrap flex-shrink-0 network-more-btn">
+          More
+          <svg 
+            class="w-3 h-3 ml-1 transition-transform"
+            [class.rotate-180]="showNetworkMenu()"
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <!-- Table Filter Controls -->
+    <!-- Table Action Buttons -->
     <div class="flex items-center space-x-2">
       <app-button variant="ghost" size="sm" class="text-muted-foreground">
         <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -37,18 +58,21 @@
         </svg>
         <span class="hidden sm:inline">Market Cap</span>
       </app-button>
+      
       <app-button variant="ghost" size="sm" class="text-muted-foreground hidden sm:flex">
         <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
         <span class="hidden md:inline">Volume(24h)</span>
       </app-button>
+      
       <app-button variant="ghost" size="sm" class="text-muted-foreground">
         <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
         <span class="hidden md:inline">Filters</span>
       </app-button>
+      
       <app-button variant="ghost" size="sm" class="text-muted-foreground">
         <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="7" height="7"></rect>
@@ -61,7 +85,7 @@
     </div>
   </div>
 
-  <!-- Table -->
+  <!-- ==================== CRYPTOCURRENCY TABLE ==================== -->
   <app-card [padding]="false">
     <div class="overflow-x-auto">
       <table class="w-full min-w-[800px]">
@@ -135,3 +159,28 @@
   </app-card>
 </div>
 
+<!-- ==================== NETWORK DROPDOWN MENU ==================== -->
+<!-- Fixed positioned dropdown to prevent overflow clipping -->
+<div 
+  *ngIf="showNetworkMenu()" 
+  class="fixed w-64 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-[9999] network-menu-container"
+  [style.left.px]="menuPosition.left"
+  [style.top.px]="menuPosition.top">
+  <div class="max-h-96 overflow-y-auto custom-scrollbar">
+    <div class="p-2">
+      <button
+        *ngFor="let network of additionalNetworks"
+        (click)="selectAdditionalNetwork(network)"
+        class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-muted/40 transition-colors text-left group">
+        <div 
+          [class]="network.color"
+          class="w-8 h-8 rounded-full flex items-center justify-center text-white flex-shrink-0">
+          <span class="text-lg">{{ network.icon }}</span>
+        </div>
+        <span class="text-sm text-foreground group-hover:text-primary transition-colors font-medium">
+          {{ network.name }}
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

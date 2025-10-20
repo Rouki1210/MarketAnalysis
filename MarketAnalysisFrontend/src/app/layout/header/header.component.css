@@ -1,7 +1,8 @@
 /* Header specific styles if needed */
 
 /* Settings Menu Animation */
-.settings-menu-container {
+.settings-menu-container,
+.crypto-menu-container {
   position: relative;
 }
 
@@ -17,7 +18,13 @@
   }
 }
 
-.settings-menu-container > div {
+.settings-menu-container > div,
+.crypto-menu-container > div {
   animation: slideDown 0.2s ease-out;
+}
+
+/* Rotate animation for chevron */
+.rotate-180 {
+  transform: rotate(180deg);
 }
 
