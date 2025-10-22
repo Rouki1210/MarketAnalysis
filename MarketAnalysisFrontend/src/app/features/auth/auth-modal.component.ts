@@ -138,6 +138,7 @@ export class AuthModalComponent {
                     // Store token
                     localStorage.setItem('token', response.token);
                     localStorage.setItem('user', JSON.stringify(response.user));
+                    this.authService.currentWallet = walletAddress;
 
                     // Redirect to dashboard
                     setTimeout(() => {
@@ -169,6 +170,11 @@ export class AuthModalComponent {
     }
   }
 
+  // Authentication via binance
+  async handleBinanceLogin(): Promise<void> {
+    console.log('Binance login not yet implemented');
+  }
+
   onSocialAuth(provider: string): void {
     console.log('Social auth:', provider);
     // TODO: Implement social authentication
@@ -179,6 +185,9 @@ export class AuthModalComponent {
     if (provider === 'wallet') {
       // Implement wallet-based social authentication
       this.handleMetaMaskLogin();
+    }
+    if (provider === 'binance') {
+      this.handleBinanceLogin();
     }
   }
 }

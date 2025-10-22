@@ -17,10 +17,14 @@ export interface MarketStats {
 
 export interface MarketOverview {
   totalMarketCap: string;
+  cmc20: string;
+  fearGreedIndex: string;
+  fear_and_greed_text: string;
   totalVolume24h: string;
   btcDominance: string;
   ethDominance: string;
-  fearGreedIndex: number;
+  btcDominancePercent: string;
+  ethDominancePercent: string;
   altcoinSeasonIndex: number;
 }
 
