@@ -12,6 +12,6 @@ namespace MarketAnalysisBackend.Services.Interfaces
 
         Task<NonceResponseDTO> RequestNonceAsync(string walletAddress);
         Task<User?> MetaMaskLoginAsync(MetaMaskLoginDTO dto);
-        Task DeleteAllUsersAsync();
+        Task<bool> ChangePasswordAsync(string username, ChangePasswordDto dto);
     }
 }

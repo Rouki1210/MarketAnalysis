@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace MarketAnalysisBackend.Services.Implementations
 {
-    public class AssetImporter : IAssetImport
+    public class AssetImporter :  IAssetImport
     {
         private readonly ILogger<AssetImporter> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
@@ -142,9 +142,9 @@ namespace MarketAnalysisBackend.Services.Implementations
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("X-CMC_PRO_API_KEY", _apiKey);
 
-           var mapResponse = await client.GetFromJsonAsync<CmcMap>(
-                "https://pro-api.coinmarketcap.com/v1/cryptocurrency/map",
-                cancellationToken);
+            var mapResponse = await client.GetFromJsonAsync<CmcMap>(
+                 "https://pro-api.coinmarketcap.com/v1/cryptocurrency/map",
+                 cancellationToken);
 
             if (mapResponse == null || !mapResponse.Data.Any())
             {
@@ -153,7 +153,7 @@ namespace MarketAnalysisBackend.Services.Implementations
 
             var existingAssets = await _assetRepo.GetAllAsync();
 
-            foreach(var cmc in mapResponse.Data)
+            foreach (var cmc in mapResponse.Data)
             {
                 if (existingAssets.Any(a => a.Symbol.ToUpper() == cmc.Symbol.ToUpper()))
                     continue;

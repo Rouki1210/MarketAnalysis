@@ -19,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection"))
 );
@@ -44,9 +45,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAssetImport, AssetImporter>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddHostedService<AssetImporterService>();
 builder.Services.AddHostedService<PriceDataCollector>();
+builder.Services.AddHostedService<GlobalMetricService>();
 
 // Google Authentication
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
@@ -94,7 +97,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200") // Angular dev server
+            policy.WithOrigins("http://localhost:4200", "https://localhost:4200") // Angular dev server
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
@@ -113,6 +116,9 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAngular");
 
 app.MapHub<PriceHub>("/pricehub");
+app.MapHub<GlobalMetric>("/globalmetrichub");
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 
