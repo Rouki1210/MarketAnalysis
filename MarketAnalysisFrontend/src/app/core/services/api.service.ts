@@ -13,7 +13,10 @@ export class ApiService {
   private readonly apiUrl = 'https://localhost:7175'; // Placeholder API
 
   private hubConnection!: signalR.HubConnection;
+  private globalMetricsHubConnection!: signalR.HubConnection;
   private coinsSource = new BehaviorSubject<Coin[]>([]);
+  private globalMetricSource = new BehaviorSubject<MarketOverview | null>(null);
+  public globalMetric$ = this.globalMetricSource.asObservable();
   public coins$ = this.coinsSource.asObservable();
   private realtimeData: Record<string, any> = {};
 
@@ -262,17 +265,47 @@ export class ApiService {
     return of(mockChartData);
   }
 
-  getMarketOverview(): Observable<MarketOverview> {
-    const overview: MarketOverview = {
-      totalMarketCap: "$4.2T",
-      totalVolume24h: "$194.88B",
-      btcDominance: "58.0%",
-      ethDominance: "13.0%",
-      fearGreedIndex: 57,
-      altcoinSeasonIndex: 60
-    };
+  startGlobalMetricSignalR(){
+    // Placeholder for future implementation
+    if (this.globalMetricsHubConnection) return;
+    
+    this.globalMetricsHubConnection = new signalR.HubConnectionBuilder()
+      .withUrl(`${this.apiUrl}/globalmetrichub`)
+      .withAutomaticReconnect([0, 2000, 5000, 10000])
+      .build();
 
-    return of(overview);
+    this.globalMetricsHubConnection
+      .start()
+      .then(() => {
+        console.log('Global Metrics SignalR Connected');
+      })
+      .catch((err) => console.error('Global Metrics SignalR Error:', err));
+    
+    this.globalMetricsHubConnection.on('ReceiveGlobalMetric', (message: any) => {
+        const data = message.data;
+        if (!data) return;
+        console.log('Global Metric update:', data);
+        const overview : MarketOverview = {
+          totalMarketCap: data.totalMarketCap,
+          cmc20: "0",
+          fearGreedIndex: data.fearGreedIndex,
+          fear_and_greed_text: data.fear_and_greed_text,
+          totalVolume24h: "0",
+          btcDominance: data.btcDominance,
+          ethDominance: data.ethDominance,
+          btcDominancePercent: data.btcDominancePercent,
+          ethDominancePercent: data.ethDominancePercent,
+          altcoinSeasonIndex: data.altcoinSeasonIndex
+        };
+        this.globalMetricSource.next(overview);
+      }
+    );
   }
+
+  getMarketOverview(): Observable<MarketOverview | null> {
+  this.startGlobalMetricSignalR();
+  return this.globalMetric$;
+}
+
 }
 

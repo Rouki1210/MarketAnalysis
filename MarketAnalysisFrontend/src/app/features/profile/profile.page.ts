@@ -63,12 +63,21 @@ export class ProfilePage implements OnInit {
 
   // Private Methods
   private loadUserData(): void {
-    const currentUser = this.authService.currentUser();
-    if (currentUser) {
-      const userName = currentUser.name || '';
-      this.displayName.set(userName);
-      this.username.set(userName);
-    }
+    this.authService.getUserInfo().subscribe({
+      next: (data) => {
+        console.log('User info loaded:', data);
+        if(data?.user){
+          this.displayName.set(data.user.username || '');
+          this.username.set(data.user.username || '');
+          this.bio.set(data.user.bio || '');
+          this.birthday.set(data.user.birthday || '');
+          this.website.set(data.user.website || '');
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load user info:', err);
+      }
+    });
   }
 
   private getProfileData(): ProfileData {

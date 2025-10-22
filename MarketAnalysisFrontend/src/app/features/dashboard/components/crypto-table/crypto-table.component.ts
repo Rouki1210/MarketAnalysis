@@ -6,6 +6,7 @@ import { Coin } from '../../../../core/models/coin.model';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { CardComponent } from '../../../../shared/components/card/card.component';
 import { SparklineComponent } from '../../../../shared/components/sparkline/sparkline.component';
+import { MarketOverview } from '@app/core/models/market.model';
 
 interface Network {
   name: string;
@@ -30,6 +31,7 @@ export class CryptoTableComponent implements OnInit {
   
   // Data properties
   coins: Coin[] = [];
+  metrics: MarketOverview[] = [];
   filteredCoins: Coin[] = [];
   
   // UI state
@@ -63,6 +65,7 @@ export class CryptoTableComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCoins();
+    this.apiService.startGlobalMetricSignalR();
   }
 
   private loadCoins(): void {
