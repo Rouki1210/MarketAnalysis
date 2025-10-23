@@ -37,9 +37,10 @@ namespace MarketAnalysisBackend.Repositories.Implementations
             return await _dbSet.FindAsync(id);
         }
 
-        public Task UpdateAsync(T entity)
+        public async Task UpdateAsync(T entity)
         {
-            throw new NotImplementedException();
+            _context.Set<T>().Update(entity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task SaveChangesAsync()

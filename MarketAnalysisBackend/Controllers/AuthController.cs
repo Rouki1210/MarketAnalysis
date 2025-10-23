@@ -3,6 +3,7 @@ using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -19,10 +20,10 @@ namespace MarketAnalysisBackend.Controllers
         private readonly IUserRepository _userRepository;
         private readonly ILogger<AuthController> _logger;
         public AuthController(
-            IAuthService userService, 
-            IJwtService jwtService, 
-            IHttpClientFactory httpClientFactory, 
-            IConfiguration config, 
+            IAuthService userService,
+            IJwtService jwtService,
+            IHttpClientFactory httpClientFactory,
+            IConfiguration config,
             IUserRepository userRepository,
             ILogger<AuthController> logger
             )
@@ -35,31 +36,44 @@ namespace MarketAnalysisBackend.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllUser()
-        {
-            var user = await _userRepository.GetAllAsync();
-            return Ok(user);
-        }
-
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO dto)
         {
-           var user = await _authService.RegisterAsync(dto);
-           var token = _jwtService.GenerateToken(user);
+            var user = await _authService.RegisterAsync(dto);
+            var token = _jwtService.GenerateToken(user);
             return Ok(new { success = true, user.Username, token });
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO dto)
         {
-           var user = await _authService.LoginAsync(dto);
-            var token = _jwtService.GenerateToken(user);
+            var user = await _authService.LoginAsync(dto);
             if (user == null)
-           {
+            {
                 return Unauthorized(new { message = "Invalid credentials" });
-           }
-           return Ok(new { success = true, user.Username, token });
+            }
+            var token = _jwtService.GenerateToken(user);
+            return Ok(new { success = true, user.Username, token });
+        }
+
+        [HttpPost("change-password/{username}")]
+        public async Task<IActionResult> ChangePassword(string username, [FromBody] ChangePasswordDto dto)
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.CurrentPassword) || string.IsNullOrWhiteSpace(dto.NewPassword))
+                return BadRequest(new { success = false, message = "Invalid password data." });
+            try
+            {
+                bool verify = await _authService.ChangePasswordAsync(username, dto);
+                if (!verify)
+                {
+                    return BadRequest(new { message = "Old password is incorrect" });
+                }
+                return Ok(new { message = "Password change successfully" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         [HttpPost("google")]
@@ -74,7 +88,7 @@ namespace MarketAnalysisBackend.Controllers
                 new("code", request.Code),
                 new("client_id", clientId),
                 new("client_secret", clientSecret),
-                new("redirect_uri", redirectUri),  
+                new("redirect_uri", redirectUri),
                 new("grant_type", "authorization_code")
             };
 
@@ -98,24 +112,23 @@ namespace MarketAnalysisBackend.Controllers
             var name = payload.Name;
 
             var user = await _authService.GoogleLoginAsync(email, name);
-            var existingUser = await _userRepository.GetByEmailOrUsernameAsync(email);
-            if (existingUser == null)
+            if (user == null)
             {
-                existingUser = new User
+                user = new User
                 {
                     Email = email,
                     Username = name,
                     AuthProvider = "Google",
                     CreatedAt = DateTime.UtcNow
                 };
-                await _userRepository.CreateAsync(existingUser);
+                await _userRepository.CreateAsync(user);
             }
             var token = _jwtService.GenerateToken(user);
 
             // TODO: Create or update user in your database, issue your JWT token, etc.
             return Ok(new
             {
-                success=true,
+                success = true,
                 user = new { user.Id, user.Email, user.Username },
                 AuthProvider = "Google",
                 token
@@ -182,14 +195,6 @@ namespace MarketAnalysisBackend.Controllers
                 _logger.LogError(ex, "Error during MetaMask login");
                 return StatusCode(500, new { success = false, error = "Internal server error" });
             }
-        }
-
-
-
-        [HttpDelete]
-        public async Task DeleteAllUsers()
-        {
-            await _authService.DeleteAllUsersAsync();
         }
     }
 }

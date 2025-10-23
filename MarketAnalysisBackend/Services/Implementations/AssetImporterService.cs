@@ -44,7 +44,7 @@ namespace MarketAnalysisBackend.Services.Implementations
 
                     // Step 1: get symbol, name, rank
                     var mapResponse = await client.GetFromJsonAsync<CmcMap>(
-                        "https://pro-api.coinmarketcap.com/v1/cryptocurrency/map",
+                        "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=20&sort=market_cap",
                         stoppingToken);
 
                     if (mapResponse != null)

@@ -12,10 +12,11 @@ namespace MarketAnalysisBackend.Services.Implementations
         private readonly IWalletService _walletService;
         private readonly ILogger<AuthService> _logger;
         private readonly INonceRepository _nonceRepo;
-        public AuthService( 
+        public AuthService(
             IUserRepository userRepo,
             IWalletService walletService,
             INonceRepository nonceRepo,
+            IJwtService _jwt,
             ILogger<AuthService> logger)
         {
             _userRepo = userRepo;
@@ -51,6 +52,23 @@ namespace MarketAnalysisBackend.Services.Implementations
             await _userRepo.CreateAsync(newUser);
             return newUser;
         }
+        public async Task<bool> ChangePasswordAsync(string username, ChangePasswordDto dto)
+        {
+            var user = await _userRepo.GetByEmailOrUsernameAsync(username);
+            if (user == null)
+                throw new Exception("User not found");
+            bool verify = BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash);
+            if (!verify)
+            {
+                throw new Exception("Current password is incorrect");
+            }
+            string newHashPassword = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            user.PasswordHash = newHashPassword;
+
+            await _userRepo.UpdateAsync(user);
+            return true;
+
+        }
         public async Task<User?> GoogleLoginAsync(string email, string name)
         {
             var user = await _userRepo.GetByEmailOrUsernameAsync(email);
@@ -60,7 +78,8 @@ namespace MarketAnalysisBackend.Services.Implementations
             {
                 Email = email,
                 Username = $"google_{Guid.NewGuid().ToString().Substring(0, 6)}",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                AuthProvider = "Google"
             };
             await _userRepo.CreateAsync(newUser);
             return newUser;
@@ -124,7 +143,7 @@ namespace MarketAnalysisBackend.Services.Implementations
 
             var user = await _userRepo.GetByWalletAddressAsync(dto.WalletAddress);
 
-            if (user == null) 
+            if (user == null)
             {
                 user = new User
                 {
@@ -137,7 +156,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                 await _userRepo.CreateAsync(user);
                 _logger.LogInformation($"Created new user for wallet {dto.WalletAddress}");
             }
-            
+
             return user;
         }
 
@@ -176,11 +195,5 @@ namespace MarketAnalysisBackend.Services.Implementations
                 return null;
             }
         }
-
-        public async Task DeleteAllUsersAsync()
-        {
-            await _userRepo.DeleteAllAsync();
-        }
-
-    }
+    }   
 }

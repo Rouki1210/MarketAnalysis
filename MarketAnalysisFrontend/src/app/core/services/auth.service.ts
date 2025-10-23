@@ -16,17 +16,25 @@ export class AuthService {
   constructor(private http: HttpClient) {
     // Check if user is already logged in
     this.checkAuthStatus();
+    this.initGoogleAuth();
+    this.initMetaMaskListener();
+  }
+  
+  showAuthModal = signal(false);
+  authModalTab = signal<'login' | 'signup'>('login');
+  isAuthenticated = signal(false);
+  currentUser = signal<{ email: string; name?: string } | null>(null);
+  currentWallet: string | null = null;
+
+  private initGoogleAuth() {
     const init = () => {
-      if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+      if (typeof google !== 'undefined' && google.accounts?.oauth2) {
         this.codeClient = google.accounts.oauth2.initCodeClient({
           client_id: environment.googleClientId,
           scope: 'openid email profile',
           ux_mode: 'popup',
           redirect_uri: environment.googleRedirectUri,
-          callback: (response: any) => {
-            console.log('Google code:', response.code);
-            this.sendCodeToBackend(response.code);
-          }
+          callback: (response: any) => this.sendCodeToBackend(response.code)
         });
       } else {
         setTimeout(init, 200);
@@ -34,11 +42,26 @@ export class AuthService {
     };
     init();
   }
-  
-  showAuthModal = signal(false);
-  authModalTab = signal<'login' | 'signup'>('login');
-  isAuthenticated = signal(false);
-  currentUser = signal<{ email: string; name?: string } | null>(null);
+
+  private initMetaMaskListener() {
+    if ((window as any).ethereum) {
+      (window as any).ethereum.on('accountsChanged', (accounts: string[]) => {
+        if (accounts.length === 0) {
+          console.warn('MetaMask disconnected');
+          this.logout();
+        } else {
+          const newWallet = accounts[0];
+          if (this.currentWallet && this.currentWallet !== newWallet) {
+            console.warn('Wallet changed:', newWallet);
+            // Tự động cập nhật hoặc buộc login lại
+            this.logout();
+            alert('⚠️ You switched MetaMask account. Please reconnect.');
+          }
+          this.currentWallet = newWallet;
+        }
+      });
+    }
+  }
   
   private checkAuthStatus(): void {
     const token = localStorage.getItem('token');
@@ -70,6 +93,12 @@ export class AuthService {
       name: email.split('@')[0]
     });
   }
+
+  getUserInfo(): Observable<any> {
+    const token = localStorage.getItem('token');
+    console.log(token);
+    return this.http.get<any>(`https://localhost:7175/api/User/userInfo/${token}`);
+  }
   
   logout(): void {
     localStorage.removeItem('token');
@@ -82,6 +111,7 @@ export class AuthService {
   async login(email: string, password: string): Promise<any> {
     const body = { usernameOrEmail: email, password };
     return await firstValueFrom(this.http.post(`${this.apiUrl}/login`, body));
+    this.getUserInfo()  ;
   }
 
   async signup(email: string, password: string): Promise<any> {
@@ -158,11 +188,7 @@ export class AuthService {
     signature: string,
     message: string
   ): Observable<any> {
-    return this.http.post(`${this.apiUrl}/wallet/login`, {
-      walletAddress,
-      signature,
-      message
-    });
+    return this.http.post(`${this.apiUrl}/wallet/login`, {walletAddress, signature,message});
   }
 
   async getCurrentAccount(): Promise<string | null> {

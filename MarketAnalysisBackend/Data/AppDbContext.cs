@@ -14,6 +14,7 @@ namespace MarketAnalysisBackend.Data
         public DbSet<PricePoint> PricePoints { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Nonce> Nonces { get; set; }
+        public DbSet<Global_metric> GlobalMetric { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +32,9 @@ namespace MarketAnalysisBackend.Data
                 .HasIndex(n => n.WalletAddress);
             modelBuilder.Entity<Nonce>()
                 .HasIndex(n => n.ExpireAt);
+            modelBuilder.Entity<Global_metric>()
+                .HasIndex(n => n.TimestampUtc);
+                
         }
 
     }
