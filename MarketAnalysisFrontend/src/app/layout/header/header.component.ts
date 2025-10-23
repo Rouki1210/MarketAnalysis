@@ -21,6 +21,8 @@ export class HeaderComponent implements OnDestroy {
   searchQuery = '';
   showSettingsMenu = signal(false);
   showCryptoMenu = signal(false);
+  showExchangeMenu = signal(false);
+  showCommunityMenu = signal(false);
   selectedLanguage = signal('English');
   systemTheme = signal(false);
 
@@ -63,6 +65,8 @@ export class HeaderComponent implements OnDestroy {
   toggleSettingsMenu(): void {
     this.showSettingsMenu.update(value => !value);
     this.showCryptoMenu.set(false);
+    this.showExchangeMenu.set(false);
+    this.showCommunityMenu.set(false);
   }
 
   private closeSettingsMenu(): void {
@@ -73,15 +77,43 @@ export class HeaderComponent implements OnDestroy {
   toggleCryptoMenu(): void {
     this.showCryptoMenu.update(value => !value);
     this.showSettingsMenu.set(false);
+    this.showExchangeMenu.set(false);
+    this.showCommunityMenu.set(false);
   }
 
   openCryptoMenu(): void {
     this.showCryptoMenu.set(true);
     this.showSettingsMenu.set(false);
+    this.showExchangeMenu.set(false);
+    this.showCommunityMenu.set(false);
   }
 
   closeCryptoMenu(): void {
     this.showCryptoMenu.set(false);
+  }
+
+  // Exchange Menu
+  openExchangeMenu(): void {
+    this.showExchangeMenu.set(true);
+    this.showSettingsMenu.set(false);
+    this.showCryptoMenu.set(false);
+    this.showCommunityMenu.set(false);
+  }
+
+  closeExchangeMenu(): void {
+    this.showExchangeMenu.set(false);
+  }
+
+  // Community Menu
+  openCommunityMenu(): void {
+    this.showCommunityMenu.set(true);
+    this.showSettingsMenu.set(false);
+    this.showCryptoMenu.set(false);
+    this.showExchangeMenu.set(false);
+  }
+
+  closeCommunityMenu(): void {
+    this.showCommunityMenu.set(false);
   }
 
   // Navigation
