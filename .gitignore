@@ -376,8 +376,3 @@ MarketAnalysisBackend/appsettings.Production.json
 # Ignore environment config for Angular frontend
 MarketAnalysisFrontend/src/app/environments/environment.ts
 MarketAnalysisFrontend/src/app/environments/environment.prod.ts
-
-# Ignore github spec kit
-.github/
-.specify
-.vscode
