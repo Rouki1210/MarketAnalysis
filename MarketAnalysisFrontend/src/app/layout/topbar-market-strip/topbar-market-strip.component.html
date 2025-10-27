@@ -1,26 +1,131 @@
 <div class="bg-card border-b border-border">
-  <div class="mx-auto px-3 lg:px-4 xl:px-6 py-4 lg:py-5">
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4 auto-rows-fr">
-      <app-card *ngFor="let stat of marketStats" [padding]="false" customClass="p-3 lg:p-4 bg-background h-full flex flex-col justify-center">
-        <div class="text-xs text-muted-foreground mb-1 whitespace-nowrap truncate">{{ stat.title }}</div>
-        <div class="flex items-center space-x-2 flex-wrap">
-          <span class="text-base lg:text-lg font-semibold text-foreground whitespace-nowrap">{{ stat.value }}</span>
-          <span *ngIf="stat.change" 
-                [class]="stat.isPositive ? 'text-secondary' : 'text-accent'"
-                class="text-xs flex items-center flex-shrink-0 whitespace-nowrap">
-            <svg *ngIf="stat.isPositive" class="w-3 h-3 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-              <polyline points="17 6 23 6 23 12"></polyline>
+  <div class="mx-auto px-3 lg:px-4 xl:px-6 py-2">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-3">
+      <!-- Market Cap -->
+      <div class="bg-background rounded-lg p-3 lg:p-4">
+        <div class="flex items-center gap-1 mb-1.5">
+          <span class="text-xs text-muted-foreground">Market Cap</span>
+          <svg class="w-3 h-3 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+        <div class="flex items-baseline gap-1.5 mb-2">
+          <span class="text-xl lg:text-2xl font-bold text-foreground">$3.69T</span>
+          <span class="text-xs text-secondary flex items-center">
+            <svg class="w-3 h-3 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="18 15 12 9 6 15"></polyline>
             </svg>
-            <svg *ngIf="!stat.isPositive" class="w-3 h-3 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
-              <polyline points="17 18 23 18 23 12"></polyline>
-            </svg>
-            {{ stat.change }}
+            0.87%
           </span>
         </div>
-        <div *ngIf="stat.subtitle" class="text-xs text-muted-foreground mt-1 truncate">{{ stat.subtitle }}</div>
-      </app-card>
+        <div class="w-full h-12 -mb-1">
+          <app-sparkline 
+            [data]="marketCapSparkline"
+            [isPositive]="true"
+            [width]="280"
+            [height]="48">
+          </app-sparkline>
+        </div>
+      </div>
+
+      <!-- 24h Vol -->
+      <div class="bg-background rounded-lg p-3 lg:p-4">
+        <div class="flex items-center gap-1 mb-1.5">
+          <span class="text-xs text-muted-foreground">24h Vol</span>
+          <svg class="w-3 h-3 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+        <div class="flex items-baseline gap-1.5 mb-2">
+          <span class="text-xl lg:text-2xl font-bold text-foreground">$194.88B</span>
+          <span class="text-xs text-secondary flex items-center">
+            <svg class="w-3 h-3 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+            2.01%
+          </span>
+        </div>
+        <div class="w-full h-12 -mb-1">
+          <app-sparkline 
+            [data]="volumeSparkline"
+            [isPositive]="true"
+            [width]="280"
+            [height]="48">
+          </app-sparkline>
+        </div>
+      </div>
+
+      <!-- BTC Dominance -->
+      <div class="bg-background rounded-lg p-3 lg:p-4">
+        <div class="flex items-center gap-1 mb-1.5">
+          <span class="text-xs text-muted-foreground">BTC Dominance</span>
+          <svg class="w-3 h-3 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+        <div class="flex items-baseline gap-1.5 mb-2">
+          <span class="text-xl lg:text-2xl font-bold text-foreground">58.0%</span>
+          <span class="text-xs text-secondary flex items-center">
+            <svg class="w-3 h-3 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+            0.15%
+          </span>
+        </div>
+        <div class="w-full h-12 -mb-1">
+          <app-sparkline 
+            [data]="btcDominanceSparkline"
+            [isPositive]="true"
+            [width]="280"
+            [height]="48">
+          </app-sparkline>
+        </div>
+      </div>
+
+      <!-- ETH Dominance -->
+      <div class="bg-background rounded-lg p-3 lg:p-4">
+        <div class="flex items-center gap-1 mb-1.5">
+          <span class="text-xs text-muted-foreground">ETH Dominance</span>
+          <svg class="w-3 h-3 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+        <div class="flex items-baseline gap-1.5 mb-2">
+          <span class="text-xl lg:text-2xl font-bold text-foreground">13.0%</span>
+          <span class="text-xs text-secondary flex items-center">
+            <svg class="w-3 h-3 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+            0.08%
+          </span>
+        </div>
+        <div class="w-full h-12 -mb-1">
+          <app-sparkline 
+            [data]="ethDominanceSparkline"
+            [isPositive]="true"
+            [width]="280"
+            [height]="48">
+          </app-sparkline>
+        </div>
+      </div>
+
+      <!-- Fear & Greed -->
+      <div class="bg-background rounded-lg p-3 lg:p-4 flex flex-col">
+        <div class="flex items-center gap-1 mb-1">
+          <span class="text-xs text-muted-foreground">Fear & Greed</span>
+          <svg class="w-3 h-3 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+        <div class="flex-1 flex items-center justify-center -mb-1">
+          <app-gauge 
+            [value]="fearGreedValue"
+            [label]="fearGreedLabel"
+            [size]="140"
+            [strokeWidth]="12">
+          </app-gauge>
+        </div>
+      </div>
     </div>
   </div>
 </div>
