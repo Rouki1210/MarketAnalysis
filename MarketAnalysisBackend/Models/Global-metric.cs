@@ -4,6 +4,9 @@
     {
         public int Id { get; set; }
         public decimal Total_market_cap_usd { get; set; }
+        public decimal Total_market_cap_percent_change_24h { get; set; }
+        public decimal Total_volume_24h { get; set; }
+        public decimal Total_volume_24h_percent_change_24h { get; set; }
         public decimal Cmc_20 { get; set; }
         public string fear_and_greed_index { get; set; } = string.Empty;
         public string fear_and_greed_text { get; set; } = string.Empty;

@@ -37,21 +37,25 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(new { success = true, message = "All users deleted." });
         }
 
-        [HttpGet("{emailOrUsername}")]
-        public async Task<IActionResult> GetUserByEmailOrUsername(string emailorusername)
+
+        [HttpGet("by-email-or-username/{emailOrUsername}")]
+        public async Task<IActionResult> GetUserByEmailOrUsername(string emailOrUsername)
         {
-            var user = await _userRepo.GetByEmailOrUsernameAsync(emailorusername);
+            if (string.IsNullOrWhiteSpace(emailOrUsername))
+                return BadRequest(new { success = false, message = "Email or username is required." });
+
+            var user = await _userSer.GetUserByEmailorUsername(emailOrUsername);
+
             if (user == null)
-            {
                 return NotFound(new { success = false, message = "User not found." });
-            }
-            return Ok(user);
+
+            return Ok(new { success = true, data = user });
         }
 
-        [HttpGet("{walletaddress}")]
-        public async Task<IActionResult> GetUserByWalletAddress(string walletaddress)
+        [HttpGet("by-wallet-address/{walletAddress}")]
+        public async Task<IActionResult> GetUserByWalletAddress(string walletAddress)
         {
-            var user = await _userRepo.GetByWalletAddressAsync(walletaddress);
+            var user = await _userRepo.GetByWalletAddressAsync(walletAddress);
             if (user == null)
             {
                 return NotFound(new { success = false, message = "User not found." });

@@ -20,9 +20,5 @@ namespace MarketAnalysisBackend.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-
-
-        //public string[] Notication { get; set; }
-        //public string[] FavoriteStocks { get; set; }
     }
 }

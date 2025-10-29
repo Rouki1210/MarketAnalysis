@@ -1,4 +1,6 @@
-﻿using MarketAnalysisBackend.Services.Interfaces;
+﻿using MarketAnalysisBackend.Models;
+using MarketAnalysisBackend.Repositories.Interfaces;
+using MarketAnalysisBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketAnalysisBackend.Controllers
@@ -7,17 +9,17 @@ namespace MarketAnalysisBackend.Controllers
     [Route("[controller]")]
     public class GlobalMetricController : Controller
     {
-        private readonly IGlobalMetricService _globalRepo;
-        public GlobalMetricController(IGlobalMetricService globalRepo)
+        private readonly IGenericRepository<Global_metric> _globalRepo;
+        public GlobalMetricController(IGenericRepository<Global_metric> globalRepo)
         {
             _globalRepo = globalRepo;
         }
 
         [HttpGet("global-metric")]
-        public async Task<IActionResult> GetGlobalMetric(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetGlobalMetric()
         {
-            var result = await _globalRepo.FetchAndSaveMetricsAsync(cancellationToken);
-            return Ok(result);
+            var results = await _globalRepo.GetAllAsync(); 
+            return Ok(results);
         }
 
     }

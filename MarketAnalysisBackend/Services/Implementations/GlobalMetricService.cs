@@ -11,7 +11,7 @@ using static System.Net.WebRequestMethods;
 
 namespace MarketAnalysisBackend.Services.Implementations
 {
-    public class GlobalMetricService : BackgroundService, IGlobalMetricService
+    public class GlobalMetricService : BackgroundService
     {
         private readonly ILogger<GlobalMetricService> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
@@ -48,6 +48,9 @@ namespace MarketAnalysisBackend.Services.Implementations
             var data = jsonDoc.RootElement.GetProperty("data");
 
             var totalMarketCap = data.GetProperty("quote").GetProperty("USD").GetProperty("total_market_cap").GetDecimal();
+            var totalMarketCapChange24h = data.GetProperty("quote").GetProperty("USD").GetProperty("total_market_cap_yesterday_percentage_change").GetDecimal();
+            var totalVolume24h = data.GetProperty("quote").GetProperty("USD").GetProperty("total_volume_24h").GetDecimal();
+            var totalVolume24hChange24h = data.GetProperty("quote").GetProperty("USD").GetProperty("total_volume_24h_yesterday_percentage_change").GetDecimal();
             var btcDominance = data.GetProperty("btc_dominance").GetDecimal();
             var ethDominance = data.GetProperty("eth_dominance").GetDecimal();
             var btcDominancePercentage = data.GetProperty("btc_dominance_24h_percentage_change").GetDecimal();
@@ -68,6 +71,9 @@ namespace MarketAnalysisBackend.Services.Implementations
             var globalMetric = new Global_metric
             {
                 Total_market_cap_usd = totalMarketCap,
+                Total_market_cap_percent_change_24h = totalMarketCapChange24h,
+                Total_volume_24h = totalVolume24h,
+                Total_volume_24h_percent_change_24h = totalVolume24hChange24h,
                 Cmc_20 = 0,
                 fear_and_greed_index = fngValue.ToString(),
                 fear_and_greed_text = fngText,
@@ -89,6 +95,9 @@ namespace MarketAnalysisBackend.Services.Implementations
                 data = new
                 {
                     Total_market_cap_usd = totalMarketCap,
+                    Total_market_cap_percent_change_24h = totalMarketCapChange24h,
+                    Total_volume_24h = totalVolume24h,
+                    Total_volume_24h_percent_change_24h = totalVolume24hChange24h,
                     Cmc_20 = 0,
                     fear_and_greed_index = fngValue.ToString(),
                     fear_and_greed_text = fngText,

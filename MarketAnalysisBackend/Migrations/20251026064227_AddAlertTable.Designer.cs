@@ -3,6 +3,7 @@ using System;
 using MarketAnalysisBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MarketAnalysisBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251026064227_AddAlertTable")]
+    partial class AddAlertTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -201,17 +204,12 @@ namespace MarketAnalysisBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("ViewedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AlertEventId");
-
-                    b.HasIndex("UserId1");
 
                     b.HasIndex("UserId", "AlertEventId")
                         .IsUnique();
@@ -499,13 +497,7 @@ namespace MarketAnalysisBackend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MarketAnalysisBackend.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1");
-
                     b.Navigation("AlertEvent");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MarketAnalysisBackend.Models.PricePoint", b =>

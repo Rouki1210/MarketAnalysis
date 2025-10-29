@@ -12,11 +12,21 @@ namespace MarketAnalysisBackend.Services.Implementations
         {
             _userRepo = userRepo;
         }
-        public Task<User?> GetUserByEmailorUsername(string? emailorusername)
+        public async Task<User?> GetUserByEmailorUsername(string emailorusername)
         {
-            if (!string.IsNullOrEmpty(emailorusername))
+            var user = await _userRepo.GetByEmailOrUsernameAsync(emailorusername);
+            if (user == null)
             {
-                return _userRepo.GetByEmailOrUsernameAsync(emailorusername);
+                throw new NotImplementedException();
+            }
+            return user;
+        }
+
+        public Task<User?> GetUserByWalletAddress(string? walletaddress)
+        {
+            if (!string.IsNullOrEmpty(walletaddress))
+            {
+                return _userRepo.GetByWalletAddressAsync(walletaddress);
             }
             return null;
         }

@@ -20,6 +20,7 @@
     "@angular/platform-browser-dynamic": "^18.0.0",
     "@angular/router": "^18.0.0",
     "@microsoft/signalr": "^9.0.6",
+    "@supabase/supabase-js": "^2.76.1",
     "chart.js": "^4.4.0",
     "ethers": "^6.15.0",
     "lucide-angular": "^0.454.0",
