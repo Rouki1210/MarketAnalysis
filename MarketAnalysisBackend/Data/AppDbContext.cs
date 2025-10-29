@@ -1,4 +1,5 @@
 ﻿using MarketAnalysisBackend.Models;
+using MarketAnalysisBackend.Models.Alert;
 using Microsoft.EntityFrameworkCore;
 
 namespace MarketAnalysisBackend.Data
@@ -15,12 +16,16 @@ namespace MarketAnalysisBackend.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Nonce> Nonces { get; set; }
         public DbSet<Global_metric> GlobalMetric { get; set; }
+        public DbSet<GlobalAlertRule> GlobalAlertRules { get; set; }
+        public DbSet<GlobalAlertEvent> GlobalAlertEvents { get; set; }
+        public DbSet<UserAlertView> UserAlertView { get; set; }
+        public DbSet<PriceCache> PriceCaches { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Asset>()
                 .HasIndex(a => a.Symbol)
-            .IsUnique();
+                .IsUnique();
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.WalletAddress)
                 .IsUnique();
@@ -34,7 +39,27 @@ namespace MarketAnalysisBackend.Data
                 .HasIndex(n => n.ExpireAt);
             modelBuilder.Entity<Global_metric>()
                 .HasIndex(n => n.TimestampUtc);
-                
+
+            modelBuilder.Entity<GlobalAlertRule>(entity =>
+            {
+                entity.HasIndex(r => r.IsActive).HasFilter("\"IsActive\" = true");
+                entity.HasIndex(e => new { e.RuleType, e.IsActive });
+            });
+            modelBuilder.Entity<GlobalAlertEvent>(entity =>
+            {
+                entity.HasIndex(e => new { e.AssetId, e.TriggeredAt }).IsDescending(false, true);
+                entity.HasIndex(e => e.TriggeredAt).IsDescending();
+                entity.HasIndex(e => new { e.RuleId, e.TriggeredAt }).IsDescending(false, true);
+            });
+            modelBuilder.Entity<UserAlertView>(entity =>
+            {
+                entity.HasIndex(e => new { e.UserId, e.AlertEventId }).IsUnique();
+                entity.HasIndex(e => new { e.UserId, e.ViewedAt }).IsDescending(false, true);
+            });
+            modelBuilder.Entity<PriceCache>(entity =>
+            {
+                entity.HasIndex(e => e.AssetId).IsUnique();
+            });
         }
 
     }

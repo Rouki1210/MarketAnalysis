@@ -56,7 +56,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                     // Fetch latest listings
-                    var url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=10";
+                    var url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest";
                     var response = await client.GetStringAsync(url, stoppingToken);
                     var jsonDoc = JsonDocument.Parse(response);
                     var dataArray = jsonDoc.RootElement.GetProperty("data").EnumerateArray();

@@ -14,4 +14,3 @@ namespace MarketAnalysisBackend.Repositories.Interfaces
 
 
 }
- 

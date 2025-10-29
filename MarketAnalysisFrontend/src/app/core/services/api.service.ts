@@ -5,6 +5,7 @@ import { Coin, CoinDetail } from '../models/coin.model';
 import { Market, MarketOverview } from '../models/market.model';
 import { ChartData } from '../models/common.model';
 import * as signalR from '@microsoft/signalr';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable({
   providedIn: 'root'
@@ -290,7 +291,7 @@ export class ApiService {
           cmc20: "0",
           fearGreedIndex: data.fearGreedIndex,
           fear_and_greed_text: data.fear_and_greed_text,
-          totalVolume24h: "0",
+          totalVolume24h: data.totalVolume24h,
           btcDominance: data.btcDominance,
           ethDominance: data.ethDominance,
           btcDominancePercent: data.btcDominancePercent,

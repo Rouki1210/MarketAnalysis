@@ -4,6 +4,7 @@ using MarketAnalysisBackend.Repositories.Implementations;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Services.Implementations;
 using MarketAnalysisBackend.Services.Interfaces;
+using MarketAnalysisBackend.Services.Mocks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -38,6 +39,8 @@ builder.Services.AddScoped<IPriceRepository, PriceRepository>();
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<INonceRepository, NonceRepository>();
+builder.Services.AddScoped<IPriceCacheRepository, PriceCacheRepository>();
+builder.Services.AddScoped<IGlobalAlertRepository, GlobalAlertRepository>();
 
 builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddScoped<IPriceService, PriceService>();
@@ -46,10 +49,16 @@ builder.Services.AddScoped<IAssetImport, AssetImporter>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPriceCacheService, PriceCacheService>();
+builder.Services.AddScoped<IAlertEvaluationService, AlertEvaluationService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IGlobalAlertOrchestrationService, GlobalAlertOrchestrationService>();
 
 builder.Services.AddHostedService<AssetImporterService>();
 builder.Services.AddHostedService<PriceDataCollector>();
 builder.Services.AddHostedService<GlobalMetricService>();
+//builder.Services.AddScoped<IGlobalAlertOrchestrationService, MockGlobalAlertOrchestrationService>();
+builder.Services.AddHostedService<GlobalAlertDetectorService>();
 
 // Google Authentication
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];

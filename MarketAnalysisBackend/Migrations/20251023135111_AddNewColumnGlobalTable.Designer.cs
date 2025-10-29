@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MarketAnalysisBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251017052153_AddMetaMaskSupport")]
-    partial class AddMetaMaskSupport
+    [Migration("20251023135111_AddNewColumnGlobalTable")]
+    partial class AddNewColumnGlobalTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -59,6 +59,62 @@ namespace MarketAnalysisBackend.Migrations
                         .IsUnique();
 
                     b.ToTable("Assets");
+                });
+
+            modelBuilder.Entity("MarketAnalysisBackend.Models.Global_metric", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Altcoin_season_score")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Bitcoin_dominance_percentage")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Bitcoin_dominance_price")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Cmc_20")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Ethereum_dominance_percentage")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Ethereum_dominance_price")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("TimestampUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Total_market_cap_percent_change_24h")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Total_market_cap_usd")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Total_volume_24h")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Total_volume_24h_percent_change_24h")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("fear_and_greed_index")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("fear_and_greed_text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TimestampUtc");
+
+                    b.ToTable("GlobalMetric");
                 });
 
             modelBuilder.Entity("MarketAnalysisBackend.Models.Nonce", b =>
