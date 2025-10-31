@@ -2,6 +2,7 @@ import { Component, OnInit, signal, HostListener, ViewChild, ElementRef } from '
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
+import { AlertService } from '@app/core/services/alert.service';
 import { Coin } from '../../../../core/models/coin.model';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { CardComponent } from '../../../../shared/components/card/card.component';
@@ -60,12 +61,14 @@ export class CryptoTableComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
+    private alertService: AlertService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadCoins();
     this.apiService.startGlobalMetricSignalR();
+    this.alertService.startConnection();
   }
 
   private loadCoins(): void {
