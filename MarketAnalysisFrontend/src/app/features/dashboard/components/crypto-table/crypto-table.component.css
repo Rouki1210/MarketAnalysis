@@ -71,3 +71,33 @@
   background-color: rgba(156, 163, 175, 0.5);
 }
 
+/* ====================
+   WATCHLIST STAR BUTTON
+   ==================== */
+.watchlist-star-btn {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.watchlist-star-btn:focus {
+  outline: 2px solid rgb(59, 130, 246);
+  outline-offset: 2px;
+}
+
+.watchlist-star-btn svg {
+  transition: all 0.2s ease-in-out;
+}
+
+.watchlist-star-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.watchlist-star-btn:active svg {
+  transform: scale(0.95);
+}
+

@@ -27,7 +27,7 @@ export class ApiService {
     this.http.get<any[]>(`${this.apiUrl}/api/Asset`).subscribe({
       next: (assets) => {
         const coins: Coin[] = assets.map(a => ({
-          id: a.id,
+          id: a.id || a.symbol, // Use symbol as fallback if id is missing
           name: a.name,
           symbol: a.symbol,
           description: a.description,
