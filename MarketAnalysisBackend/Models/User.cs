@@ -20,5 +20,7 @@ namespace MarketAnalysisBackend.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
+        public virtual ICollection<Watchlist> Watchlists { get; set; } = new List<Watchlist>();
+
     }
 }
