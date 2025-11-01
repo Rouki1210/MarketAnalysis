@@ -32,6 +32,8 @@ export class TopbarMarketStripComponent implements OnInit {
     this.volumeSparkline = this.generateVolumePattern();
     this.btcDominanceSparkline = this.generateDominancePattern();
     this.ethDominanceSparkline = this.generateDominancePattern();
+
+    this.loadMetricData();
   }
 
   private loadMetricData() {
