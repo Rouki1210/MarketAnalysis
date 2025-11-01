@@ -287,18 +287,18 @@ export class ApiService {
         if (!data) return;
         console.log('Global Metric update:', data);
         const overview : MarketOverview = {
-          totalMarketCap: data.total_market_cap,
-          totalMarketCapChange24h: data.total_market_cap_change_24h,
+          totalMarketCap: data.total_market_cap_usd,
+          totalMarketCapChange24h: data.total_market_cap_percent_change_24h,
           cmc20: "0",
-          fearGreedIndex: data.fear_greed_index,
+          fearGreedIndex: data.fear_and_greed_index,
           fear_and_greed_text: data.fear_and_greed_text,
           totalVolume24h: data.total_volume_24h,
-          totalVolume24hChange: data.total_volume_24h_change,
-          btcDominance: data.btc_dominance_price,
-          ethDominance: data.eth_dominance_price,
-          btcDominancePercent: data.btc_dominance_percent,
-          ethDominancePercent: data.eth_dominance_percent,
-          altcoinSeasonIndex: data.altcoin_season_index
+          totalVolume24hChange: data.total_volume_24h_percent_change_24h,
+          btcDominance: data.bitcoin_dominance_price,
+          ethDominance: data.ethereum_dominance_price,
+          btcDominancePercent: data.bitcoin_dominance_percentage,
+          ethDominancePercent: data.ethereum_dominance_percentage,
+          altcoinSeasonIndex: data.altcoin_season_score
         };
         this.globalMetricSource.next(overview);
       }
