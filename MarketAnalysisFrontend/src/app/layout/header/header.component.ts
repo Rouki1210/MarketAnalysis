@@ -7,7 +7,10 @@ import { AuthModalComponent } from '../../features/auth/auth-modal.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { CurrencyService } from '../../core/services/currency.service';
+import { WatchlistService } from '../../core/services/watchlist.service';
 import { Currency, Theme } from '../../core/models/common.model';
+import { WatchlistCoin } from '../../core/models/watchlist.model';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -23,8 +26,12 @@ export class HeaderComponent implements OnDestroy {
   showCryptoMenu = signal(false);
   showExchangeMenu = signal(false);
   showCommunityMenu = signal(false);
+  showWatchlistDropdown = signal(false);
   selectedLanguage = signal('English');
   systemTheme = signal(false);
+
+  // Watchlist data
+  watchlistCoins$: Observable<WatchlistCoin[]>;
 
   // Constants
   readonly languages = ['English', 'Tiếng Việt', '中文', '日本語', 'Español'];
@@ -35,9 +42,11 @@ export class HeaderComponent implements OnDestroy {
     public authService: AuthService,
     public themeService: ThemeService,
     public currencyService: CurrencyService,
+    private watchlistService: WatchlistService,
     private router: Router
   ) {
     this.initializeSystemThemeListener();
+    this.watchlistCoins$ = this.watchlistService.watchlistCoins$;
   }
 
   ngOnDestroy(): void {
@@ -116,6 +125,28 @@ export class HeaderComponent implements OnDestroy {
     this.showCommunityMenu.set(false);
   }
 
+  // Watchlist Dropdown
+  toggleWatchlistDropdown(): void {
+    this.showWatchlistDropdown.update(value => !value);
+    this.showSettingsMenu.set(false);
+    this.showCryptoMenu.set(false);
+    this.showExchangeMenu.set(false);
+    this.showCommunityMenu.set(false);
+  }
+
+  closeWatchlistDropdown(): void {
+    this.showWatchlistDropdown.set(false);
+  }
+
+  navigateToCoinFromWatchlist(coinId: string): void {
+    this.router.navigate(['/coin', coinId.toLowerCase()]);
+    this.closeWatchlistDropdown();
+  }
+
+  getPercentClass(isPositive: boolean): string {
+    return isPositive ? 'text-secondary' : 'text-accent';
+  }
+
   // Navigation
   goToProfile(): void {
     this.router.navigate(['/profile']);
@@ -173,7 +204,9 @@ export class HeaderComponent implements OnDestroy {
     if (!target.closest('.settings-menu-container')) {
       this.closeSettingsMenu();
     }
-    // Removed crypto menu click outside handler since we use hover now
+    if (!target.closest('.watchlist-dropdown-container')) {
+      this.closeWatchlistDropdown();
+    }
   }
 }
 

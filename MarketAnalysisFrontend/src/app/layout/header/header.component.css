@@ -2,7 +2,8 @@
 
 /* Settings Menu Animation */
 .settings-menu-container,
-.crypto-menu-container {
+.crypto-menu-container,
+.watchlist-dropdown-container {
   position: relative;
 }
 
@@ -19,12 +20,37 @@
 }
 
 .settings-menu-container > div,
-.crypto-menu-container > div {
+.crypto-menu-container > div,
+.watchlist-dropdown-container > div {
   animation: slideDown 0.2s ease-out;
 }
 
 /* Rotate animation for chevron */
 .rotate-180 {
   transform: rotate(180deg);
+}
+
+/* Watchlist Dropdown Styles */
+.watchlist-dropdown-container .custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+}
+
+.watchlist-dropdown-container .custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.watchlist-dropdown-container .custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.watchlist-dropdown-container .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.watchlist-dropdown-container .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.5);
 }
 

@@ -2,6 +2,7 @@ import { Component, OnInit, signal, HostListener, ViewChild, ElementRef } from '
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
+import { WatchlistService } from '../../../../core/services/watchlist.service';
 import { AlertService } from '@app/core/services/alert.service';
 import { Coin } from '../../../../core/models/coin.model';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -40,6 +41,7 @@ export class CryptoTableComponent implements OnInit {
   selectedTab = 'Top';
   showNetworkMenu = signal(false);
   menuPosition: MenuPosition = { left: 0, top: 0 };
+  watchlistIds: string[] = [];
 
   // Constants
   readonly networks = ['All Networks', 'Bitcoin', 'Ethereum', 'BSC', 'Solana', 'Base'];
@@ -61,6 +63,7 @@ export class CryptoTableComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
+    private watchlistService: WatchlistService,
     private alertService: AlertService,
     private router: Router
   ) {}
@@ -68,6 +71,11 @@ export class CryptoTableComponent implements OnInit {
   ngOnInit(): void {
     this.loadCoins();
     this.apiService.startGlobalMetricSignalR();
+    
+    // Subscribe to watchlist changes
+    this.watchlistService.watchlistIds$.subscribe(ids => {
+      this.watchlistIds = ids;
+    });
     this.alertService.startConnection();
   }
 
@@ -108,6 +116,18 @@ export class CryptoTableComponent implements OnInit {
 
   getPercentClass(isPositive: boolean): string {
     return isPositive ? 'text-secondary' : 'text-accent';
+  }
+
+  // Watchlist Methods
+  toggleWatchlist(coinId: string, event: MouseEvent): void {
+    event.stopPropagation(); // Prevent row click navigation
+    
+    // WatchlistService will open auth modal if user is not authenticated
+    this.watchlistService.toggleWatchlist(coinId);
+  }
+
+  isInWatchlist(coinId: string): boolean {
+    return this.watchlistIds.includes(coinId);
   }
 
   toggleNetworkMenu(): void {
