@@ -378,9 +378,8 @@ MarketAnalysisFrontend/src/app/environments/environment.ts
 MarketAnalysisFrontend/src/app/environments/environment.prod.ts
 <<<<<<< HEAD
 MarketAnalysisFrontend/src/app/core/services/supabase.client.ts
-=======
 
-.github
+.github/copilot/
 .specify
 .vscode
 >>>>>>> 03fc87a8d747c811cabd32ee7dae26c661924587

@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SparklineComponent } from '../../shared/components/sparkline/sparkline.component';
 import { GaugeComponent } from '../../shared/components/gauge/gauge.component';
+import { ApiService } from '../../core/services/api.service';
+import { MarketOverview as GlobalMarketOverview } from '../../core/models/market.model';
 
 @Component({
   selector: 'app-topbar-market-strip',
@@ -11,11 +13,14 @@ import { GaugeComponent } from '../../shared/components/gauge/gauge.component';
   styleUrls: ['./topbar-market-strip.component.css']
 })
 export class TopbarMarketStripComponent implements OnInit {
+
+  constructor(private apiService: ApiService) { }
   // Sparkline data
   marketCapSparkline: number[] = [];
   volumeSparkline: number[] = [];
   btcDominanceSparkline: number[] = [];
   ethDominanceSparkline: number[] = [];
+  globalMarketOverview: GlobalMarketOverview[] = [];
 
   // Fear & Greed data
   fearGreedValue: number = 28;
@@ -27,6 +32,22 @@ export class TopbarMarketStripComponent implements OnInit {
     this.volumeSparkline = this.generateVolumePattern();
     this.btcDominanceSparkline = this.generateDominancePattern();
     this.ethDominanceSparkline = this.generateDominancePattern();
+  }
+
+  private loadMetricData() {
+    this.apiService.startGlobalMetricSignalR();
+
+    this.apiService.globalMetric$.subscribe({
+    next: (data) => {
+      if (!data) return;
+      this.globalMarketOverview = [data];
+
+      // Fear & Greed gauge update
+      this.fearGreedValue = Number(data.fearGreedIndex);
+      this.fearGreedLabel = data.fear_and_greed_text;
+    },
+    error: (err) => console.error('Global metric subscription error:', err)
+  });
   }
 
   private generateMarketCapPattern(): number[] {

@@ -15,6 +15,8 @@ namespace MarketAnalysisBackend.Data
         public DbSet<PricePoint> PricePoints { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Nonce> Nonces { get; set; }
+        public DbSet<Watchlist> Watchlists { get; set; }
+        public DbSet<WatchlistItems> WatchlistItems { get; set; }
         public DbSet<Global_metric> GlobalMetric { get; set; }
         public DbSet<GlobalAlertRule> GlobalAlertRules { get; set; }
         public DbSet<GlobalAlertEvent> GlobalAlertEvents { get; set; }
@@ -60,6 +62,28 @@ namespace MarketAnalysisBackend.Data
             {
                 entity.HasIndex(e => e.AssetId).IsUnique();
             });
+
+            modelBuilder.Entity<Watchlist>()
+               .HasOne(w => w.User)
+               .WithMany()
+               .HasForeignKey(w => w.UserId);
+
+            // Watchlist - WatchlistItem: One-to-Many
+            modelBuilder.Entity<WatchlistItems>()
+                .HasOne(wi => wi.Watchlist)
+                .WithMany(w => w.WatchlistItems)
+                .HasForeignKey(wi => wi.WatchlistId);
+
+            // Asset - WatchlistItem: One-to-Many
+            modelBuilder.Entity<WatchlistItems>()
+                .HasOne(wi => wi.Asset)
+                .WithMany()
+                .HasForeignKey(wi => wi.AssetId);
+
+            // Unique: Một Asset không thể trùng trong cùng một Watchlist
+            modelBuilder.Entity<WatchlistItems>()
+                .HasIndex(wi => new { wi.WatchlistId, wi.AssetId })
+                .IsUnique();
         }
 
     }
