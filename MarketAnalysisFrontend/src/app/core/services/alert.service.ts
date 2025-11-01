@@ -28,7 +28,7 @@ export class AlertService {
     /** 🚀 Kết nối tới SignalR Hub */
     public startConnection(): void {
         this.hubConnection = new signalR.HubConnectionBuilder()
-            .withUrl(`${this.apiUrl}/hubs/globalAlerts`, {
+            .withUrl(`${this.apiUrl}/alerthub`, {
                 transport: signalR.HttpTransportType.WebSockets,
                 withCredentials: false,
             })

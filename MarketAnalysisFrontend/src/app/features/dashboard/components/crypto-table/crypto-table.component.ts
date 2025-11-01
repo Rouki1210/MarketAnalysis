@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
 import { WatchlistService } from '../../../../core/services/watchlist.service';
+import { AlertService } from '@app/core/services/alert.service';
 import { Coin } from '../../../../core/models/coin.model';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { CardComponent } from '../../../../shared/components/card/card.component';
@@ -63,6 +64,7 @@ export class CryptoTableComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private watchlistService: WatchlistService,
+    private alertService: AlertService,
     private router: Router
   ) {}
 
@@ -74,6 +76,7 @@ export class CryptoTableComponent implements OnInit {
     this.watchlistService.watchlistIds$.subscribe(ids => {
       this.watchlistIds = ids;
     });
+    this.alertService.startConnection();
   }
 
   private loadCoins(): void {

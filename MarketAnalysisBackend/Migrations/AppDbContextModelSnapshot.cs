@@ -211,7 +211,6 @@ namespace MarketAnalysisBackend.Migrations
 
                     b.HasIndex("AlertEventId");
 
-                    b.HasIndex("UserId1");
 
                     b.HasIndex("UserId", "AlertEventId")
                         .IsUnique();
