@@ -11,11 +11,12 @@ import { WatchlistService } from '../../core/services/watchlist.service';
 import { Currency, Theme } from '../../core/models/common.model';
 import { WatchlistCoin } from '../../core/models/watchlist.model';
 import { Observable } from 'rxjs';
+import { CompactNumberPipe } from '../../shared/pipes/compact-number.pipe';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, AuthModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, AuthModalComponent, CompactNumberPipe],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
