@@ -48,3 +48,6 @@ Thumbs.db
 environment.ts
 !environment.example.ts
 
+# Speckit
+.github
+.specify
