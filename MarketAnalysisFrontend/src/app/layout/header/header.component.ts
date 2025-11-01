@@ -134,6 +134,14 @@ export class HeaderComponent implements OnDestroy {
     this.showCommunityMenu.set(false);
   }
 
+  openWatchlistDropdown(): void {
+    this.showWatchlistDropdown.set(true);
+    this.showSettingsMenu.set(false);
+    this.showCryptoMenu.set(false);
+    this.showExchangeMenu.set(false);
+    this.showCommunityMenu.set(false);
+  }
+
   closeWatchlistDropdown(): void {
     this.showWatchlistDropdown.set(false);
   }
@@ -204,9 +212,7 @@ export class HeaderComponent implements OnDestroy {
     if (!target.closest('.settings-menu-container')) {
       this.closeSettingsMenu();
     }
-    if (!target.closest('.watchlist-dropdown-container')) {
-      this.closeWatchlistDropdown();
-    }
+    // Watchlist dropdown is now hover-based, no click outside needed
   }
 }
 

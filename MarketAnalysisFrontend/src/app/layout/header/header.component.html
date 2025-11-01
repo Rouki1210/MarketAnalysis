@@ -436,13 +436,13 @@
           <span class="hidden lg:inline">Portfolio</span>
         </app-button>
         
-        <!-- Watchlist Dropdown Container (Only visible when logged in) -->
-        <div *ngIf="authService.isAuthenticated()" class="relative watchlist-dropdown-container">
+        <!-- Watchlist Dropdown Container -->
+        <div class="relative watchlist-dropdown-container">
           <app-button 
             variant="ghost" 
             size="sm" 
             class="hidden md:flex"
-            (click)="toggleWatchlistDropdown()"
+            (mouseenter)="openWatchlistDropdown()"
           >
             <svg class="w-4 h-4 lg:mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -453,6 +453,8 @@
           <!-- Watchlist Dropdown Menu -->
           <div 
             *ngIf="showWatchlistDropdown()" 
+            (mouseenter)="openWatchlistDropdown()"
+            (mouseleave)="closeWatchlistDropdown()"
             class="absolute right-0 top-full mt-2 w-[500px] bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50"
           >
             <!-- Header with Title -->
