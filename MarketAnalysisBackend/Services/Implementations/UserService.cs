@@ -12,6 +12,8 @@ namespace MarketAnalysisBackend.Services.Implementations
         {
             _userRepo = userRepo;
         }
+
+
         public async Task<User?> GetUserByEmailorUsername(string emailorusername)
         {
             var user = await _userRepo.GetByEmailOrUsernameAsync(emailorusername);
@@ -29,6 +31,15 @@ namespace MarketAnalysisBackend.Services.Implementations
                 return _userRepo.GetByWalletAddressAsync(walletaddress);
             }
             return null;
+        }
+        public Task<User?> EditInforUser(string? walletaddress)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<User?> EditInforUser()
+        {
+            throw new NotImplementedException();
         }
     }
 }

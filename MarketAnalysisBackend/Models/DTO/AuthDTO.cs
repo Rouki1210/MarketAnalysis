@@ -1,10 +1,14 @@
-﻿namespace MarketAnalysisBackend.Models.DTO
+﻿using System.ComponentModel.DataAnnotations;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace MarketAnalysisBackend.Models.DTO
 {
     public class RegisterDTO
     {
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public DateTime Brithday { get; set; }
     }
     public class LoginDTO
     {
@@ -48,9 +52,36 @@
     {
         public int Id { get; set; }
         public string Username { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? WalletAddress { get; set; }
         public string AuthType { get; set; } = string.Empty;
+        public string? Bio { get; set; }
+        public string? Website { get; set; }
+        public DateTime? Birthday { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class UpdateProfileDTO
+    {
+        [MaxLength(100)]
+        public string? DisplayName { get; set; }
+
+        [MaxLength(250)]
+        public string? Bio { get; set; }
+
+        [Url]
+        public string? Website { get; set; }
+
+        public DateTime? Birthday { get; set; }
+    }
+
+    public class UserSearchDTO
+    {
+        public int Id { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public string? Bio { get; set; }
     }
 
     public class ChangePasswordDto 

@@ -3,6 +3,7 @@ using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Services.Interfaces;
 using System.Security.Cryptography;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MarketAnalysisBackend.Services.Implementations
 {
@@ -45,7 +46,9 @@ namespace MarketAnalysisBackend.Services.Implementations
             {
                 Email = dto.Email,
                 Username = username,
+                DisplayName = username,
                 PasswordHash = hashedPassword,
+                Brithday = DateTime.MinValue,
                 CreatedAt = DateTime.UtcNow,
                 AuthProvider = "Local"
             };

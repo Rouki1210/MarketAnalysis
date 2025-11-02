@@ -23,7 +23,7 @@ export class AuthService {
   showAuthModal = signal(false);
   authModalTab = signal<'login' | 'signup'>('login');
   isAuthenticated = signal(false);
-  currentUser = signal<{ email: string; name?: string } | null>(null);
+  currentUser = signal<{ email: string; name?: string} | null>(null);
   currentWallet: string | null = null;
 
   private initGoogleAuth() {
@@ -205,6 +205,12 @@ export class AuthService {
       return null;
     }
   }
+
+    updateUserInfo(userId: string, displayName: string, bio?: string, birthday?: string, website?: string): Observable<any> {
+      const body = {displayName, bio, birthday, website };
+      console.log('Updating user info with body:', body, 'and userId:', userId);
+      return this.http.put(`https://localhost:7175/api/users/${userId}`,  body);
+    }
   
   socialAuth(provider: string): Promise<any> {
     console.log('Social auth:', provider);

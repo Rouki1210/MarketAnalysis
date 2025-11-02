@@ -170,9 +170,10 @@ namespace MarketAnalysisBackend.Controllers
                     {
                         Id = user.Id,
                         Username = user.Username,
+                        DisplayName = user.DisplayName,
                         Email = user.Email,
                         WalletAddress = user.WalletAddress,
-                        AuthType = user.AuthProvider
+                        AuthType = user.AuthProvider,
                     }
                 };
 

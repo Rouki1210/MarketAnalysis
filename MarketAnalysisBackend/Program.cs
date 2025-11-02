@@ -21,19 +21,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
+
+// Database connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection"))
 );
 
 builder.Services.AddSignalR();
-//builder.Services.AddScoped<Supabase.Client>(sp =>
-//{
-//    var url = builder.Configuration["Supabase:Url"];
-//    var key = builder.Configuration["Supabase:Key"];
-//    return new Supabase.Client(url, key);
-//});
 builder.Services.AddHttpClient();
 
+// Repositories
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IPriceRepository, PriceRepository>();
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
@@ -43,6 +40,7 @@ builder.Services.AddScoped<INonceRepository, NonceRepository>();
 builder.Services.AddScoped<IPriceCacheRepository, PriceCacheRepository>();
 builder.Services.AddScoped<IGlobalAlertRepository, GlobalAlertRepository>();
 
+// Services
 builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddScoped<IPriceService, PriceService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -50,12 +48,14 @@ builder.Services.AddScoped<IAssetImport, AssetImporter>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IWatchlistService, WatchlistService>();
 builder.Services.AddScoped<IPriceCacheService, PriceCacheService>();
 builder.Services.AddScoped<IAlertEvaluationService, AlertEvaluationService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IGlobalAlertOrchestrationService, GlobalAlertOrchestrationService>();
 
+// Background Services
 builder.Services.AddHostedService<AssetImporterService>();
 builder.Services.AddHostedService<PriceDataCollector>();
 builder.Services.AddHostedService<GlobalMetricService>();
@@ -128,6 +128,7 @@ app.UseCors("AllowAngular");
 
 app.MapHub<PriceHub>("/pricehub");
 app.MapHub<GlobalMetric>("/globalmetrichub");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
