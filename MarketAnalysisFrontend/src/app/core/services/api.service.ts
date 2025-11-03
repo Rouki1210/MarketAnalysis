@@ -286,18 +286,25 @@ export class ApiService {
         const data = message.data;
         if (!data) return;
         console.log('Global Metric update:', data);
+        
+        const formatNumber = (num: number, digits: number = 0) =>
+          num?.toLocaleString(undefined, {
+            minimumFractionDigits: digits,
+            maximumFractionDigits: digits
+          }) ?? '0';
+        
         const overview : MarketOverview = {
-          totalMarketCap: data.total_market_cap_usd,
-          totalMarketCapChange24h: data.total_market_cap_percent_change_24h,
+          totalMarketCap: `$${formatNumber(data.total_market_cap_usd, 0)}`,
+          totalMarketCapChange24h: (data.total_market_cap_percent_change_24h / 100).toString(),
           cmc20: "0",
-          fearGreedIndex: data.fear_and_greed_index,
+          fearGreedIndex: data.fear_and_greed_index.toString(),
           fear_and_greed_text: data.fear_and_greed_text,
-          totalVolume24h: data.total_volume_24h,
-          totalVolume24hChange: data.total_volume_24h_percent_change_24h,
-          btcDominance: data.bitcoin_dominance_price,
-          ethDominance: data.ethereum_dominance_price,
-          btcDominancePercent: data.bitcoin_dominance_percentage,
-          ethDominancePercent: data.ethereum_dominance_percentage,
+          totalVolume24h: `$${formatNumber(data.total_volume_24h, 0)}`,
+          totalVolume24hChange: (data.total_volume_24h_percent_change_24h / 100).toString(),
+          btcDominance: (data.bitcoin_dominance_price / 100).toString(),
+          ethDominance: (data.ethereum_dominance_price / 100).toString(),
+          btcDominancePercent: (data.bitcoin_dominance_percentage / 100).toString(),
+          ethDominancePercent: (data.ethereum_dominance_percentage / 100).toString(),
           altcoinSeasonIndex: data.altcoin_season_score
         };
         this.globalMetricSource.next(overview);

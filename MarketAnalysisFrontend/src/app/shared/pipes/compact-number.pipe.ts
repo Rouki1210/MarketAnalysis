@@ -22,9 +22,9 @@ export class CompactNumberPipe implements PipeTransform {
       return '-';
     }
 
-    // Remove currency symbols and commas if present
+    // Remove currency symbols, commas, and spaces if present
     const cleanValue = typeof value === 'string' 
-      ? value.replace(/[$,]/g, '') 
+      ? value.replace(/[$,\s]/g, '') 
       : value.toString();
 
     const numValue = parseFloat(cleanValue);

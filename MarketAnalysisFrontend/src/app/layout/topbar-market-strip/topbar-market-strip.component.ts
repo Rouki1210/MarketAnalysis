@@ -4,11 +4,12 @@ import { SparklineComponent } from '../../shared/components/sparkline/sparkline.
 import { GaugeComponent } from '../../shared/components/gauge/gauge.component';
 import { ApiService } from '../../core/services/api.service';
 import { MarketOverview as GlobalMarketOverview } from '../../core/models/market.model';
+import { CompactNumberPipe } from '../../shared/pipes/compact-number.pipe';
 
 @Component({
   selector: 'app-topbar-market-strip',
   standalone: true,
-  imports: [CommonModule, SparklineComponent, GaugeComponent],
+  imports: [CommonModule, SparklineComponent, GaugeComponent, CompactNumberPipe],
   templateUrl: './topbar-market-strip.component.html',
   styleUrls: ['./topbar-market-strip.component.css']
 })
