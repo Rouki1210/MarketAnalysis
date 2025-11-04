@@ -26,6 +26,7 @@ export class ProfilePage implements OnInit {
   activeTab = signal<ProfileTab>('profile');
 
   // Form Data
+  id = signal('');
   displayName = signal('');
   username = signal('');
   bio = signal('');
@@ -46,9 +47,23 @@ export class ProfilePage implements OnInit {
   // Profile Actions
   onSave(): void {
     const profileData = this.getProfileData();
+    const userId = this.id();
     console.log('Saving profile:', profileData);
-    // TODO: Implement API call to save profile
-    this.showSuccess('Profile saved successfully!');
+
+    this.authService.updateUserInfo(
+      userId,
+      profileData.displayName,
+      profileData.bio,
+      profileData.birthday,
+      profileData.website
+    ).subscribe({
+      next: () => {
+        this.showSuccess('Profile updated successfully!');
+      },
+      error: () => {
+        console.error('Failed to update profile');
+      }
+    });
   }
 
   onEditAvatar(): void {
@@ -67,7 +82,8 @@ export class ProfilePage implements OnInit {
       next: (data) => {
         console.log('User info loaded:', data);
         if(data?.user){
-          this.displayName.set(data.user.username || '');
+          this.id.set(data.user.id || '');
+          this.displayName.set(data.user.displayName || '');
           this.username.set(data.user.username || '');
           this.bio.set(data.user.bio || '');
           this.birthday.set(data.user.birthday || '');

@@ -6,6 +6,7 @@ namespace MarketAnalysisBackend.Repositories.Interfaces
     {
         Task<User?> GetByEmailOrUsernameAsync(string emailOrUsername);
         Task<User?> GetByWalletAddressAsync(string walletAddress);
+        Task<IEnumerable<User>> SearchByDisplayNameOrUsernameAsync(string query, int limit);
         Task CreateAsync(User user);
         Task DeleteAllAsync();
 

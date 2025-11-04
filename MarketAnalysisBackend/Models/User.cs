@@ -8,6 +8,7 @@ namespace MarketAnalysisBackend.Models
         public int Id { get; set; }
         [Required, MaxLength(100)]
         public string Username { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
         [Required, MaxLength(200)]
         public string PasswordHash { get; set; } = string.Empty;
         [Required]
@@ -16,7 +17,10 @@ namespace MarketAnalysisBackend.Models
         public string? WalletAddress { get; set; }
         [MaxLength(50)]
         public string AuthProvider { get; set; } = "Local"; // Local || Google || MetaMask || Other
-
+        [MaxLength(250)]
+        public string? Bio { get; set; }
+        public string? Website { get; set; }
+        public DateTime Brithday { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 

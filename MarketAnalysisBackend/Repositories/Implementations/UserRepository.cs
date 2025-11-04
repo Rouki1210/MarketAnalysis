@@ -37,6 +37,13 @@ namespace MarketAnalysisBackend.Repositories.Implementations
                 .FirstOrDefaultAsync(u => u.WalletAddress == walletAddress.ToLower());
         }
 
-
+        public async Task<IEnumerable<User>> SearchByDisplayNameOrUsernameAsync(string query, int limit)
+        {
+            return await _context.Users
+                .Where(u => u.DisplayName.Contains(query) || u.Username.Contains(query))
+                .Take(limit)
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

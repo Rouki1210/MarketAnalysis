@@ -16,11 +16,14 @@ namespace MarketAnalysisBackend.Controllers
         private readonly IUserRepository _userRepo;
         private readonly IUserService _userSer;
         private readonly IJwtService _jwtService;
-        public UserController(IUserRepository userRepo, IUserService userSer, IJwtService jwtService)
+        private readonly IUserProfileService _profileService;
+        private readonly IUserProfileService _profileSer;
+        public UserController(IUserRepository userRepo, IUserService userSer, IJwtService jwtService, IUserProfileService profileSer)
         {
             _userRepo = userRepo;
             _userSer = userSer;
             _jwtService = jwtService;
+            _profileSer = profileSer;
         }
 
         [HttpGet("users")]
@@ -63,6 +66,20 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(user);
         }
 
+        [HttpPut("{userId}")]
+        public Task<IActionResult> UpdateUser(int userId, [FromBody] UpdateProfileDTO updateDto)
+        {
+            return _profileSer.UpdateProfileAsync(userId, updateDto)
+                .ContinueWith<IActionResult>(task =>
+                {
+                    if (task.IsFaulted)
+                    {
+                        return BadRequest(new { success = false, message = task.Exception?.GetBaseException().Message });
+                    }
+                    return Ok(new { success = true, data = task.Result });
+                });
+        }
+
         [HttpGet("userInfo/{token}")]
         public async Task<IActionResult> GetUserInfoFromToken(string token)
         {
@@ -90,8 +107,12 @@ namespace MarketAnalysisBackend.Controllers
                     Id = user.Id,
                     Email = user.Email,
                     Username = user.Username,
+                    DisplayName = user.DisplayName,
                     WalletAddress = user.WalletAddress,
-                    AuthType = user.AuthProvider
+                    AuthType = user.AuthProvider,
+                    Bio = user.Bio,
+                    Website = user.Website,
+                    Birthday = user.Brithday
                 }
             });
         }
