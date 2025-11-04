@@ -413,29 +413,7 @@
 
     <!-- Search and User Actions -->
     <div class="flex items-center space-x-2 lg:space-x-3">
-      <div class="relative hidden lg:block">
-        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" 
-             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <path d="m21 21-4.35-4.35"></path>
-        </svg>
-        <input 
-          [(ngModel)]="searchQuery"
-          (keyup.enter)="onSearch()"
-          placeholder="Search" 
-          class="pl-10 w-48 xl:w-64 h-9 bg-input border border-border rounded-md text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" 
-        />
-      </div>
-
       <div class="flex items-center space-x-1 lg:space-x-2">
-        <app-button variant="ghost" size="sm" class="hidden md:flex">
-          <svg class="w-4 h-4 lg:mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-          </svg>
-          <span class="hidden lg:inline">Portfolio</span>
-        </app-button>
-        
         <!-- Watchlist Dropdown Container -->
         <div class="relative watchlist-dropdown-container">
           <app-button 
@@ -455,18 +433,20 @@
             *ngIf="showWatchlistDropdown()" 
             (mouseenter)="openWatchlistDropdown()"
             (mouseleave)="closeWatchlistDropdown()"
-            class="absolute right-0 top-full mt-2 w-[500px] bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50"
+            class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[500px] bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50"
           >
-            <!-- Header with Title -->
-            <div class="p-4 border-b border-border">
-              <h3 class="text-lg font-semibold text-foreground">My First Coin Watchlist</h3>
-            </div>
-
-            <!-- Tab Navigation (Only "Coins" tab) -->
-            <div class="flex border-b border-border">
-              <button class="flex-1 px-4 py-3 text-sm font-medium text-foreground bg-background/50 border-b-2 border-primary">
-                Coins
-              </button>
+            <!-- Header with Title and Full View -->
+            <div class="flex items-center justify-between p-4 border-b border-border">
+              <h3 class="text-lg font-semibold text-foreground">My Main Watchlist</h3>
+              <a 
+                href="#" 
+                class="text-sm text-primary hover:text-primary/80 transition-colors font-medium inline-flex items-center"
+              >
+                Full View
+                <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </a>
             </div>
 
             <!-- Watchlist Content -->
@@ -558,20 +538,29 @@
                 </div>
               </div>
             </div>
-
-            <!-- Footer with Full View Link -->
-            <div *ngIf="(watchlistCoins$ | async)?.length! > 0" class="p-4 border-t border-border">
-              <a 
-                href="#" 
-                class="text-sm text-primary hover:text-primary/80 transition-colors font-medium inline-flex items-center"
-              >
-                Full View
-                <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-              </a>
-            </div>
           </div>
+        </div>
+
+        <app-button variant="ghost" size="sm" class="hidden md:flex">
+          <svg class="w-4 h-4 lg:mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <span class="hidden lg:inline">Portfolio</span>
+        </app-button>
+
+        <div class="relative hidden lg:block">
+          <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" 
+               xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <input 
+            [(ngModel)]="searchQuery"
+            (keyup.enter)="onSearch()"
+            placeholder="Search" 
+            class="pl-10 w-48 xl:w-64 h-9 bg-input border border-border rounded-md text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" 
+          />
         </div>
         
         <app-button variant="ghost" size="icon" class="hidden sm:flex">
