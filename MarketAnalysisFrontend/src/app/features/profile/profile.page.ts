@@ -26,12 +26,12 @@ export class ProfilePage implements OnInit {
   activeTab = signal<ProfileTab>('profile');
 
   // Form Data
-  id = signal('');
   displayName = signal('');
   username = signal('');
   bio = signal('');
   birthday = signal('');
   website = signal('');
+
 
   constructor(public authService: AuthService) {}
 
@@ -47,11 +47,9 @@ export class ProfilePage implements OnInit {
   // Profile Actions
   onSave(): void {
     const profileData = this.getProfileData();
-    const userId = this.id();
     console.log('Saving profile:', profileData);
 
     this.authService.updateUserInfo(
-      userId,
       profileData.displayName,
       profileData.bio,
       profileData.birthday,
@@ -80,9 +78,8 @@ export class ProfilePage implements OnInit {
   private loadUserData(): void {
     this.authService.getUserInfo().subscribe({
       next: (data) => {
-        console.log('User info loaded:', data);
+        console.log('User info loaded:', data.user.id);
         if(data?.user){
-          this.id.set(data.user.id || '');
           this.displayName.set(data.user.displayName || '');
           this.username.set(data.user.username || '');
           this.bio.set(data.user.bio || '');

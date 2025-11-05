@@ -56,9 +56,9 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IGlobalAlertOrchestrationService, GlobalAlertOrchestrationService>();
 
 // Background Services
-builder.Services.AddHostedService<AssetImporterService>();
-builder.Services.AddHostedService<PriceDataCollector>();
-builder.Services.AddHostedService<GlobalMetricService>();
+//builder.Services.AddHostedService<AssetImporterService>();
+//builder.Services.AddHostedService<PriceDataCollector>();
+//builder.Services.AddHostedService<GlobalMetricService>();
 //builder.Services.AddScoped<IGlobalAlertOrchestrationService, MockGlobalAlertOrchestrationService>();
 builder.Services.AddHostedService<GlobalAlertDetectorService>();
 
@@ -108,10 +108,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200", "https://localhost:4200") // Angular dev server
+            policy.WithOrigins("http://localhost:4200", "https://localhost:4200", "http://localhost:7175", "https://localhost:7175") // Angular dev server
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .AllowCredentials();
+                  .AllowCredentials()
+                  .SetIsOriginAllowed(origin => true)
+                  .WithExposedHeaders("*");
         });
 });
 
@@ -128,6 +130,7 @@ app.UseCors("AllowAngular");
 
 app.MapHub<PriceHub>("/pricehub");
 app.MapHub<GlobalMetric>("/globalmetrichub");
+app.MapHub <AlertHub>("/alerthub");
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -3,6 +3,7 @@ using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -66,18 +67,21 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(user);
         }
 
-        [HttpPut("{userId}")]
-        public Task<IActionResult> UpdateUser(int userId, [FromBody] UpdateProfileDTO updateDto)
+        [HttpPut("updateProfile")]
+        public async Task<IActionResult> UpdateUser(string token, [FromBody] UpdateProfileDTO updateDto)
         {
-            return _profileSer.UpdateProfileAsync(userId, updateDto)
-                .ContinueWith<IActionResult>(task =>
-                {
-                    if (task.IsFaulted)
-                    {
-                        return BadRequest(new { success = false, message = task.Exception?.GetBaseException().Message });
-                    }
-                    return Ok(new { success = true, data = task.Result });
-                });
+            var jwtPayload = _jwtService.GetPrincipalFromToken(token);
+            if (jwtPayload == null)
+            {
+                return BadRequest(new { success = false, message = "Invalid token." });
+            }
+            var userIdStr = jwtPayload?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdStr, out int userId))
+            {
+                return BadRequest(new { success = false, message = "Invalid user id in token." });
+            }
+            var updatedUser = await _profileSer.UpdateProfileAsync(userId, updateDto);
+            return Ok(new { success = true, data = updatedUser });
         }
 
         [HttpGet("userInfo/{token}")]
@@ -92,15 +96,16 @@ namespace MarketAnalysisBackend.Controllers
             var username = jwtPayload?.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(username))
             {
-                return BadRequest(new {success = false, message = "No user info found in token"});
+                return BadRequest(new { success = false, message = "No user info found in token" });
             }
             var user = await _userSer.GetUserByEmailorUsername(username);
-            
+
             if (user == null)
             {
-                return NotFound(new {success = false, message = "User not found." });
+                return NotFound(new { success = false, message = "User not found." });
             }
-            return Ok(new {
+            return Ok(new
+            {
                 success = true,
                 user = new UserDTO
                 {

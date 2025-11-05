@@ -1,7 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { first, firstValueFrom, Observable } from 'rxjs';
+import { BehaviorSubject, catchError, first, firstValueFrom, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { UpdateProfileResponse, UserInfo } from '../models/user.model';
 
 declare const google: any; // For Google Identity Services
 
@@ -11,6 +12,7 @@ declare const google: any; // For Google Identity Services
 
 export class AuthService {
   private readonly apiUrl = 'https://localhost:7175/api/Auth';
+  private readonly userApiUrl = 'https://localhost:7175/api/User';
   
   private codeClient: any;
   constructor(private http: HttpClient) {
@@ -25,6 +27,8 @@ export class AuthService {
   isAuthenticated = signal(false);
   currentUser = signal<{ email: string; name?: string} | null>(null);
   currentWallet: string | null = null;
+  private currentUserSubject = new BehaviorSubject<UserInfo | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
 
   private initGoogleAuth() {
     const init = () => {
@@ -94,10 +98,31 @@ export class AuthService {
     });
   }
 
-  getUserInfo(): Observable<any> {
+  getUserInfo(): Observable<{success: boolean; user: UserInfo}> {
     const token = localStorage.getItem('token');
     console.log(token);
-    return this.http.get<any>(`https://localhost:7175/api/User/userInfo/${token}`);
+    return this.http.get<{success: boolean; user: UserInfo}>(`https://localhost:7175/api/User/userInfo/${token}`)
+      .pipe(
+        tap(response => {
+          if (response.success && response.user) {
+            this.currentUserSubject.next(response.user);
+          }
+        }), catchError(error => {
+          console.error('Error fetching user info:', error);
+          throw error;
+        })
+      );
+  }
+
+  updateUserInfo(displayName?: string, bio?: string, birthday?: string, website?: string): Observable<UpdateProfileResponse>{
+    const body = {
+      displayName: displayName || null,
+      bio: bio || null,
+      birthday: birthday || null,
+      website: website || null
+    };
+    const token = localStorage.getItem('token');
+    return this.http.put<UpdateProfileResponse>(`${this.userApiUrl}/updateProfile`, body, { params: { token: token || '' } });
   }
   
   logout(): void {
@@ -205,12 +230,6 @@ export class AuthService {
       return null;
     }
   }
-
-    updateUserInfo(userId: string, displayName: string, bio?: string, birthday?: string, website?: string): Observable<any> {
-      const body = {displayName, bio, birthday, website };
-      console.log('Updating user info with body:', body, 'and userId:', userId);
-      return this.http.put(`https://localhost:7175/api/users/${userId}`,  body);
-    }
   
   socialAuth(provider: string): Promise<any> {
     console.log('Social auth:', provider);
