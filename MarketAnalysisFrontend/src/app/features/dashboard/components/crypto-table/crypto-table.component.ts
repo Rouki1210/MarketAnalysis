@@ -51,6 +51,7 @@ export class CryptoTableComponent implements OnInit {
   showNetworkMenu = signal(false);
   menuPosition: MenuPosition = { left: 0, top: 0 };
   watchlistIds: string[] = [];
+  isLoading: boolean = true;
 
   // Constants
   readonly networks = ['All Networks', 'Bitcoin', 'Ethereum', 'BSC', 'Solana', 'Base'];
@@ -93,13 +94,20 @@ export class CryptoTableComponent implements OnInit {
       next: (coins) => {
         this.coins = coins;
         this.applyFilter();
+        this.isLoading = false;
       },
-      error: (err) => console.error('Error loading coins:', err)
+      error: (err) => {
+        console.error('Error loading coins:', err);
+        this.isLoading = false;
+      }
     });
 
     this.apiService.coins$.subscribe(coins => {
       this.coins = coins;
       this.applyFilter();
+      if (coins.length > 0) {
+        this.isLoading = false;
+      }
     });
   }
 

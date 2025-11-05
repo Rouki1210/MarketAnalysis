@@ -104,6 +104,28 @@
           </tr>
         </thead>
         <tbody>
+          <!-- Loading Skeleton -->
+          <tr *ngIf="isLoading" class="border-b border-border">
+            <td colspan="10" class="px-3 lg:px-4 py-3 lg:py-4">
+              <div class="space-y-3">
+                <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]" class="flex items-center space-x-4 animate-pulse">
+                  <div class="h-4 bg-muted rounded w-8"></div>
+                  <div class="h-8 w-8 bg-muted rounded-full"></div>
+                  <div class="flex-1 space-y-2">
+                    <div class="h-4 bg-muted rounded w-32"></div>
+                    <div class="h-3 bg-muted rounded w-16"></div>
+                  </div>
+                  <div class="h-4 bg-muted rounded w-24"></div>
+                  <div class="h-4 bg-muted rounded w-16"></div>
+                  <div class="h-4 bg-muted rounded w-16"></div>
+                  <div class="h-4 bg-muted rounded w-16"></div>
+                  <div class="h-4 bg-muted rounded w-32"></div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Actual Data -->
           <tr 
             *ngFor="let coin of paginatedCoins"
             class="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer"
