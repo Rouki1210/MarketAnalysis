@@ -1,6 +1,16 @@
 <div class="bg-card border-b border-border">
   <div class="mx-auto px-3 lg:px-4 xl:px-6 py-2">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-3">
+    <!-- Loading Skeleton -->
+    <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-3">
+      <div *ngFor="let i of [1,2,3,4,5]" class="bg-background rounded-lg p-3 lg:p-4 animate-pulse">
+        <div class="h-3 bg-muted rounded w-20 mb-2"></div>
+        <div class="h-6 bg-muted rounded w-32 mb-3"></div>
+        <div class="h-12 bg-muted rounded"></div>
+      </div>
+    </div>
+
+    <!-- Actual Data -->
+    <div *ngIf="!isLoading && globalMarketOverview.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-3">
       <!-- Market Cap -->
       <div class="bg-background rounded-lg p-3 lg:p-4">
         <div class="flex items-center gap-1 mb-1.5">

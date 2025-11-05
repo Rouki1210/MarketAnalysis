@@ -22,6 +22,7 @@ export class TopbarMarketStripComponent implements OnInit {
   btcDominanceSparkline: number[] = [];
   ethDominanceSparkline: number[] = [];
   globalMarketOverview: GlobalMarketOverview[] = [];
+  isLoading: boolean = true;
 
   // Fear & Greed data
   fearGreedValue: number = 28;
@@ -44,12 +45,16 @@ export class TopbarMarketStripComponent implements OnInit {
     next: (data) => {
       if (!data) return;
       this.globalMarketOverview = [data];
+      this.isLoading = false;
 
       // Fear & Greed gauge update
       this.fearGreedValue = Number(data.fearGreedIndex);
       this.fearGreedLabel = data.fear_and_greed_text;
     },
-    error: (err) => console.error('Global metric subscription error:', err)
+    error: (err) => {
+      console.error('Global metric subscription error:', err);
+      this.isLoading = false;
+    }
   });
   }
 

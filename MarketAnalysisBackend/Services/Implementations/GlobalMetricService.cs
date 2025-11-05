@@ -97,7 +97,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     Total_market_cap_usd = totalMarketCap,
                     Total_market_cap_percent_change_24h = totalMarketCapChange24h,
                     Total_volume_24h = totalVolume24h,
-                    Total_volume_24h_percent_change_24h = totalVolume24h,
+                    Total_volume_24h_percent_change_24h = totalVolumeChange24,
                     Cmc_20 = 0,
                     fear_and_greed_index = fngValue.ToString(),
                     fear_and_greed_text = fngText,
