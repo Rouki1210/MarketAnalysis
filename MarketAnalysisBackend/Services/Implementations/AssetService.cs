@@ -37,6 +37,12 @@ namespace MarketAnalysisBackend.Services.Interfaces
             return await _assetService.GetAllAsync();
         }
 
+        public async Task<IEnumerable<Asset>> GetByPagination(int pageNumber, int pageSize)
+        {
+            return await _assetRepo.GetByPagination(pageNumber, pageSize);
+
+        }
+
         public async Task<IEnumerable<Asset>> RefreshTopAssetAsync(CancellationToken cancellationToken = default)
         {
             await _assetRepo.DeleteAllAsync();

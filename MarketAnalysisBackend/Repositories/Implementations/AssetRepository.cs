@@ -1,7 +1,9 @@
 ﻿using MarketAnalysisBackend.Data;
 using MarketAnalysisBackend.Models;
+using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace MarketAnalysisBackend.Repositories.Implementations
 {
@@ -17,6 +19,20 @@ namespace MarketAnalysisBackend.Repositories.Implementations
         {
             _context.Assets.RemoveRange(_context.Assets);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Asset>> GetByPagination(int from, int to)
+        {
+            var totalItems = await _context.Assets.CountAsync();
+
+            var assets = await _context.Assets
+                .OrderBy(a => a.Rank)
+                .Skip(from)
+                .Take(to - from + 1)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return assets;
         }
     }
 }
