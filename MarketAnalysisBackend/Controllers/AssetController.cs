@@ -32,6 +32,15 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(asset);
         }
 
+        [HttpGet("{pagination}")]
+        public async Task<IActionResult> GetAssetsPaged(int pagination = 1)
+        {
+            var pageSize = 15; // Define a default page size
+
+            var pagedAssets = await _assetService.GetByPagination(pagination, pageSize);
+            return Ok(pagedAssets);
+        }
+
         [HttpDelete]
         public async Task DeleteAsset()
         {

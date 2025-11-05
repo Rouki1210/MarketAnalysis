@@ -121,8 +121,8 @@ export class AuthService {
       birthday: birthday || null,
       website: website || null
     };
-    const token = localStorage.getItem('token');
-    return this.http.put<UpdateProfileResponse>(`${this.userApiUrl}/updateProfile`, body, { params: { token: token || '' } });
+    const token = localStorage.getItem('token') || '';
+    return this.http.put<UpdateProfileResponse>(`${this.userApiUrl}/updateProfile`, body, { params: { token: token} });
   }
   
   logout(): void {
