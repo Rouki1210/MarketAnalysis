@@ -105,7 +105,7 @@
         </thead>
         <tbody>
           <tr 
-            *ngFor="let coin of filteredCoins"
+            *ngFor="let coin of paginatedCoins"
             class="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer"
             (click)="navigateToCoin(coin.symbol)">
             <td class="px-3 lg:px-4 py-3 lg:py-4 sticky left-0 bg-card">
@@ -171,6 +171,58 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- ==================== PAGINATION ==================== -->
+    <div *ngIf="totalPages > 1" class="px-3 lg:px-4 py-4 border-t border-border">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 relative">
+        <!-- Page Info -->
+        <div class="text-sm text-muted-foreground sm:absolute sm:left-0">
+          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredCoins.length) }} of {{ filteredCoins.length }} coins
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="flex items-center space-x-1">
+          <!-- Previous Button -->
+          <button
+            (click)="previousPage()"
+            [disabled]="currentPage === 1"
+            [class.text-muted-foreground]="currentPage === 1"
+            class="inline-flex items-center justify-center h-9 px-3 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted/50 hover:text-foreground">
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            <span class="hidden sm:inline ml-1">Previous</span>
+          </button>
+
+          <!-- Page Numbers -->
+          <div class="flex items-center space-x-1">
+            <button
+              *ngFor="let page of getPageNumbers()"
+              (click)="page !== -1 ? goToPage(page) : null"
+              [disabled]="page === -1"
+              [class.bg-primary]="page === currentPage"
+              [class.text-primary-foreground]="page === currentPage"
+              [class.text-foreground]="page !== currentPage && page !== -1"
+              [class.cursor-default]="page === -1"
+              class="inline-flex items-center justify-center h-9 min-w-[36px] px-3 text-sm font-medium rounded-md transition-colors hover:bg-muted/50">
+              {{ page === -1 ? '...' : page }}
+            </button>
+          </div>
+
+          <!-- Next Button -->
+          <button
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+            [class.text-muted-foreground]="currentPage === totalPages"
+            class="inline-flex items-center justify-center h-9 px-3 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted/50 hover:text-foreground">
+            <span class="hidden sm:inline mr-1">Next</span>
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   </app-card>
 </div>

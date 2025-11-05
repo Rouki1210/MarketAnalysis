@@ -1,32 +1,13 @@
 <div class="mx-auto px-3 lg:px-4 xl:px-6 py-6 lg:py-8" *ngIf="coinDetail">
-  <!-- Navigation Tabs -->
-  <div class="flex items-center space-x-4 lg:space-x-6 mb-6 border-b border-border overflow-x-auto scrollbar-hide">
-    <app-button 
-      *ngFor="let tab of tabs"
-      variant="ghost"
-      size="sm"
-      [class.text-foreground]="selectedTab === tab"
-      [class.text-muted-foreground]="selectedTab !== tab"
-      [class.border-b-2]="selectedTab === tab"
-      [class.border-primary]="selectedTab === tab"
-      [class.rounded-none]="selectedTab === tab"
-      class="pb-3 whitespace-nowrap"
-      (click)="selectTab(tab)">
-      {{ tab }}
-    </app-button>
-  </div>
-
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
     <!-- Left Column - Stats -->
     <div class="lg:col-span-1">
       <app-coin-stats [coinDetail]="coinDetail"></app-coin-stats>
     </div>
 
-    <!-- Right Column - Chart and Markets -->
-    <div class="lg:col-span-2 space-y-6 lg:space-y-8">
+    <!-- Right Column - Chart -->
+    <div class="lg:col-span-2">
       <app-price-chart [symbol]="coinDetail.coin.symbol"></app-price-chart>
-
-      <app-market-pairs-table [markets]="markets"></app-market-pairs-table>
     </div>
   </div>
 </div>

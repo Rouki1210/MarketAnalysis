@@ -19,10 +19,27 @@
   }
 }
 
-.settings-menu-container > div,
-.crypto-menu-container > div,
-.watchlist-dropdown-container > div {
+@keyframes slideDownCentered {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.settings-menu-container > div {
   animation: slideDown 0.2s ease-out;
+}
+
+.crypto-menu-container > div {
+  animation: slideDown 0.2s ease-out;
+}
+
+.watchlist-dropdown-container > div {
+  animation: slideDownCentered 0.2s ease-out;
 }
 
 /* Rotate animation for chevron */

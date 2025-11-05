@@ -11,11 +11,12 @@ import { WatchlistService } from '../../core/services/watchlist.service';
 import { Currency, Theme } from '../../core/models/common.model';
 import { WatchlistCoin } from '../../core/models/watchlist.model';
 import { Observable } from 'rxjs';
+import { CompactNumberPipe } from '../../shared/pipes/compact-number.pipe';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, AuthModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, AuthModalComponent, CompactNumberPipe],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
@@ -134,6 +135,14 @@ export class HeaderComponent implements OnDestroy {
     this.showCommunityMenu.set(false);
   }
 
+  openWatchlistDropdown(): void {
+    this.showWatchlistDropdown.set(true);
+    this.showSettingsMenu.set(false);
+    this.showCryptoMenu.set(false);
+    this.showExchangeMenu.set(false);
+    this.showCommunityMenu.set(false);
+  }
+
   closeWatchlistDropdown(): void {
     this.showWatchlistDropdown.set(false);
   }
@@ -204,9 +213,7 @@ export class HeaderComponent implements OnDestroy {
     if (!target.closest('.settings-menu-container')) {
       this.closeSettingsMenu();
     }
-    if (!target.closest('.watchlist-dropdown-container')) {
-      this.closeWatchlistDropdown();
-    }
+    // Watchlist dropdown is now hover-based, no click outside needed
   }
 }
 
