@@ -70,20 +70,43 @@ export class ApiService {
     .start()
     .then(async() => {
       console.log('SignalR Connected');
-      for (const symbol of symbols) {
-        await this.hubConnection.invoke('JoinAssetGroup', symbol);
-      }
+      // for (const symbol of symbols) {
+      //   await this.hubConnection.invoke('JoinAssetGroup', symbol);
+      // }
     })
     .catch((err) => console.error('SignalR Error:', err));
 
   this.hubConnection.on('ReceiveMessage', (message: any) => {
       const data = message.data;
       if (!data || !data.asset) return;
-
-      console.log('Realtime update:', data);
+      
       this.realtimeData[data.asset] = data;   
       this.updateCoinRealTime(data);
     });
+  }
+
+  async joinAssetGroup(symbols: string[]): Promise<void> {
+    if (!this.hubConnection) return;
+
+    for (const symbol of symbols) {
+    try {
+      await this.hubConnection.invoke('JoinAssetGroup', symbol);
+    } catch (err) {
+      console.error(`Failed to join group ${symbol}:`, err);
+    }
+    }
+  }
+
+  async leaveAssetGroups(symbols: string[]): Promise<void> {
+  if (!this.hubConnection) return;
+
+  for (const symbol of symbols) {
+    try {
+      await this.hubConnection.invoke('LeaveAssetGroup', symbol);
+    } catch (err) {
+      console.error(`Failed to leave group ${symbol}:`, err);
+    }
+  }
   }
 
   private updateCoinRealTime(update: any) {
@@ -285,7 +308,6 @@ export class ApiService {
     this.globalMetricsHubConnection.on('ReceiveGlobalMetric', (message: any) => {
         const data = message.data;
         if (!data) return;
-        console.log('Global Metric update:', data);
         
         const formatNumber = (num: number, digits: number = 0) =>
           num?.toLocaleString(undefined, {

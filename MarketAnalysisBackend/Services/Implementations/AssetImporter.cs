@@ -71,6 +71,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                 var symbol = d.GetProperty("symbol").GetString()!.ToUpper();
                 var name = d.GetProperty("name").GetString() ?? "";
                 var price = d.GetProperty("quote").GetProperty("USD").GetProperty("price").GetDecimal();
+
                 var description = "";
                 var logoUrl = "";
                 try
@@ -104,27 +105,13 @@ namespace MarketAnalysisBackend.Services.Implementations
                     await _assetRepo.AddAsync(asset);
                 }
 
-                else if (updateExisting)
+                else
                 {
-                    // cập nhật
                     asset.Name = name;
                     asset.Rank = rank.ToString();
-                    if (!string.IsNullOrWhiteSpace(logoUrl))
-                        asset.LogoUrl = logoUrl;
-                    if (!string.IsNullOrWhiteSpace(description))
-                        asset.Description = description;
-                    else if (updateExisting)
-                    {
-                        // cập nhật
-                        asset.Name = name;
-                        asset.Rank = rank.ToString();
-                        if (!string.IsNullOrWhiteSpace(logoUrl))
-                            asset.LogoUrl = logoUrl;
-                        if (!string.IsNullOrWhiteSpace(description))
-                            asset.Description = description;
+                    asset.LogoUrl = logoUrl;
+                    asset.Description = description;
 
-                        await _assetRepo.UpdateAsync(asset);
-                    }
                     await _assetRepo.UpdateAsync(asset);
 
                 }

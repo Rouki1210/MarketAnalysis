@@ -43,11 +43,18 @@ namespace MarketAnalysisBackend.Services.Implementations
 
                 try
                 {
-                    var assets = await assetRepo.GetAllAsync();
-                    if (!assets.Any())
+                    var activeSymbols = PriceHub.GetActiveAssetSymbols();
+                    if (!activeSymbols.Any())
                     {
-                        _logger.LogWarning("No assets in DB");
-                        await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                        await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                        continue;
+                    }
+                    var assets = await assetRepo.GetAllAsync();
+                    var activeAssets = assets.Where(a => activeSymbols.Contains(a.Symbol, StringComparer.OrdinalIgnoreCase)).ToList();
+                    if (!activeAssets.Any())
+                    {
+                        _logger.LogWarning("No active assets found in DB matching current symbols");
+                        await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
                         continue;
                     }
 
@@ -72,7 +79,7 @@ namespace MarketAnalysisBackend.Services.Implementations
                     foreach (var coin in dataArray)
                     {
                         var symbol = coin.GetProperty("symbol").GetString();
-                        var matchAsset = assets.FirstOrDefault(a => a.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+                        var matchAsset = activeAssets.FirstOrDefault(a => a.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
                         if (matchAsset == null) continue;
 
                         var quote = coin.GetProperty("quote").GetProperty("USD");

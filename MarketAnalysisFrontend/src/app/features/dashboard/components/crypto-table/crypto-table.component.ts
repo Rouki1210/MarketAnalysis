@@ -44,6 +44,7 @@ export class CryptoTableComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 15;
   totalPages = 0;
+  private currentGroup: string[] = [];
   
   // UI state
   selectedNetwork = 'All Networks';
@@ -74,7 +75,6 @@ export class CryptoTableComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private watchlistService: WatchlistService,
-    private alertService: AlertService,
     private router: Router
   ) {}
 
@@ -86,7 +86,6 @@ export class CryptoTableComponent implements OnInit {
     this.watchlistService.watchlistIds$.subscribe(ids => {
       this.watchlistIds = ids;
     });
-    this.alertService.startConnection();
   }
 
   private loadCoins(): void {
@@ -131,11 +130,19 @@ export class CryptoTableComponent implements OnInit {
     this.updatePagination();
   }
 
-  private updatePagination(): void {
+  private async updatePagination(): Promise<void> {
+    if (this.currentGroup.length > 0) {
+      await this.apiService.leaveAssetGroups(this.currentGroup);
+    }
+
     this.totalPages = Math.ceil(this.filteredCoins.length / this.itemsPerPage);
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedCoins = this.filteredCoins.slice(startIndex, endIndex);
+    this.paginatedCoins = this.filteredCoins.slice(startIndex, endIndex); 
+
+    this.currentGroup = this.paginatedCoins.map(coin => coin.symbol);
+    this.apiService.startSignalR(this.currentGroup);
+    await this.apiService.joinAssetGroup(this.currentGroup);
   }
 
   // Pagination methods
