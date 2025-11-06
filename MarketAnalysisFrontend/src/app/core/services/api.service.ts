@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, map, Observable, of } from 'rxjs';
+import { BehaviorSubject, catchError, filter, first, map, Observable, of, switchMap } from 'rxjs';
 import { Coin, CoinDetail } from '../models/coin.model';
 import { Market, MarketOverview } from '../models/market.model';
 import { ChartData } from '../models/common.model';
@@ -211,69 +211,80 @@ export class ApiService {
   }
 
   getCoinBySymbol(symbol: string): Observable<CoinDetail> {
-    const coins = this.getMockCoins();
-    const coin = coins.find(c => c.symbol === symbol);
+    console.log('Fetching coin data for symbol:', symbol);
     
-    if (!coin) {
-      throw new Error('Coin not found');
-    }
+    // Wait for coins to be loaded (non-empty array), then find the coin
+    return this.coins$.pipe(
+      // Wait until we have at least some coins loaded
+      filter(coins => coins.length > 0),
+      // Take only the first emission with data
+      first(),
+      map(coins => {
+        console.log('Coins loaded, searching for:', symbol);
+        console.log('Available coins:', coins.map(c => c.symbol).join(', '));
+        
+        const foundCoin = coins.find(c => c.symbol === symbol);
+        if (!foundCoin) {
+          console.error(`Coin ${symbol} not found in:`, coins.map(c => c.symbol));
+          throw new Error(`Coin with symbol ${symbol} not found`);
+        }
+        
+        console.log('Found coin:', foundCoin);
+        
+        // Helper function to parse numeric values from formatted strings
+        const parseValue = (str: string | undefined): number => {
+          if (!str) return 0;
+          return parseFloat(str.replace(/[$,]/g, ''));
+        };
 
-    const detail: CoinDetail = {
-      coin,
-      stats: {
-        marketCap: { value: coin.marketCap ?? "", change: coin.change24h, isPositive: coin.isPositive24h },
-        volume24h: { value: coin.volume ?? "", change: "+7.94%", isPositive: true },
-        volumeMarketCapRatio: "2.03%",
-        maxSupply: "21M BTC",
-        circulatingSupply: coin.supply ?? "",
-        totalSupply: coin.supply ?? "",
-      },
-      links: {
-        website: "https://bitcoin.org",
-        whitepaper: "https://bitcoin.org/bitcoin.pdf"
-      }
-    };
+        // Parse values from the coin object
+        const price = parseValue(foundCoin.price);
+        const marketCap = parseValue(foundCoin.marketCap);
+        const volume = parseValue(foundCoin.volume);
+        const change1h = parseValue(foundCoin.change1h);
+        const change24h = parseValue(foundCoin.change24h);
+        const change7d = parseValue(foundCoin.change7d);
 
-    return of(detail);
+        // Calculate volume/market cap ratio
+        const volMktCapRatio = marketCap > 0 ? ((volume / marketCap) * 100).toFixed(2) : '0.00';
+
+        const detail: CoinDetail = {
+          coin: foundCoin,
+          stats: {
+            marketCap: { 
+              value: foundCoin.marketCap ?? '$0', 
+              change: foundCoin.change24h ?? '+0%', 
+              isPositive: foundCoin.isPositive24h 
+            },
+            volume24h: { 
+              value: foundCoin.volume ?? '$0', 
+              change: foundCoin.change24h ?? '+0%',
+              isPositive: foundCoin.isPositive24h 
+            },
+            volumeMarketCapRatio: `${volMktCapRatio}%`,
+            maxSupply: foundCoin.supply ?? '0',
+            circulatingSupply: foundCoin.supply ?? '0',
+            totalSupply: foundCoin.supply ?? '0',
+          },
+          links: {
+            website: 'https://bitcoin.org',
+            whitepaper: 'https://bitcoin.org/bitcoin.pdf'
+          }
+        };
+
+        return detail;
+      }),
+      catchError(error => {
+        console.error('Error fetching coin details:', error);
+        throw error;
+      })
+    );
   }
 
   getMarketPairs(symbol: string): Observable<Market[]> {
-    const mockMarkets: Market[] = [
-      {
-        exchange: "Binance",
-        pair: `${symbol}/USDT`,
-        price: "$122,234.55",
-        volume: "$1,639,495,106",
-        confidence: "High",
-        updated: "Recently"
-      },
-      {
-        exchange: "Binance",
-        pair: `${symbol}/FDUSD`,
-        price: "$122,236.71",
-        volume: "$2,492,410,294",
-        confidence: "High",
-        updated: "Recently"
-      },
-      {
-        exchange: "Bybit",
-        pair: `${symbol}/USDT`,
-        price: "$122,129.89",
-        volume: "$894,860,976",
-        confidence: "High",
-        updated: "Recently"
-      },
-      {
-        exchange: "Coinbase Exchange",
-        pair: `${symbol}/USD`,
-        price: "$122,189.11",
-        volume: "$507,210,084",
-        confidence: "High",
-        updated: "Recently"
-      }
-    ];
-
-    return of(mockMarkets);
+    console.log('Fetching market pairs for symbol:', symbol);
+    // Backend doesn't have this endpoint yet, return empty array
+    return of([]);
   }
 
   getChartData(symbol: string, timeframe: string): Observable<ChartData[]> {
