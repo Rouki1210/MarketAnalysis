@@ -9,6 +9,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { CardComponent } from '../../../../shared/components/card/card.component';
 import { SparklineComponent } from '../../../../shared/components/sparkline/sparkline.component';
 import { MarketOverview } from '@app/core/models/market.model';
+import { first, map, Observable, switchMap, tap } from 'rxjs';
 
 interface Network {
   name: string;
@@ -53,6 +54,7 @@ export class CryptoTableComponent implements OnInit {
   menuPosition: MenuPosition = { left: 0, top: 0 };
   watchlistIds: string[] = [];
   isLoading: boolean = true;
+  isTogglingWatchlist = signal<Record<string, boolean>>({});
 
   // Constants
   readonly networks = ['All Networks', 'Bitcoin', 'Ethereum', 'BSC', 'Solana', 'Base'];
@@ -81,7 +83,17 @@ export class CryptoTableComponent implements OnInit {
   ngOnInit(): void {
     this.loadCoins();
     this.apiService.startGlobalMetricSignalR();
-    
+
+    this.watchlistService.getWatchlistFromApi().subscribe({
+      next: (watchlists) => {
+        watchlists.forEach(wl => {
+          console.log('Watchlist from API:', wl, wl.assets);
+        })
+        console.log('Fetched watchlists from API:', watchlists);
+      },error: (err) => {
+        console.error('Error fetching watchlists from API:', err);
+      }
+    });
     // Subscribe to watchlist changes
     this.watchlistService.watchlistIds$.subscribe(ids => {
       this.watchlistIds = ids;
@@ -214,9 +226,9 @@ export class CryptoTableComponent implements OnInit {
   }
 
   // Watchlist Methods
-  toggleWatchlist(coinId: string, event: MouseEvent): void {
+  async toggleWatchlist(coinId: string, event: MouseEvent): Promise<void> {
     event.stopPropagation(); // Prevent row click navigation
-    
+
     // WatchlistService will open auth modal if user is not authenticated
     this.watchlistService.toggleWatchlist(coinId);
   }
@@ -224,6 +236,11 @@ export class CryptoTableComponent implements OnInit {
   isInWatchlist(coinId: string): boolean {
     return this.watchlistIds.includes(coinId);
   }
+
+  isToggling(coinId: string): boolean {
+    return this.isTogglingWatchlist()[coinId] || false;
+  }
+
 
   toggleNetworkMenu(): void {
     if (!this.showNetworkMenu()) {
