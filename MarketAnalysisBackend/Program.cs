@@ -57,7 +57,7 @@ builder.Services.AddScoped<IGlobalAlertOrchestrationService, GlobalAlertOrchestr
 
 // Background Services
 //builder.Services.AddHostedService<AssetImporterService>();
-//builder.Services.AddHostedService<PriceDataCollector>();
+builder.Services.AddHostedService<PriceDataCollector>();
 builder.Services.AddHostedService<GlobalMetricService>();
 //builder.Services.AddScoped<IGlobalAlertOrchestrationService, MockGlobalAlertOrchestrationService>();
 builder.Services.AddHostedService<GlobalAlertDetectorService>();
