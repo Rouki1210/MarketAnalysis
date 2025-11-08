@@ -1,18 +1,13 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest, map, catchError, of, tap } from 'rxjs';
-import { WatchlistCoin, WatchlistDto, ToggleAssetResponse, WatchlistResponse } from '../models/watchlist.model';
+import { BehaviorSubject, Observable, combineLatest, firstValueFrom, map, throwError } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
+import {Watchlist, WatchlistCoin, WatchlistStorage, BackendWatchlist } from '../models/watchlist.model';
 import { Coin } from '../models/coin.model';
+import { HttpClient } from '@angular/common/http';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 
-/**
- * WatchlistService
- * Manages cryptocurrency watchlist functionality including:
- * - Adding/removing coins from watchlist (requires authentication)
- * - Persisting watchlist to database per user
- * - Providing real-time coin data for watchlist items
- */
 @Injectable({
   providedIn: 'root'
 })
@@ -26,12 +21,26 @@ export class WatchlistService {
   // Observable state for full watchlist coin data
   private watchlistCoinsSubject = new BehaviorSubject<WatchlistCoin[]>([]);
   public watchlistCoins$ = this.watchlistCoinsSubject.asObservable();
+  private readonly apiUrl = 'https://localhost:7175/api/Watchlist';
+
+  private currentWatchlistId: number | null = null;
+  private userId: number | null = null;
+  private isLoading: boolean = false;
 
   constructor(
     private http: HttpClient,
     private apiService: ApiService,
     private authService: AuthService
   ) {
+    // Load watchlist when user is authenticated
+    this.loadWatchlistFromLocalStorage();
+
+    const isAuth = this.authService.isAuthenticated();
+    const userId = this.authService.currentUser();
+    if (isAuth) {
+      this.initializeUserWatchlist();
+    }
+    
     // Subscribe to coin updates and merge with watchlist
     this.setupWatchlistDataSync();
 
@@ -51,81 +60,247 @@ export class WatchlistService {
     });
   }
 
-  /**
-   * Get current user ID from AuthService
-   */
-  private getUserId(): number | null {
-    return this.authService.getCurrentUserId();
+  private async initializeUserWatchlist(): Promise<void> {
+    if (this.isLoading) return;
+    
+    this.isLoading = true;
+    
+    try {
+      // Get and cache userId
+      this.userId = await this.getUserId();
+      
+      if (this.userId) {
+        console.log('User authenticated with ID:', this.userId);
+        // Load watchlist from backend
+        await this.loadWatchlistFromBackend();
+      } else {
+        console.warn('Could not get user ID, using localStorage only');
+        this.loadWatchlistFromLocalStorage();
+      }
+    } catch (error) {
+      console.error('Error initializing user watchlist:', error);
+      // Fallback to localStorage
+      this.loadWatchlistFromLocalStorage();
+    } finally {
+      this.isLoading = false;
+    }
   }
 
-  /**
-   * Load watchlist from database for current user
-   */
-  private loadWatchlistFromDatabase(): void {
-    const userId = this.getUserId();
-    console.log('🔍 loadWatchlistFromDatabase called, userId:', userId);
+  private async getUserId(): Promise<number | null> {
+    try {
+      const response = await firstValueFrom(this.authService.getUserInfo());
+      if (response.success && response.user) {
+        console.log("User ID in WatchlistService:", response.user.id);
+        return response.user.id;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting user ID:', error);
+      return null;
+    }
+  }
 
-    if (!userId) {
-      console.warn('⚠️ Cannot load watchlist: User ID not available');
-      this.watchlistIdsSubject.next([]);
+    public getWatchlistFromApi(): Observable<BackendWatchlist[]> {
+    if (this.userId === null) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    
+    console.log(`Fetching watchlist for user ${this.userId}`);
+    
+    return this.http.get<BackendWatchlist[]>(`${this.apiUrl}/user/${this.userId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private async loadWatchlistFromBackend(): Promise<void> {
+    try {
+      const watchlists = await firstValueFrom(this.getWatchlistFromApi());
+      
+      console.log('Watchlists loaded from backend:', watchlists);
+      
+      if (watchlists && watchlists.length > 0) {
+        // Use the first watchlist (or you can implement logic to select default)
+        const defaultWatchlist = watchlists[0];
+        this.currentWatchlistId = defaultWatchlist.id;
+        
+        // Extract asset symbols from backend response
+        const coinIds = defaultWatchlist.assets?.map(asset => asset.symbol) || [];
+        
+        console.log('Extracted coin IDs:', coinIds);
+        
+        // Update local state
+        this.watchlistIdsSubject.next(coinIds);
+        
+        // Also save to localStorage as cache
+        this.saveWatchlistToLocalStorage(coinIds);
+      } else {
+        console.log('No watchlists found for user');
+        this.watchlistIdsSubject.next([]);
+      }
+    } catch (error) {
+      console.error('Error loading watchlist from backend:', error);
+      // Fallback to localStorage
+      this.loadWatchlistFromLocalStorage();
+    }
+  }
+
+  private async createDefaultWatchlist(assetId: number): Promise<void> {
+    if (!this.userId) {
+      throw new Error('User not authenticated');
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ success: boolean; data: BackendWatchlist }>(
+          `${this.apiUrl}/${this.userId}/watchlist-default`,
+          null,
+          { params: { assetId: assetId.toString() } }
+        ).pipe(catchError(this.handleError))
+      );
+
+      if (response.success && response.data) {
+        this.currentWatchlistId = response.data.id;
+        console.log('Created default watchlist:', response.data);
+      }
+    } catch (error) {
+      console.error('Error creating default watchlist:', error);
+      throw error;
+    }
+  }
+
+  private async addAssetToBackend(assetId: number): Promise<void> {
+    if (!this.currentWatchlistId) {
+      // Create watchlist if it doesn't exist
+      await this.createDefaultWatchlist(assetId);
       return;
     }
 
-    console.log(`📡 Fetching watchlist for user ${userId}...`);
-    this.http.get<WatchlistResponse>(`${this.apiUrl}/user/${userId}/default`)
-      .pipe(
-        tap(response => {
-          console.log('📦 Watchlist API response:', response);
-          if (response.success && response.data) {
-            const assetIds = response.data.assets.map(a => a.id);
-            this.watchlistIdsSubject.next(assetIds);
-            console.log(`✅ Watchlist loaded from database: ${assetIds.length} items`, assetIds);
-          }
-        }),
-        catchError(error => {
-          console.error('❌ Error loading watchlist from database:', error);
-          this.watchlistIdsSubject.next([]);
-          return of(null);
-        })
-      )
-      .subscribe();
+    try {
+      await firstValueFrom(
+        this.http.post<{ success: boolean }>(
+          `${this.apiUrl}/${this.currentWatchlistId}/add/${assetId}`,
+          null
+        ).pipe(catchError(this.handleError))
+      );
+      console.log(`Added asset ${assetId} to watchlist ${this.currentWatchlistId}`);
+    } catch (error) {
+      console.error('Error adding asset to backend:', error);
+      throw error;
+    }
   }
 
-  /**
-   * Toggle a coin in the watchlist (add if not present, remove if present)
-   * Requires user to be authenticated
-   */
-  toggleWatchlist(coinId: number): boolean {
+  private async removeAssetFromBackend(assetId: number): Promise<void> {
+    if (!this.currentWatchlistId) {
+      throw new Error('No watchlist found');
+    }
+
+    try {
+      await firstValueFrom(
+        this.http.delete<{ success: boolean }>(
+          `${this.apiUrl}/${this.currentWatchlistId}/remove/${assetId}`
+        ).pipe(catchError(this.handleError))
+      );
+      console.log(`Removed asset ${assetId} from watchlist ${this.currentWatchlistId}`);
+    } catch (error) {
+      console.error('Error removing asset from backend:', error);
+      throw error;
+    }
+  }
+
+  private handleError(error: any): Observable<never> {
+    console.error('Watchlist API Error:', error);
+    return throwError(() => new Error(error.error?.error || 'An error occurred'));
+  }
+
+  async toggleWatchlist(coinId: string): Promise<boolean> {
     // Check if user is authenticated
     if (!this.authService.isAuthenticated()) {
       this.authService.openAuthModal('login');
       return false;
     }
-
-    const userId = this.getUserId();
-    if (!userId) {
-      console.warn('Cannot toggle watchlist: User ID not available');
+    
+    const currentIds = this.watchlistIdsSubject.value;
+    const index = currentIds.indexOf(coinId);
+    
+    try{
+      if (index > -1) {
+        await this.removeFromWatchlist(coinId);
+      } else {
+        await this.addToWatchlist(coinId);
+      }
+      return true;
+    } catch (error) {
+      console.error('Error toggling watchlist:', error);
       return false;
     }
+  }
 
-    // Call API to toggle asset
-    this.http.post<ToggleAssetResponse>(`${this.apiUrl}/user/${userId}/toggle/${coinId}`, {})
-      .pipe(
-        tap(response => {
-          if (response.success) {
-            const assetIds = response.watchlist.assets.map(a => a.id);
-            this.watchlistIdsSubject.next(assetIds);
-            console.log(`✅ Asset ${response.added ? 'added to' : 'removed from'} watchlist`);
-          }
-        }),
-        catchError(error => {
-          console.error('❌ Error toggling watchlist:', error);
-          return of(null);
-        })
-      )
-      .subscribe();
+  private async addToWatchlist(coinSymbol: string): Promise<void> {
+    // Update local state immediately (optimistic update)
+    const currentIds = this.watchlistIdsSubject.value;
+    const newIds = [...currentIds, coinSymbol];
+    this.watchlistIdsSubject.next(newIds);
+    this.saveWatchlistToLocalStorage(newIds);
 
-    return true;
+    // Sync with backend if user is authenticated and we have userId
+    if (this.userId) {
+      try {
+        // Find the asset ID from coins list
+        const coins = await firstValueFrom(this.apiService.coins$);
+        const coin = coins.find(c => c.symbol === coinSymbol || c.id === coinSymbol);
+        
+        if (!coin) {
+          throw new Error(`Coin ${coinSymbol} not found`);
+        }
+
+        const assetId = typeof coin.id === 'string' ? parseInt(coin.id, 10) : coin.id;
+
+        if (isNaN(assetId)) {
+          throw new Error(`Invalid asset ID for ${coinSymbol}`);
+        }
+
+        // Add to backend
+        await this.addAssetToBackend(assetId);
+        console.log(`Successfully added ${coinSymbol} to backend`);
+      } catch (error) {
+        console.error('Failed to sync with backend, keeping local changes:', error);
+        // Keep local changes even if backend fails
+      }
+    }
+  }
+
+  private async removeFromWatchlist(coinSymbol: string): Promise<void> {
+    // Update local state immediately (optimistic update)
+    const currentIds = this.watchlistIdsSubject.value;
+    const newIds = currentIds.filter(id => id !== coinSymbol);
+    this.watchlistIdsSubject.next(newIds);
+    this.saveWatchlistToLocalStorage(newIds);
+
+    // Sync with backend if user is authenticated and we have userId
+    if (this.userId && this.currentWatchlistId) {
+      try {
+        // Find the asset ID from coins list
+        const coins = await firstValueFrom(this.apiService.coins$);
+        const coin = coins.find(c => c.symbol === coinSymbol || c.id === coinSymbol);
+        
+        if (!coin) {
+          throw new Error(`Coin ${coinSymbol} not found`);
+        }
+
+        const assetId = typeof coin.id === 'string' ? parseInt(coin.id, 10) : coin.id;
+
+        if (isNaN(assetId)) {
+          throw new Error(`Invalid asset ID for ${coinSymbol}`);
+        }
+
+        // Remove from backend
+        await this.removeAssetFromBackend(assetId);
+        console.log(`Successfully removed ${coinSymbol} from backend`);
+      } catch (error) {
+        console.error('Failed to sync with backend, keeping local changes:', error);
+        // Keep local changes even if backend fails
+      }
+    }
   }
 
   /**
@@ -148,6 +323,8 @@ export class WatchlistService {
   private clearWatchlistOnLogout(): void {
     this.watchlistIdsSubject.next([]);
     this.watchlistCoinsSubject.next([]);
+    this.userId = null;
+    this.currentWatchlistId = null;
   }
 
   /**
@@ -195,19 +372,46 @@ export class WatchlistService {
   /**
    * Clear entire watchlist for current user
    */
-  clearWatchlist(): void {
+  async clearWatchlist(): Promise<void> {
     if (!this.authService.isAuthenticated()) {
       return;
     }
-
-    // Clear in memory - could also call API to delete all items
+    
+    const currentIds = this.watchlistIdsSubject.value;
+    
+    // Clear local state
     this.watchlistIdsSubject.next([]);
-  }
+    this.saveWatchlistToLocalStorage([]);
 
+    // Clear from backend if authenticated
+    if (this.userId && this.currentWatchlistId) {
+      for (const coinId of currentIds) {
+        try {
+          await this.removeFromWatchlist(coinId);
+        } catch (error) {
+          console.error(`Error removing ${coinId}:`, error);
+        }
+      }
+    }
+  }
   /**
    * Check if user is authenticated (for UI state)
    */
   isUserAuthenticated(): boolean {
     return this.authService.isAuthenticated();
+  }
+
+  async refreshWatchlist(): Promise<void> {
+    if (!this.userId) {
+      console.warn('Cannot refresh: User not authenticated');
+      return;
+    }
+
+    try {
+      await this.loadWatchlistFromBackend();
+      console.log('Watchlist refreshed from backend');
+    } catch (error) {
+      console.error('Error refreshing watchlist:', error);
+    }
   }
 }

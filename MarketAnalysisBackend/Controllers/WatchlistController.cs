@@ -35,7 +35,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [HttpPost("{userId}/watchlist-defaut")]
+        [HttpPost("{userId}/watchlist-default")]
         public async Task<IActionResult> CreateDefaultWatchlist(int userId, int assetId)
         {
             try

@@ -6,12 +6,15 @@ import { Market, MarketOverview } from '../models/market.model';
 import { ChartData } from '../models/common.model';
 import * as signalR from '@microsoft/signalr';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { Watchlist } from '../models/watchlist.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   private readonly apiUrl = 'https://localhost:7175'; // Placeholder API
+  private readonly watchlistApiUrl = 'https://localhost:7175/api/Watchlist';
 
   private hubConnection!: signalR.HubConnection;
   private globalMetricsHubConnection!: signalR.HubConnection;
@@ -21,7 +24,7 @@ export class ApiService {
   public coins$ = this.coinsSource.asObservable();
   private realtimeData: Record<string, any> = {};
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   getCoins(): Observable<Coin[]> {
     this.http.get<any[]>(`${this.apiUrl}/api/Asset`).subscribe({
@@ -167,49 +170,6 @@ export class ApiService {
     });
   }
 
-  private getMockCoins(): Coin[] {
-    return [
-      {
-        id: "1",
-        rank: "1",
-        name: "Bitcoin",
-        symbol: "BTC",
-        price: "$122,234.07",
-        change1h: "+1.04%",
-        change24h: "+1.89%",
-        change7d: "+12.07%",
-        marketCap: "$2,435,905,446,491",
-        volume: "$64,672,428,314",
-        supply: "19.92M BTC",
-        isPositive1h: true,
-        isPositive24h: true,
-        isPositive7d: true,
-        icon: "₿",
-        network: "Bitcoin",
-        sparklineData: [111000, 112500, 111800, 113200, 112100, 122234]
-      },
-      {
-        id: "2",
-        rank: "2",
-        name: "Ethereum",
-        symbol: "ETH",
-        price: "$4,532.81",
-        change1h: "+1.07%",
-        change24h: "+2.07%",
-        change7d: "+14.81%",
-        marketCap: "$547,125,800,865",
-        volume: "$45,188,465,505",
-        supply: "120.7M ETH",
-        isPositive1h: true,
-        isPositive24h: true,
-        isPositive7d: true,
-        icon: "Ξ",
-        network: "Ethereum",
-        sparklineData: [4200, 4350, 4280, 4450, 4380, 4532]
-      }
-    ];
-  }
-
   getCoinBySymbol(symbol: string): Observable<CoinDetail> {
     console.log('Fetching coin data for symbol:', symbol);
     
@@ -350,5 +310,26 @@ export class ApiService {
   return this.globalMetric$;
 }
 
+
+// Watchlist Api
+  getWatchlistsByUserId(userId: number): Observable<Watchlist[]> {
+    return this.http.get<Watchlist[]>(`${this.watchlistApiUrl}/user/${userId}`).pipe(
+      map(watchlists => watchlists || [])
+    );
+  }
+
+  createWatchlist(userId: number, name: string): Observable<Watchlist> {
+    const param = new HttpParams().set('name', name);
+
+    return this.http.post<Watchlist>(`http://localhost:7151/api/watchlist`, { userId, name });
+  }
+
+  addAssetToWatchlist(watchlistId: number, assetId: number): Observable<any> {
+    return this.http.post(`${this.watchlistApiUrl}/${watchlistId}/add/${assetId}`, {});
+  }
+
+  createDefaultWatchlist(userId: number, assetId: number): Observable<any> {
+  return this.http.post(`${this.watchlistApiUrl}/${userId}/watchlist-default?assetId=${assetId}`, {});
+}
 }
 
