@@ -51,7 +51,7 @@ export class CryptoTableComponent implements OnInit {
   selectedTab = 'Top';
   showNetworkMenu = signal(false);
   menuPosition: MenuPosition = { left: 0, top: 0 };
-  watchlistIds: string[] = [];
+  watchlistIds: number[] = [];
   isLoading: boolean = true;
 
   // Constants
@@ -216,13 +216,17 @@ export class CryptoTableComponent implements OnInit {
   // Watchlist Methods
   toggleWatchlist(coinId: string, event: MouseEvent): void {
     event.stopPropagation(); // Prevent row click navigation
-    
+
+    // Convert coinId to number (it's the asset ID from backend)
+    const assetId = Number(coinId);
+
     // WatchlistService will open auth modal if user is not authenticated
-    this.watchlistService.toggleWatchlist(coinId);
+    this.watchlistService.toggleWatchlist(assetId);
   }
 
   isInWatchlist(coinId: string): boolean {
-    return this.watchlistIds.includes(coinId);
+    const assetId = Number(coinId);
+    return this.watchlistIds.includes(assetId);
   }
 
   toggleNetworkMenu(): void {

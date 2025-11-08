@@ -86,5 +86,39 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
+        /// <summary>
+        /// Get or create default watchlist for user
+        /// </summary>
+        [HttpGet("user/{userId}/default")]
+        public async Task<IActionResult> GetOrCreateDefaultWatchlist(int userId)
+        {
+            try
+            {
+                var watchlist = await _watchlistSer.GetOrCreateDefaultWatchlistAsync(userId);
+                return Ok(new { success = true, data = watchlist });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Toggle asset in default watchlist (add if not exists, remove if exists)
+        /// </summary>
+        [HttpPost("user/{userId}/toggle/{assetId}")]
+        public async Task<IActionResult> ToggleAssetInDefaultWatchlist(int userId, int assetId)
+        {
+            try
+            {
+                var result = await _watchlistSer.ToggleAssetInDefaultWatchlistAsync(userId, assetId);
+                return Ok(new { success = true, added = result.Added, watchlist = result.Watchlist });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, error = ex.Message });
+            }
+        }
+
         }
     }

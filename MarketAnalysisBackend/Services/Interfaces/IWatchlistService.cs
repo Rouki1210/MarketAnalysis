@@ -12,5 +12,13 @@ namespace MarketAnalysisBackend.Services.Interfaces
         Task AddAssetToWatchlistAsync(int watchlistId, int assetId);
         Task RemoveAssetFromWatchlistAsync(int watchlistId, int assetId);
         Task DeleteWatchlistAsync(int watchlistId);
+        Task<WatchlistDto> GetOrCreateDefaultWatchlistAsync(int userId);
+        Task<ToggleAssetResult> ToggleAssetInDefaultWatchlistAsync(int userId, int assetId);
+    }
+
+    public class ToggleAssetResult
+    {
+        public bool Added { get; set; }
+        public WatchlistDto Watchlist { get; set; } = null!;
     }
 }

@@ -4,13 +4,38 @@
  */
 
 /**
- * Represents a user's watchlist containing cryptocurrency IDs
+ * Backend DTO for Asset
  */
-export interface Watchlist {
-  userId: string | null; // null for unauthenticated users
-  coinIds: string[];
-  createdAt: Date;
-  updatedAt: Date;
+export interface AssetDto {
+  id: number;
+  symbol: string;
+  name: string;
+}
+
+/**
+ * Backend DTO for Watchlist
+ */
+export interface WatchlistDto {
+  id: number;
+  name: string;
+  assets: AssetDto[];
+}
+
+/**
+ * Response from toggle endpoint
+ */
+export interface ToggleAssetResponse {
+  success: boolean;
+  added: boolean;
+  watchlist: WatchlistDto;
+}
+
+/**
+ * Response from get watchlist endpoint
+ */
+export interface WatchlistResponse {
+  success: boolean;
+  data: WatchlistDto;
 }
 
 /**
@@ -28,12 +53,4 @@ export interface WatchlistCoin {
   change24h?: string;
   isPositive24h: boolean;
   sparklineData?: number[];
-}
-
-/**
- * Local storage structure for watchlist persistence
- */
-export interface WatchlistStorage {
-  coinIds: string[];
-  timestamp: number;
 }
