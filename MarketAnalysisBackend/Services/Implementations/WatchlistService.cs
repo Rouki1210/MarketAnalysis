@@ -58,5 +58,45 @@ namespace MarketAnalysisBackend.Services.Implementations
         {
             return _watchlistRepo.RemoveAssetAsync(watchlistId, assetId);
         }
+
+        public async Task<WatchlistDto> GetOrCreateDefaultWatchlistAsync(int userId)
+        {
+            var defaultName = "My Watchlist";
+            var existingWatchlists = await _watchlistRepo.GetWatchlistsByUserIdAsync(userId);
+            var defaultWatchlist = existingWatchlists.FirstOrDefault(w => w.Name == defaultName);
+
+            if (defaultWatchlist == null)
+            {
+                defaultWatchlist = await _watchlistRepo.CreateWatchlistAsync(userId, defaultName);
+            }
+
+            return defaultWatchlist;
+        }
+
+        public async Task<ToggleAssetResult> ToggleAssetInDefaultWatchlistAsync(int userId, int assetId)
+        {
+            // Get or create default watchlist
+            var watchlist = await GetOrCreateDefaultWatchlistAsync(userId);
+
+            // Check if asset already exists in watchlist
+            var assetExists = watchlist.Assets.Any(a => a.Id == assetId);
+
+            if (assetExists)
+            {
+                // Remove asset
+                await _watchlistRepo.RemoveAssetAsync(watchlist.Id, assetId);
+                // Reload watchlist to get updated data
+                watchlist = await _watchlistRepo.GetWatchlistByIdAsync(watchlist.Id) ?? watchlist;
+                return new ToggleAssetResult { Added = false, Watchlist = watchlist };
+            }
+            else
+            {
+                // Add asset
+                await _watchlistRepo.AddAssetAsync(watchlist.Id, assetId);
+                // Reload watchlist to get updated data
+                watchlist = await _watchlistRepo.GetWatchlistByIdAsync(watchlist.Id) ?? watchlist;
+                return new ToggleAssetResult { Added = true, Watchlist = watchlist };
+            }
+        }
     }
 }

@@ -6,17 +6,18 @@ import { Coin } from '../models/coin.model';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WatchlistService {
-  private readonly STORAGE_KEY_PREFIX = 'watchlist_coins_';
-  
-  // Observable state for watchlist coin IDs
-  private watchlistIdsSubject = new BehaviorSubject<string[]>([]);
+  private readonly apiUrl = 'https://localhost:7175/api/Watchlist';
+
+  // Observable state for watchlist coin IDs (asset IDs from backend)
+  private watchlistIdsSubject = new BehaviorSubject<number[]>([]);
   public watchlistIds$ = this.watchlistIdsSubject.asObservable();
-  
+
   // Observable state for full watchlist coin data
   private watchlistCoinsSubject = new BehaviorSubject<WatchlistCoin[]>([]);
   public watchlistCoins$ = this.watchlistCoinsSubject.asObservable();
@@ -42,14 +43,18 @@ export class WatchlistService {
     
     // Subscribe to coin updates and merge with watchlist
     this.setupWatchlistDataSync();
-    
-    // Watch for auth state changes using effect
-    effect(() => {
-      const isAuth = this.authService.isAuthenticated();
-      if (isAuth) {
-        this.loadWatchlistFromLocalStorage();
+
+    // Watch for user info changes (better than isAuthenticated signal)
+    this.authService.currentUser$.subscribe(userInfo => {
+      console.log('🔄 User info changed:', userInfo);
+
+      if (userInfo && userInfo.id) {
+        // User logged in and we have user ID
+        console.log('👤 User logged in with ID:', userInfo.id, '- loading watchlist...');
+        this.loadWatchlistFromDatabase();
       } else {
-        // Clear watchlist when user logs out
+        // User logged out or no user info
+        console.log('👋 No user info, clearing watchlist...');
         this.clearWatchlistOnLogout();
       }
     });
@@ -301,80 +306,19 @@ export class WatchlistService {
   /**
    * Check if a coin is in the watchlist
    */
-  isInWatchlist(coinId: string): boolean {
+  isInWatchlist(coinId: number): boolean {
     return this.watchlistIdsSubject.value.includes(coinId);
   }
 
   /**
    * Get current watchlist coin IDs
    */
-  getWatchlistIds(): string[] {
+  getWatchlistIds(): number[] {
     return this.watchlistIdsSubject.value;
   }
 
   /**
-   * Get storage key for current user
-   */
-  private getUserStorageKey(): string | null {
-    const user = this.authService.currentUser();
-    if (!user?.email) {
-      return null;
-    }
-    // Use email as unique identifier for user's watchlist
-    return `${this.STORAGE_KEY_PREFIX}${user.email}`;
-  }
-
-  /**
-   * Load watchlist from localStorage for current user
-   */
-  private loadWatchlistFromLocalStorage(): void {
-    try {
-      const storageKey = this.getUserStorageKey();
-      if (!storageKey) {
-        this.watchlistIdsSubject.next([]);
-        return;
-      }
-      
-      const stored = localStorage.getItem(storageKey);
-      if (stored) {
-        const data: WatchlistStorage = JSON.parse(stored);
-        this.watchlistIdsSubject.next(data.coinIds || []);
-      } else {
-        this.watchlistIdsSubject.next([]);
-      }
-    } catch (error) {
-      console.error('Error loading watchlist from localStorage:', error);
-      this.watchlistIdsSubject.next([]);
-    }
-  }
-
-  /**
-   * Save watchlist to localStorage for current user
-   */
-  private saveWatchlistToLocalStorage(coinIds: string[]): void {
-    try {
-      const storageKey = this.getUserStorageKey();
-      if (!storageKey) {
-        console.warn('Cannot save watchlist: User not authenticated');
-        return;
-      }
-      
-      const data: WatchlistStorage = {
-        coinIds,
-        timestamp: Date.now()
-      };
-      localStorage.setItem(storageKey, JSON.stringify(data));
-    } catch (error) {
-      console.error('Error saving watchlist to localStorage:', error);
-      // Handle quota exceeded or other localStorage errors
-      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-        console.warn('localStorage quota exceeded. Watchlist not saved.');
-      }
-    }
-  }
-
-  /**
-   * Clear watchlist in memory when user logs out (but keep in localStorage)
+   * Clear watchlist in memory when user logs out
    */
   private clearWatchlistOnLogout(): void {
     this.watchlistIdsSubject.next([]);
@@ -395,18 +339,14 @@ export class WatchlistService {
       map(([watchlistIds, allCoins]) => {
         // Filter coins that are in the watchlist
         const watchlistCoins: WatchlistCoin[] = watchlistIds
-          .map(id => {
-            // Try to find coin by ID first, then by symbol (case-insensitive)
-            // Also handle string/number type mismatches
-            const coin = allCoins.find(c => 
-              String(c.id) === String(id) || 
-              c.symbol.toLowerCase() === String(id).toLowerCase()
-            );
-            
+          .map(assetId => {
+            // Find coin by asset ID (which matches coin.id from backend)
+            const coin = allCoins.find(c => Number(c.id) === assetId);
+
             if (!coin) {
               return null;
             }
-            
+
             return {
               id: coin.id,
               name: coin.name,
@@ -421,7 +361,7 @@ export class WatchlistService {
             } as WatchlistCoin;
           })
           .filter(coin => coin !== null) as WatchlistCoin[];
-        
+
         return watchlistCoins;
       })
     ).subscribe(watchlistCoins => {

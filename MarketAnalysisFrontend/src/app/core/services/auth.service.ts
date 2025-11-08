@@ -30,6 +30,20 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
+  /**
+   * Get current user info
+   */
+  getCurrentUserInfo(): UserInfo | null {
+    return this.currentUserSubject.value;
+  }
+
+  /**
+   * Get current user ID
+   */
+  getCurrentUserId(): number | null {
+    return this.currentUserSubject.value?.id || null;
+  }
+
   private initGoogleAuth() {
     const init = () => {
       if (typeof google !== 'undefined' && google.accounts?.oauth2) {
@@ -72,9 +86,19 @@ export class AuthService {
     const userEmail = localStorage.getItem('userEmail');
     if (token && userEmail) {
       this.isAuthenticated.set(true);
-      this.currentUser.set({ 
+      this.currentUser.set({
         email: userEmail,
         name: userEmail.split('@')[0] // Use email prefix as display name
+      });
+
+      // Load full user info
+      this.getUserInfo().subscribe({
+        next: (response) => {
+          console.log('✅ User info loaded on startup:', response.user);
+        },
+        error: (err) => {
+          console.error('❌ Error loading user info on startup:', err);
+        }
       });
     }
   }
@@ -96,19 +120,33 @@ export class AuthService {
       email,
       name: email.split('@')[0]
     });
+
+    // Load full user info after setting token
+    this.getUserInfo().subscribe({
+      next: (response) => {
+        console.log('✅ User info loaded:', response.user);
+      },
+      error: (err) => {
+        console.error('❌ Error loading user info:', err);
+      }
+    });
   }
 
   getUserInfo(): Observable<{success: boolean; user: UserInfo}> {
     const token = localStorage.getItem('token');
-    console.log(token);
+    console.log('📡 Getting user info with token:', token);
     return this.http.get<{success: boolean; user: UserInfo}>(`https://localhost:7175/api/User/userInfo/${token}`)
       .pipe(
         tap(response => {
+          console.log('📦 User info API response:', response);
           if (response.success && response.user) {
+            console.log('✅ Setting currentUserSubject with user:', response.user);
             this.currentUserSubject.next(response.user);
+          } else {
+            console.warn('⚠️ User info response not successful or missing user');
           }
         }), catchError(error => {
-          console.error('Error fetching user info:', error);
+          console.error('❌ Error fetching user info:', error);
           throw error;
         })
       );
@@ -130,6 +168,7 @@ export class AuthService {
     localStorage.removeItem('userEmail');
     this.isAuthenticated.set(false);
     this.currentUser.set(null);
+    this.currentUserSubject.next(null);
   }
   
   // Login with email and password
