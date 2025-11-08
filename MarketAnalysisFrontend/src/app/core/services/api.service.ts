@@ -6,7 +6,6 @@ import { Market, MarketOverview } from '../models/market.model';
 import { ChartData } from '../models/common.model';
 import * as signalR from '@microsoft/signalr';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Watchlist } from '../models/watchlist.model';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -14,7 +13,6 @@ import { AuthService } from './auth.service';
 })
 export class ApiService {
   private readonly apiUrl = 'https://localhost:7175'; // Placeholder API
-  private readonly watchlistApiUrl = 'https://localhost:7175/api/Watchlist';
 
   private hubConnection!: signalR.HubConnection;
   private globalMetricsHubConnection!: signalR.HubConnection;
@@ -310,26 +308,5 @@ export class ApiService {
   return this.globalMetric$;
 }
 
-
-// Watchlist Api
-  getWatchlistsByUserId(userId: number): Observable<Watchlist[]> {
-    return this.http.get<Watchlist[]>(`${this.watchlistApiUrl}/user/${userId}`).pipe(
-      map(watchlists => watchlists || [])
-    );
-  }
-
-  createWatchlist(userId: number, name: string): Observable<Watchlist> {
-    const param = new HttpParams().set('name', name);
-
-    return this.http.post<Watchlist>(`http://localhost:7151/api/watchlist`, { userId, name });
-  }
-
-  addAssetToWatchlist(watchlistId: number, assetId: number): Observable<any> {
-    return this.http.post(`${this.watchlistApiUrl}/${watchlistId}/add/${assetId}`, {});
-  }
-
-  createDefaultWatchlist(userId: number, assetId: number): Observable<any> {
-  return this.http.post(`${this.watchlistApiUrl}/${userId}/watchlist-default?assetId=${assetId}`, {});
-}
 }
 

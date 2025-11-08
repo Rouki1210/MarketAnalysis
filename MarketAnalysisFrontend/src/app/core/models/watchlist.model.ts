@@ -54,25 +54,3 @@ export interface WatchlistCoin {
   isPositive24h: boolean;
   sparklineData?: number[];
 }
-/**
- * Local storage structure for watchlist persistence
- */
-export interface WatchlistStorage {
-  coinIds: string[];
-  timestamp: number;
-}
-
-export interface BackendWatchlist {
-  id: number;
-  userId: number;
-  name: string;
-  assets: BackendAsset[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BackendAsset {
-  id: number;
-  symbol: string;
-  name: string;
-}
