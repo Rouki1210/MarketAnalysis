@@ -21,7 +21,7 @@ import { FooterComponent } from '../footer/footer.component';
 })
 export class ShellComponent implements OnInit {
   private readonly router = inject(Router);
-  private readonly routesWithoutTopbar = ['/profile'];
+  private readonly routesWithoutTopbar = ['/profile', '/community'];
 
   showTopbarMarketStrip = signal(true);
 
