@@ -1,5 +1,6 @@
 using MarketAnalysisBackend.Data;
 using MarketAnalysisBackend.Hubs;
+using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Repositories.Implementations;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Services.Implementations;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using OpenAI.Interfaces;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +28,13 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection"))
 );
+
+// AI Settings
+builder.Services.Configure<OpenAISettings>(
+    builder.Configuration.GetSection("OpenAI")
+);
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IAiAnalysisService, AiAnalysisService>();
 
 builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
@@ -57,10 +66,10 @@ builder.Services.AddScoped<IGlobalAlertOrchestrationService, GlobalAlertOrchestr
 
 // Background Services
 //builder.Services.AddHostedService<AssetImporterService>();
-builder.Services.AddHostedService<PriceDataCollector>();
-builder.Services.AddHostedService<GlobalMetricService>();
+//builder.Services.AddHostedService<PriceDataCollector>();
+//builder.Services.AddHostedService<GlobalMetricService>();
 //builder.Services.AddScoped<IGlobalAlertOrchestrationService, MockGlobalAlertOrchestrationService>();
-builder.Services.AddHostedService<GlobalAlertDetectorService>();
+//builder.Services.AddHostedService<GlobalAlertDetectorService>();
 
 // Google Authentication
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];

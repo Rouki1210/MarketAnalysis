@@ -1,0 +1,321 @@
+<div class="flex h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+  <!-- Sidebar -->
+  <aside 
+    [class]="sidebarOpen ? 'w-64' : 'w-20'" 
+    class="bg-gradient-to-b from-indigo-900 to-indigo-800 dark:from-gray-900 dark:to-gray-800 text-white transition-all duration-300 shadow-xl">
+    
+    <div class="flex items-center justify-between p-6 border-b border-indigo-700 dark:border-gray-700">
+      <div *ngIf="sidebarOpen" class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-indigo-600 dark:bg-indigo-500 rounded-lg flex items-center justify-center text-2xl">
+          📊
+        </div>
+        <span class="text-xl font-bold">MarketPro</span>
+      </div>
+      <button 
+        (click)="toggleSidebar()" 
+        class="p-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-gray-700 transition-colors">
+        <span class="text-2xl">{{ sidebarOpen ? '◀' : '▶' }}</span>
+      </button>
+    </div>
+
+    <nav class="mt-8 px-4">
+      <ul class="space-y-2">
+        <li *ngFor="let item of navigationItems">
+          <a 
+            (click)="setActiveTab(item.id)"
+            [class]="item.active ? 'bg-indigo-700 dark:bg-gray-700 text-white' : 'text-indigo-200 dark:text-gray-400 hover:bg-indigo-700 dark:hover:bg-gray-700 hover:text-white'"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer">
+            <span class="text-2xl">{{ item.icon }}</span>
+            <span *ngIf="sidebarOpen" class="font-medium">{{ item.name }}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto">
+    <!-- Top Bar -->
+    <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+      <div class="flex items-center justify-between px-8 py-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 dark:text-white transition-colors duration-300">{{ activeTab | titlecase }}</h1>
+          <p class="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">Manage your market analysis platform</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button 
+            (click)="toggleDarkMode()" 
+            class="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            title="Toggle dark mode">
+            <span class="text-2xl">{{ darkMode ? '☀️' : '🌙' }}</span>
+          </button>
+          <button class="relative p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+            <span class="text-xl">🔔</span>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          </button>
+          <button (click)="loadDashboardData()" class="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors font-medium">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="p-8">
+      
+      <!-- Overview Tab -->
+      <div *ngIf="activeTab === 'overview'">
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-300 hover:border-indigo-500 dark:hover:border-indigo-400">
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center text-2xl">
+                👥
+              </div>
+              <span class="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-xs font-semibold">
+                Active
+              </span>
+            </div>
+            <h3 class="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1 transition-colors duration-300">Total Users</h3>
+            <p class="text-3xl font-bold text-gray-800 dark:text-white transition-colors duration-300">{{ totalUsers }}</p>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-300 hover:border-indigo-500 dark:hover:border-indigo-400">
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center text-2xl">
+                💰
+              </div>
+              <span class="px-2 py-1 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-xs font-semibold">
+                Live
+              </span>
+            </div>
+            <h3 class="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1 transition-colors duration-300">Total Assets</h3>
+            <p class="text-3xl font-bold text-gray-800 dark:text-white transition-colors duration-300">{{ totalAssets }}</p>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-300 hover:border-indigo-500 dark:hover:border-indigo-400">
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center text-2xl">
+                📈
+              </div>
+              <span 
+                [class]="marketCapChange >= 0 ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30' : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30'"
+                class="px-2 py-1 rounded-full text-xs font-semibold">
+                {{ marketCapChange >= 0 ? '+' : '' }}{{ marketCapChange | number:'1.2-2' }}%
+              </span>
+            </div>
+            <h3 class="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1 transition-colors duration-300">Market Cap Change</h3>
+            <p class="text-3xl font-bold text-gray-800 dark:text-white transition-colors duration-300">24h</p>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-300 hover:border-indigo-500 dark:hover:border-indigo-400">
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/50 rounded-lg flex items-center justify-center text-2xl">
+                💸
+              </div>
+            </div>
+            <h3 class="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1 transition-colors duration-300">24h Volume</h3>
+            <p class="text-3xl font-bold text-gray-800 dark:text-white transition-colors duration-300">${{ formatNumber(totalVolume24h) }}</p>
+          </div>
+        </div>
+
+        <!-- Global Metrics -->
+        <div *ngIf="globalMetric" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8 transition-colors duration-300">
+          <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4 transition-colors duration-300">Global Market Metrics</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">Total Market Cap</p>
+              <p class="text-xl font-bold text-gray-800 dark:text-white transition-colors duration-300">${{ formatNumber(globalMetric.total_market_cap_usd) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">24h Volume</p>
+              <p class="text-xl font-bold text-gray-800 dark:text-white transition-colors duration-300">${{ formatNumber(globalMetric.total_volume_24h) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">BTC Dominance</p>
+              <p class="text-xl font-bold text-gray-800 dark:text-white transition-colors duration-300">{{ globalMetric.bitcoin_dominance_price | number:'1.2-2' }}%</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">Fear & Greed</p>
+              <p class="text-xl font-bold text-gray-800 dark:text-white transition-colors duration-300">{{ globalMetric.fear_and_greed_text }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">Index: {{ globalMetric.fear_and_greed_index }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Prices -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between transition-colors duration-300">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300">Recent Price Updates</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Symbol</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Price</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">24h Change</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Market Cap</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Volume</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tr *ngFor="let price of prices" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                  <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900 dark:text-white transition-colors duration-300">{{ price.symbol }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">{{ price.name }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium dark:text-gray-200 transition-colors duration-300">${{ price.price | number:'1.2-2' }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span [class]="getChangeClass(price.percentChange24h)" class="font-semibold">
+                      {{ price.percentChange24h >= 0 ? '+' : '' }}{{ price.percentChange24h | number:'1.2-2' }}%
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-300 transition-colors duration-300">${{ formatNumber(price.marketCap) }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-300 transition-colors duration-300">${{ formatNumber(price.volume) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Tab -->
+      <div *ngIf="activeTab === 'users'">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between transition-colors duration-300">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300">User Management</h3>
+            <div class="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">Total: {{ totalUsers }} users</div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Username</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Display Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Auth Provider</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Created</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tr *ngFor="let user of users" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-300 transition-colors duration-300">{{ user.id }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white transition-colors duration-300">{{ user.username }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">{{ user.email }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-300 transition-colors duration-300">{{ user.displayName }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span [class]="getAuthProviderColor(user.authProvider)" class="px-3 py-1 rounded-full text-xs font-semibold">
+                      {{ user.authProvider }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">{{ formatDate(user.createdAt) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assets Tab -->
+      <div *ngIf="activeTab === 'assets'">
+        <div class="mb-4 flex justify-end space-x-2">
+          <button (click)="refreshAssets()" class="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors">
+            🔄 Refresh Top Assets
+          </button>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300">Asset Management</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Rank</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Logo</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Symbol</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Name</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tr *ngFor="let asset of assets" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-bold dark:text-gray-300 transition-colors duration-300">#{{ asset.rank }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <img *ngIf="asset.logoUrl" [src]="asset.logoUrl" [alt]="asset.symbol" class="w-8 h-8 rounded-full">
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900 dark:text-white transition-colors duration-300">{{ asset.symbol }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">{{ asset.name }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prices Tab -->
+      <div *ngIf="activeTab === 'prices'">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300">Real-time Price Data</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Symbol</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Price</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">24h Change</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Market Cap</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Volume</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">Last Update</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tr *ngFor="let price of prices" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="font-bold text-gray-900 dark:text-white transition-colors duration-300">{{ price.symbol }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">{{ price.name }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-lg font-bold dark:text-gray-200 transition-colors duration-300">${{ price.price | number:'1.2-2' }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span [class]="getChangeClass(price.percentChange24h)" class="font-bold text-lg">
+                      {{ price.percentChange24h >= 0 ? '+' : '' }}{{ price.percentChange24h | number:'1.2-2' }}%
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap dark:text-gray-300 transition-colors duration-300">${{ formatNumber(price.marketCap) }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap dark:text-gray-300 transition-colors duration-300">${{ formatNumber(price.volume) }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">{{ formatDate(price.timestampUtc) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div *ngIf="activeTab === 'settings'">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-300">
+          <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4 transition-colors duration-300">System Settings</h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-4 transition-colors duration-300">Configure your market analysis platform</p>
+          
+          <div class="space-y-4">
+            <div class="border-b border-gray-200 dark:border-gray-700 pb-4 transition-colors duration-300">
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">API Configuration</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300"></p>
+            </div>
+            
+            <div class="border-b border-gray-200 dark:border-gray-700 pb-4 transition-colors duration-300">
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">Data Refresh</h4>
+              <button (click)="loadDashboardData()" class="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors">
+                Refresh All Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
