@@ -23,6 +23,10 @@ export const routes: Routes = [
         loadChildren: () => import('./features/profile/profile.routes').then(m => m.profileRoutes)
       },
       {
+        path: 'community',
+        loadChildren: () => import('./features/community/community.routes').then(m => m.communityRoutes)
+      },
+      {
         path: '**',
         redirectTo: ''
       }
