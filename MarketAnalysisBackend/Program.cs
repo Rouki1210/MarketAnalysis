@@ -2,8 +2,11 @@ using MarketAnalysisBackend.Data;
 using MarketAnalysisBackend.Hubs;
 using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Repositories.Implementations;
+using MarketAnalysisBackend.Repositories.Implementations.Community;
 using MarketAnalysisBackend.Repositories.Interfaces;
+using MarketAnalysisBackend.Repositories.Interfaces.Community;
 using MarketAnalysisBackend.Services.Implementations;
+using MarketAnalysisBackend.Services.Implementations.Worker;
 using MarketAnalysisBackend.Services.Interfaces;
 using MarketAnalysisBackend.Services.Mocks;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -49,6 +52,18 @@ builder.Services.AddScoped<INonceRepository, NonceRepository>();
 builder.Services.AddScoped<IPriceCacheRepository, PriceCacheRepository>();
 builder.Services.AddScoped<IGlobalAlertRepository, GlobalAlertRepository>();
 
+builder.Services.AddScoped<ICommunityPostRepository, CommunityPostRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IPostReactionRepository, PostReactionRepository>();
+builder.Services.AddScoped<IPostBookmarkRepository, PostBookmarkRepository>();
+builder.Services.AddScoped<IPostTagRepository, PostTagRepository>();
+builder.Services.AddScoped<ICommunityNotificationRepository, CommunityNotificationRepository>();
+builder.Services.AddScoped<IUserFollowRepository, UserFollowRepository>();
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+builder.Services.AddScoped<ITopicRepository, TopicRepository>();
+builder.Services.AddScoped<IPostTopicRepository, PostTopicRepository>();
+builder.Services.AddScoped<ITopicFollowRepository, TopicFollowRepository>();
+
 // Services
 builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddScoped<IPriceService, PriceService>();
@@ -67,7 +82,7 @@ builder.Services.AddScoped<IGlobalAlertOrchestrationService, GlobalAlertOrchestr
 // Background Services
 //builder.Services.AddHostedService<AssetImporterService>();
 builder.Services.AddHostedService<PriceDataCollector>();
-builder.Services.AddHostedService<GlobalMetricService>();
+//builder.Services.AddHostedService<GlobalMetricService>();
 //builder.Services.AddScoped<IGlobalAlertOrchestrationService, MockGlobalAlertOrchestrationService>();
 //builder.Services.AddHostedService<GlobalAlertDetectorService>();
 

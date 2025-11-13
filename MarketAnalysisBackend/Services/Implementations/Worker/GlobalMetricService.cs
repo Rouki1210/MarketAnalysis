@@ -9,7 +9,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using static System.Net.WebRequestMethods;
 
-namespace MarketAnalysisBackend.Services.Implementations
+namespace MarketAnalysisBackend.Services.Implementations.Worker
 {
     public class GlobalMetricService : BackgroundService
     {

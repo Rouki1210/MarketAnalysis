@@ -1,5 +1,6 @@
 ﻿using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Models.Alert;
+using MarketAnalysisBackend.Models.Community;
 using Microsoft.EntityFrameworkCore;
 
 namespace MarketAnalysisBackend.Data
@@ -22,6 +23,19 @@ namespace MarketAnalysisBackend.Data
         public DbSet<GlobalAlertEvent> GlobalAlertEvents { get; set; }
         public DbSet<UserAlertView> UserAlertView { get; set; }
         public DbSet<PriceCache> PriceCaches { get; set; }
+
+        //Community DbSets
+        public DbSet<CommunityPost> CommunityPosts { get; set; }
+        public DbSet<PostReaction> PostReactions { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<PostTag> PostTags { get; set; }
+        public DbSet<PostBookmark> Bookmarks { get; set; }
+        public DbSet<UserFollow> userFollows { get; set; }
+        public DbSet<CommunityNotification> communityNotifications { get; set; }
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<Topic> Topics { get; set; }
+        public DbSet<PostTopic> PostTopics { get; set; }
+        public DbSet<TopicFollow> TopicFollows { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -84,6 +98,190 @@ namespace MarketAnalysisBackend.Data
             modelBuilder.Entity<WatchlistItems>()
                 .HasIndex(wi => new { wi.WatchlistId, wi.AssetId })
                 .IsUnique();
+
+            // CommunityPost configurations
+            modelBuilder.Entity<CommunityPost>(entity =>
+            {
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.CreatedAt);
+                entity.HasIndex(e => e.IsPublished);
+
+                entity.HasQueryFilter(e => e.DeletedAt == null);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.Posts)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // PostReaction configurations
+            modelBuilder.Entity<PostReaction>(entity =>
+            {
+                entity.HasIndex(e => e.PostId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => new { e.PostId, e.UserId, e.ReactionType })
+                    .IsUnique();
+
+                entity.HasOne(e => e.Post)
+                    .WithMany(p => p.Reactions)
+                    .HasForeignKey(e => e.PostId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.Reactions)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // PostBookmark configurations
+            modelBuilder.Entity<PostBookmark>(entity =>
+            {
+                entity.HasIndex(e => e.PostId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => new { e.PostId, e.UserId })
+                    .IsUnique();
+
+                entity.HasOne(e => e.Post)
+                    .WithMany(p => p.Bookmarks)
+                    .HasForeignKey(e => e.PostId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.Bookmarks)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Comment configurations
+            modelBuilder.Entity<Comment>(entity =>
+            {
+                entity.HasIndex(e => e.PostId);
+                entity.HasIndex(e => e.UserId);
+
+
+                entity.HasQueryFilter(e => e.DeletedAt == null); // Global query filter for soft delete
+
+                entity.HasOne(e => e.Post)
+                    .WithMany(p => p.Comments)
+                    .HasForeignKey(e => e.PostId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.Comments)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // UserFollow configurations
+            modelBuilder.Entity<UserFollow>(entity =>
+            {
+                entity.HasIndex(e => e.FollowerId);
+                entity.HasIndex(e => e.FollowingId);
+                entity.HasIndex(e => new { e.FollowerId, e.FollowingId })
+                    .IsUnique();
+
+                entity.HasOne(e => e.Follower)
+                    .WithMany(u => u.Following)
+                    .HasForeignKey(e => e.FollowerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Following)
+                    .WithMany(u => u.Followers)
+                    .HasForeignKey(e => e.FollowingId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Prevent self-follow
+                entity.HasCheckConstraint("CK_UserFollow_NoSelfFollow", "\"FollowerId\" != \"FollowingId\"");
+            });
+
+            // CommunityNotification configurations
+            modelBuilder.Entity<CommunityNotification>(entity =>
+            {
+                entity.HasIndex(e => new { e.UserId, e.IsRead });
+                entity.HasIndex(e => e.CreatedAt);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.Notifications)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ActorUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.ActorUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Article configurations
+            modelBuilder.Entity<Article>(entity =>
+            {
+                entity.HasIndex(e => e.Category);
+                entity.HasIndex(e => e.IsPublished); // Remove the filter
+                entity.HasIndex(e => e.PublishedAt);
+
+                entity.HasOne(e => e.Author)
+                    .WithMany(u => u.Articles)
+                    .HasForeignKey(e => e.AuthorUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Topic configurations
+            modelBuilder.Entity<Topic>(entity =>
+            {
+                entity.HasIndex(e => e.Name)
+                    .IsUnique();
+                entity.HasIndex(e => e.Slug)
+                    .IsUnique();
+            });
+
+            // PostTopic configurations
+            modelBuilder.Entity<PostTopic>(entity =>
+            {
+                entity.HasIndex(e => e.PostId);
+                entity.HasIndex(e => e.TopicId);
+                entity.HasIndex(e => new { e.PostId, e.TopicId })
+                    .IsUnique();
+
+                entity.HasOne(e => e.Post)
+                    .WithMany(p => p.Topics)
+                    .HasForeignKey(e => e.PostId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Topic)
+                    .WithMany(t => t.PostTopics)
+                    .HasForeignKey(e => e.TopicId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // TopicFollow configurations
+            modelBuilder.Entity<TopicFollow>(entity =>
+            {
+                entity.HasIndex(e => e.TopicId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => new { e.TopicId, e.UserId })
+                    .IsUnique();
+
+                entity.HasOne(e => e.Topic)
+                    .WithMany(t => t.TopicFollows)
+                    .HasForeignKey(e => e.TopicId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.TopicFollows)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // PostTag configurations
+            modelBuilder.Entity<PostTag>(entity =>
+            {
+                entity.HasIndex(e => e.PostId);
+                entity.HasIndex(e => e.TagName);
+
+                entity.HasOne(e => e.Post)
+                    .WithMany(p => p.Tags)
+                    .HasForeignKey(e => e.PostId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
     }

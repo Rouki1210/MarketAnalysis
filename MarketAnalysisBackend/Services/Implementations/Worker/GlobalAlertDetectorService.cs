@@ -1,6 +1,6 @@
 ﻿using MarketAnalysisBackend.Services.Interfaces;
 
-namespace MarketAnalysisBackend.Services.Implementations
+namespace MarketAnalysisBackend.Services.Implementations.Worker
 {
     public class GlobalAlertDetectorService : BackgroundService
     {
