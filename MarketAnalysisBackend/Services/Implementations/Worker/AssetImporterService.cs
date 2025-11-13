@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
-namespace MarketAnalysisBackend.Services.Implementations
+namespace MarketAnalysisBackend.Services.Implementations.Worker
 {
     public class AssetImporterService : BackgroundService
     {
