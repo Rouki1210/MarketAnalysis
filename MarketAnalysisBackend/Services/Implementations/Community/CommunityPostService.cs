@@ -13,7 +13,7 @@ namespace MarketAnalysisBackend.Services.Implementations.Community
         private readonly IPostReactionRepository _postReactionRepository;
         private readonly IPostBookmarkRepository _postBookmarkRepository;
         private readonly IPostTagRepository _postTagRepository;
-        private readonly ICommunityNotification _notificationService;
+        private readonly ICommunityNotificationService _notificationService;
         private readonly ITopicRepository _topicRepository;
         private readonly IPostTopicRepository _postTopicRepository;
         public CommunityPostService(
@@ -22,7 +22,7 @@ namespace MarketAnalysisBackend.Services.Implementations.Community
             IPostBookmarkRepository postBookmarkRepository,
             IPostTagRepository postTagRepository,
             ITopicRepository topicRepository,
-            ICommunityNotification notificationService,
+            ICommunityNotificationService notificationService,
             IPostTopicRepository postTopicRepository
             )
         {

@@ -6,8 +6,10 @@ using MarketAnalysisBackend.Repositories.Implementations.Community;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Repositories.Interfaces.Community;
 using MarketAnalysisBackend.Services.Implementations;
+using MarketAnalysisBackend.Services.Implementations.Community;
 using MarketAnalysisBackend.Services.Implementations.Worker;
 using MarketAnalysisBackend.Services.Interfaces;
+using MarketAnalysisBackend.Services.Interfaces.Community;
 using MarketAnalysisBackend.Services.Mocks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -15,6 +17,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using OpenAI.Interfaces;
 using System.Text;
 
@@ -24,7 +27,40 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Market Analysis Backend API",
+        Version = "v1"
+    });
+
+    // Add JWT Authentication to Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 builder.Services.AddHttpContextAccessor();
 
 // Database connection
@@ -79,6 +115,13 @@ builder.Services.AddScoped<IAlertEvaluationService, AlertEvaluationService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IGlobalAlertOrchestrationService, GlobalAlertOrchestrationService>();
 
+builder.Services.AddScoped<ICommunityPostService, CommunityPostService>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ICommunityNotificationService, CommunityNotificationService>();
+builder.Services.AddScoped<IUserFollowService, UserFollowService>();
+builder.Services.AddScoped<ITopicService, TopicService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
+
 // Background Services
 //builder.Services.AddHostedService<AssetImporterService>();
 builder.Services.AddHostedService<PriceDataCollector>();
@@ -95,38 +138,87 @@ var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Authentication:Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Authentication:Jwt:Audience"];
 
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+//    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+//})
+//.AddCookie() 
+//.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+//{
+//    options.ClientId = googleClientId;
+//    options.ClientSecret = googleClientSecret;
+//    options.CallbackPath = "/signin-google"; 
+//    options.Scope.Add("profile");
+//    options.Scope.Add("email");
+//});
+
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddJwtBearer(options =>
+//    {
+//        var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidateAudience = true,
+//            ValidateLifetime = true,
+//            ValidateIssuerSigningKey = true,
+//            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+//            ValidAudience = builder.Configuration["Jwt:Audience"],
+//            IssuerSigningKey = new SymmetricSecurityKey(key)
+//        };
+//    });
+
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
 })
-.AddCookie() 
+.AddJwtBearer(options =>
+{
+    var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+
+    // Support for SignalR authentication
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/pricehub") ||
+                 path.StartsWithSegments("/globalmetrichub") ||
+                 path.StartsWithSegments("/alerthub")))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
+})
+.AddCookie()
 .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
 {
     options.ClientId = googleClientId;
     options.ClientSecret = googleClientSecret;
-    options.CallbackPath = "/signin-google"; 
+    options.CallbackPath = "/signin-google";
     options.Scope.Add("profile");
     options.Scope.Add("email");
 });
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(key)
-        };
-    });
-
+// CORS Configuration
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
@@ -155,7 +247,6 @@ app.MapHub<GlobalMetric>("/globalmetrichub");
 app.MapHub <AlertHub>("/alerthub");
 
 app.UseAuthentication();
-app.UseAuthorization();
 
 app.UseHttpsRedirection();
 

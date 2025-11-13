@@ -11,6 +11,5 @@ namespace MarketAnalysisBackend.Services.Interfaces.Community
         Task<CommentDto> CreateCommentAsync(CreateCommentDto createCommentDto, int userId);
         Task<CommentDto> UpdateCommentAsync(int id, UpdateCommentDto updateCommentDto, int userId);
         Task<bool> DeleteCommentAsync(int id, int userId, bool isAdmin = false);
-        Task<bool> ToggleLikeAsync(int commentId, int userId);
     }
 }

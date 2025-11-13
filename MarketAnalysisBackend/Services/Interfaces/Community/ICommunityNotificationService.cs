@@ -2,7 +2,7 @@
 
 namespace MarketAnalysisBackend.Services.Interfaces.Community
 {
-    public interface ICommunityNotification
+    public interface ICommunityNotificationService
     {
         Task<List<NotificationDto>> GetUserNotificationsAsync(int userId, int page = 1, int pageSize = 20);
         Task<int> GetUnreadCountAsync(int userId);
