@@ -16,6 +16,14 @@ interface NavItem {
   imports: [CommonModule, RouterModule],
   template: `
     <aside class="space-y-4">
+      <!-- Logo & Title -->
+      <a routerLink="/community" class="flex items-center gap-3 px-4 py-3 bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl hover:bg-white/10 transition-all">
+        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+          <span class="text-white text-xl">📈</span>
+        </div>
+        <h1 class="text-xl font-bold text-white">CMC Community</h1>
+      </a>
+
       <!-- Navigation -->
       <div class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4">
         <h3 class="text-white font-semibold mb-3 flex items-center gap-2">
@@ -33,23 +41,6 @@ interface NavItem {
             {{ item.label }}
           </a>
         </nav>
-      </div>
-
-      <!-- Top Contributors -->
-      <div class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4">
-        <h3 class="text-white font-semibold mb-3 flex items-center gap-2">
-          <span class="text-yellow-500">⭐</span>
-          Top Contributors
-        </h3>
-        <div class="space-y-3">
-          <div *ngFor="let user of leaderboard.slice(0, 3)" class="flex items-center gap-3">
-            <span class="text-2xl">{{ user.badge }}</span>
-            <div class="flex-1">
-              <p class="text-white font-medium text-sm">{{ user.user.username }}</p>
-              <p class="text-gray-400 text-xs">{{ user.points.toLocaleString() }} points</p>
-            </div>
-          </div>
-        </div>
       </div>
     </aside>
   `,

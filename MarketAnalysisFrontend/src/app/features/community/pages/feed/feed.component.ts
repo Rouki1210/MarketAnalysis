@@ -7,11 +7,13 @@ import { ModalService } from '../../services/modal.service';
 import { CreatePostComponent } from '../../components/feed/create-post.component';
 import { FilterBarComponent } from '../../components/feed/filter-bar.component';
 import { PostListComponent } from '../../components/feed/post-list.component';
+import { SearchBarComponent } from '../../components/common/search-bar.component';
+import { ButtonComponent } from '../../components/common/button.component';
 
 @Component({
   selector: 'app-feed',
   standalone: true,
-  imports: [CommonModule, CreatePostComponent, FilterBarComponent, PostListComponent],
+  imports: [CommonModule, CreatePostComponent, FilterBarComponent, PostListComponent, SearchBarComponent, ButtonComponent],
   template: `
     <div>
       <!-- Create Post Modal -->
@@ -21,6 +23,19 @@ import { PostListComponent } from '../../components/feed/post-list.component';
         (close)="onCloseModal()">
       </app-create-post>
 
+      <!-- Search Bar and Create Post Button -->
+      <div class="mb-6 flex items-center gap-4 bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4">
+        <div class="flex-1">
+          <app-search-bar
+            [value]="searchQuery()"
+            (valueChange)="onSearchChange($event)"
+            placeholder="Search discussions..."
+            className="w-full">
+          </app-search-bar>
+        </div>
+        <app-button (onClick)="onCreatePostClick()">Create Post</app-button>
+      </div>
+
       <!-- Filter Bar -->
       <app-filter-bar
         [selectedFilter]="selectedFilter()"
@@ -29,7 +44,7 @@ import { PostListComponent } from '../../components/feed/post-list.component';
 
       <!-- Posts List -->
       <app-post-list
-        [posts]="posts()"
+        [posts]="filteredPosts()"
         [loading]="loading()"
         (like)="onLike($event)"
         (bookmark)="onBookmark($event)"
@@ -44,6 +59,8 @@ export class FeedComponent implements OnInit {
   selectedFilter = signal<string>('trending');
   showCreatePost = signal<boolean>(false);
   loading = signal<boolean>(false);
+  searchQuery = signal<string>('');
+  filteredPosts = signal<Post[]>([]);
 
   constructor(
     private postService: PostService,
@@ -62,13 +79,38 @@ export class FeedComponent implements OnInit {
 
   loadPosts(): void {
     this.loading.set(true);
-    this.posts.set(this.postService.getPosts());
+    const allPosts = this.postService.getPosts();
+    this.posts.set(allPosts);
+    this.filterPosts();
     this.loading.set(false);
+  }
+
+  filterPosts(): void {
+    const query = this.searchQuery().toLowerCase();
+    if (!query) {
+      this.filteredPosts.set(this.posts());
+      return;
+    }
+    const filtered = this.posts().filter(post => 
+      post.title.toLowerCase().includes(query) ||
+      post.content.toLowerCase().includes(query) ||
+      post.author.username.toLowerCase().includes(query)
+    );
+    this.filteredPosts.set(filtered);
+  }
+
+  onSearchChange(value: string): void {
+    this.searchQuery.set(value);
+    this.filterPosts();
+  }
+
+  onCreatePostClick(): void {
+    this.modalService.openCreatePost();
   }
 
   onFilterChange(filter: string): void {
     this.selectedFilter.set(filter);
-    // Filter logic can be added here
+    this.filterPosts();
   }
 
   onCreatePost(postData: Partial<Post>): void {
