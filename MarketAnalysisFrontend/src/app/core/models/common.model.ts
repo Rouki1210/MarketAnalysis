@@ -39,3 +39,29 @@ export interface ChartData {
   volume?: number;
 }
 
+export interface OHLCData {
+  symbol: string;
+  periodStart: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+export interface ChartPoint {
+  timestamp: string;
+  price: number;
+}
+
+export interface GlobalMetricHistory {
+  id: number;
+  total_market_cap_usd: number;
+  total_market_cap_percent_change_24h: number;
+  total_volume_24h: number;
+  total_volume_24h_percent_change_24h: number;
+  bitcoin_dominance_percentage: number;
+  ethereum_dominance_percentage: number;
+  timestampUtc: string;
+}
+

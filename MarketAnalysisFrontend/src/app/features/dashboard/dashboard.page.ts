@@ -7,7 +7,7 @@ import { CryptoTableComponent } from './components/crypto-table/crypto-table.com
   standalone: true,
   imports: [CommonModule, CryptoTableComponent],
   template: `
-    <div class="min-h-screen">
+    <div class="min-h-screen p-4 lg:p-6">
       <app-crypto-table></app-crypto-table>
     </div>
   `

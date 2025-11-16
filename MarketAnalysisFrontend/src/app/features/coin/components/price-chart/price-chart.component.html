@@ -1,14 +1,19 @@
 <app-card>
   <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
     <div class="flex items-center space-x-2 lg:space-x-4 overflow-x-auto scrollbar-hide w-full lg:w-auto">
-      <app-button variant="default" size="sm" class="whitespace-nowrap">
+      <app-button 
+        [variant]="selectedChartType === 'line' ? 'default' : 'ghost'" 
+        size="sm" 
+        class="whitespace-nowrap"
+        (click)="selectedChartType = 'line'; loadChartData()">
         Price
       </app-button>
-      <app-button variant="ghost" size="sm" class="text-muted-foreground whitespace-nowrap">
-        Market Cap
-      </app-button>
-      <app-button variant="ghost" size="sm" class="text-muted-foreground whitespace-nowrap">
-        TradingView
+      <app-button 
+        [variant]="selectedChartType === 'candlestick' ? 'default' : 'ghost'" 
+        size="sm" 
+        class="whitespace-nowrap"
+        (click)="selectedChartType = 'candlestick'; loadChartData()">
+        Candlestick
       </app-button>
     </div>
 
@@ -27,19 +32,56 @@
     </div>
   </div>
 
-  <div class="h-64 lg:h-96 flex items-center justify-center">
-    <svg width="100%" height="100%" viewBox="0 0 800 300" preserveAspectRatio="none" class="text-secondary">
-      <polyline 
-        [attr.points]="chartPoints"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      />
-      
-      <!-- Grid lines -->
-      <line x1="40" y1="40" x2="40" y2="260" stroke="hsl(var(--border))" stroke-width="1" />
-      <line x1="40" y1="260" x2="760" y2="260" stroke="hsl(var(--border))" stroke-width="1" />
-    </svg>
+  <div class="relative">
+    <!-- Loading Overlay -->
+    <div *ngIf="isLoading" class="absolute inset-0 flex items-center justify-center bg-background/50 z-10 rounded-lg">
+      <div class="flex flex-col items-center gap-2">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+        <span class="text-sm text-muted-foreground">Loading chart data...</span>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error && !isLoading" class="absolute inset-0 flex items-center justify-center bg-background/90 z-10 rounded-lg">
+      <div class="text-center p-6">
+        <svg class="w-12 h-12 text-destructive mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p class="text-sm text-muted-foreground">{{ error }}</p>
+        <button 
+          (click)="loadChartData()" 
+          class="mt-4 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+          Retry
+        </button>
+      </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div *ngIf="showTooltip && tooltipData" 
+         class="absolute top-4 left-4 bg-card border border-border rounded-lg shadow-lg p-3 z-20 text-sm">
+      <div class="font-medium text-foreground mb-2">{{ tooltipData.time }}</div>
+      <div class="space-y-1 text-xs">
+        <div *ngIf="tooltipData.open !== undefined" class="flex justify-between gap-4">
+          <span class="text-muted-foreground">Open:</span>
+          <span class="font-medium text-foreground">{{ tooltipData.open | number:'1.2-8' }}</span>
+        </div>
+        <div *ngIf="tooltipData.high !== undefined" class="flex justify-between gap-4">
+          <span class="text-muted-foreground">High:</span>
+          <span class="font-medium text-green-500">{{ tooltipData.high | number:'1.2-8' }}</span>
+        </div>
+        <div *ngIf="tooltipData.low !== undefined" class="flex justify-between gap-4">
+          <span class="text-muted-foreground">Low:</span>
+          <span class="font-medium text-red-500">{{ tooltipData.low | number:'1.2-8' }}</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-muted-foreground">Close:</span>
+          <span class="font-medium text-foreground">{{ tooltipData.close | number:'1.2-8' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart Container -->
+    <div #chartContainer class="w-full h-[500px] rounded-lg"></div>
   </div>
 </app-card>
 

@@ -28,6 +28,23 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(prices);
         }
 
+        [HttpGet("sparkline/{symbol}")]
+        public async Task<IActionResult> GetSparkline(string symbol, [FromQuery] int days = 7)
+        {
+            var to = DateTime.UtcNow;
+            var from = to.AddDays(-days);
+            var prices = await _priceService.GetPricePointsAsync(symbol, from, to);
+            
+            // Return simplified data for sparkline (only price and timestamp)
+            var sparklineData = prices.Select(p => new 
+            {
+                timestamp = p.TimestampUtc,
+                price = p.Price
+            });
+            
+            return Ok(sparklineData);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAllPrice()
         {
