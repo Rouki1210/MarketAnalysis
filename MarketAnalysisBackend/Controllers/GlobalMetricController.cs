@@ -22,5 +22,33 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(results);
         }
 
+        [HttpGet("history")]
+        public async Task<IActionResult> GetGlobalMetricHistory(
+            [FromQuery] string timeframe = "7d",
+            [FromQuery] DateTime? from = null,
+            [FromQuery] DateTime? to = null)
+        {
+            var now = DateTime.UtcNow;
+            var fromDate = from ?? timeframe switch
+            {
+                "1d" => now.AddDays(-1),
+                "7d" => now.AddDays(-7),
+                "1m" => now.AddMonths(-1),
+                "3m" => now.AddMonths(-3),
+                "1y" => now.AddYears(-1),
+                "all" => DateTime.MinValue,
+                _ => now.AddDays(-7)
+            };
+            var toDate = to ?? now;
+
+            var query = await _globalRepo.GetAllAsync();
+            var results = query
+                .Where(m => m.TimestampUtc >= fromDate && m.TimestampUtc <= toDate)
+                .OrderBy(m => m.TimestampUtc)
+                .ToList();
+
+            return Ok(results);
+        }
+
     }
 }

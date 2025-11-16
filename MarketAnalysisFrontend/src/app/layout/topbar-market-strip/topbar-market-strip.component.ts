@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { SparklineComponent } from '../../shared/components/sparkline/sparkline.component';
 import { GaugeComponent } from '../../shared/components/gauge/gauge.component';
 import { ApiService } from '../../core/services/api.service';
+import { ChartService } from '../../core/services/chart.service';
 import { MarketOverview as GlobalMarketOverview } from '../../core/models/market.model';
 import { CompactNumberPipe } from '../../shared/pipes/compact-number.pipe';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-topbar-market-strip',
@@ -15,7 +17,11 @@ import { CompactNumberPipe } from '../../shared/pipes/compact-number.pipe';
 })
 export class TopbarMarketStripComponent implements OnInit {
 
-  constructor(private apiService: ApiService) { }
+  constructor(
+    private apiService: ApiService,
+    private chartService: ChartService
+  ) { }
+  
   // Sparkline data
   marketCapSparkline: number[] = [];
   volumeSparkline: number[] = [];
@@ -29,99 +35,47 @@ export class TopbarMarketStripComponent implements OnInit {
   fearGreedLabel: string = 'Fear';
 
   ngOnInit(): void {
-    // Generate sparkline data similar to the image pattern
-    this.marketCapSparkline = this.generateMarketCapPattern();
-    this.volumeSparkline = this.generateVolumePattern();
-    this.btcDominanceSparkline = this.generateDominancePattern();
-    this.ethDominanceSparkline = this.generateDominancePattern();
-
     this.loadMetricData();
+    this.loadSparklineData();
   }
 
   private loadMetricData() {
     this.apiService.startGlobalMetricSignalR();
 
     this.apiService.globalMetric$.subscribe({
-    next: (data) => {
-      if (!data) return;
-      this.globalMarketOverview = [data];
-      this.isLoading = false;
+      next: (data) => {
+        if (!data) return;
+        this.globalMarketOverview = [data];
+        this.isLoading = false;
 
-      // Fear & Greed gauge update
-      this.fearGreedValue = Number(data.fearGreedIndex);
-      this.fearGreedLabel = data.fear_and_greed_text;
-    },
-    error: (err) => {
-      console.error('Global metric subscription error:', err);
-      this.isLoading = false;
-    }
-  });
-  }
-
-  private generateMarketCapPattern(): number[] {
-    // Pattern similar to the image: relatively flat with a dip in the middle
-    const data: number[] = [];
-    const points = 50;
-    
-    for (let i = 0; i < points; i++) {
-      const position = i / points;
-      let value = 60;
-      
-      // Create a dip in the middle (around 0.3-0.5)
-      if (position > 0.3 && position < 0.5) {
-        value = 60 - (Math.sin((position - 0.3) / 0.2 * Math.PI) * 20);
+        // Fear & Greed gauge update
+        this.fearGreedValue = Number(data.fearGreedIndex);
+        this.fearGreedLabel = data.fear_and_greed_text;
+      },
+      error: (err) => {
+        console.error('Global metric subscription error:', err);
+        this.isLoading = false;
       }
-      
-      // Add some noise
-      value += (Math.random() - 0.5) * 3;
-      
-      data.push(value);
-    }
-    
-    return data;
+    });
   }
 
-  private generateVolumePattern(): number[] {
-    const data: number[] = [];
-    const points = 50;
-    
-    for (let i = 0; i < points; i++) {
-      const position = i / points;
-      let value = 55;
-      
-      // Create a gentle wave
-      value += Math.sin(position * Math.PI * 2) * 8;
-      
-      // Add noise
-      value += (Math.random() - 0.5) * 4;
-      
-      data.push(value);
-    }
-    
-    return data;
-  }
+  private loadSparklineData() {
+    // Fetch 7 days of historical data for all metrics
+    this.chartService.getGlobalMetricsHistory('7d').subscribe({
+      next: (history) => {
+        if (!history || history.length === 0) return;
 
-  private generateDominancePattern(): number[] {
-    const data: number[] = [];
-    const points = 50;
-    
-    for (let i = 0; i < points; i++) {
-      const position = i / points;
-      let value = 50;
-      
-      // Slight upward trend
-      value += position * 10;
-      
-      // Add wave pattern
-      value += Math.sin(position * Math.PI * 3) * 5;
-      
-      // Add noise
-      value += (Math.random() - 0.5) * 3;
-      
-      data.push(value);
-    }
-    
-    return data;
+        // Extract sparkline data for each metric
+        this.marketCapSparkline = history.map(item => item.total_market_cap_usd);
+        this.volumeSparkline = history.map(item => item.total_volume_24h);
+        this.btcDominanceSparkline = history.map(item => item.bitcoin_dominance_percentage);
+        this.ethDominanceSparkline = history.map(item => item.ethereum_dominance_percentage);
+      },
+      error: (err) => {
+        console.error('Failed to load sparkline data:', err);
+        // Keep empty arrays if failed
+      }
+    });
   }
 }
 

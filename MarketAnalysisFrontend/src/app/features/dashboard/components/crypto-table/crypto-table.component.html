@@ -183,7 +183,7 @@
             <td class="px-3 lg:px-4 py-3 lg:py-4 text-right hidden lg:table-cell">
               <div class="flex justify-end">
                 <app-sparkline 
-                  [data]="coin.sparklineData || []"
+                  [symbol]="coin.symbol"
                   [isPositive]="coin.isPositive7d"
                   [width]="80"
                   [height]="32">

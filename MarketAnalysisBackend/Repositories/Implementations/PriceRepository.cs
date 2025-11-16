@@ -54,23 +54,60 @@ namespace MarketAnalysisBackend.Repositories.Implementations
             var prices = await query
                 .OrderBy(p => p.TimestampUtc)
                 .ToListAsync();
-            var grouped = prices.GroupBy(p => timeframe switch
-            {
-                "1h" => new DateTime(p.TimestampUtc.Year, p.TimestampUtc.Month, p.TimestampUtc.Day, p.TimestampUtc.Hour, 0, 0),
-                "1d" => p.TimestampUtc.Date,
-                _ => p.TimestampUtc,
-            }).Select(g => new OhlcDto
-            {
-                Symbol = symbol,
-                PeriodStart = g.Key,
-                Open = g.First().Open,
-                High = g.Max(x => x.High),
-                Low = g.Min(x => x.Low),
-                Close = g.Last().Close,
-                Volume = g.Sum(x => x.Volume)
-            });
+
+            if (!prices.Any())
+                return Enumerable.Empty<OhlcDto>();
+
+            // Group by timeframe with enhanced aggregation logic
+            var grouped = prices.GroupBy(p => GetTimeframePeriod(p.TimestampUtc, timeframe))
+                .Select(g => new OhlcDto
+                {
+                    Symbol = symbol,
+                    PeriodStart = g.Key,
+                    Open = g.First().Open != 0 ? g.First().Open : g.First().Close,
+                    High = g.Max(x => x.High != 0 ? x.High : x.Close),
+                    Low = g.Where(x => x.Low > 0).DefaultIfEmpty(g.First()).Min(x => x.Low != 0 ? x.Low : x.Close),
+                    Close = g.Last().Close,
+                    Volume = g.Sum(x => x.Volume)
+                })
+                .OrderBy(x => x.PeriodStart)
+                .ToList();
 
             return grouped;
+        }
+
+        private DateTime GetTimeframePeriod(DateTime timestamp, string timeframe)
+        {
+            return timeframe.ToLower() switch
+            {
+                "1h" => new DateTime(
+                    timestamp.Year, 
+                    timestamp.Month, 
+                    timestamp.Day, 
+                    timestamp.Hour, 
+                    0, 0, DateTimeKind.Utc),
+                
+                "4h" => new DateTime(
+                    timestamp.Year, 
+                    timestamp.Month, 
+                    timestamp.Day,
+                    (timestamp.Hour / 4) * 4, 
+                    0, 0, DateTimeKind.Utc),
+                
+                "1d" or "24h" => timestamp.Date,
+                
+                "1w" or "7d" => GetWeekStart(timestamp),
+                
+                "1m" or "30d" => new DateTime(timestamp.Year, timestamp.Month, 1),
+                
+                _ => timestamp.Date // Default to daily
+            };
+        }
+
+        private DateTime GetWeekStart(DateTime date)
+        {
+            int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+            return date.AddDays(-1 * diff).Date;
         }
 
         public async Task DeleteAllAsync()
