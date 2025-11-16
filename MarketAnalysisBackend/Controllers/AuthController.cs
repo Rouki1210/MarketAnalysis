@@ -2,6 +2,7 @@
 using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Repositories.Interfaces;
+using MarketAnalysisBackend.Services.Implementations;
 using MarketAnalysisBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

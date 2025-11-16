@@ -1,8 +1,17 @@
 export interface Author {
-  id: string;
+  id: number; 
   username: string;
-  avatar: string;
+  displayName: string;
+  avatarEmoji?: string;
   verified?: boolean;
+}
+
+export interface Topic {
+  id: number;
+  name: string;
+  slug: string;
+  icon: string;
+  description?: string;
 }
 
 export interface Post {
@@ -14,25 +23,51 @@ export interface Post {
   comments: number;
   bookmarks: number;
   shares: number;
+  viewCount: number;
+  isPinned: boolean;
   createdAt: string;
   updatedAt: string;
   tags?: string[];
+  topics?: Topic[];
   isLiked?: boolean;
   isBookmarked?: boolean;
 }
 
 export interface Article {
-  id: string;
+  id: number;
   title: string;
   summary: string;
   category: 'Coin' | 'Market' | 'Education';
   sourceUrl?: string;
   content?: string;
+  imageUrl?: string;
+  viewCount: number;
+  author?: Author;
+  isPublished: boolean;
+  publishedAt?: string;
+  createdAt: string;
 }
 
 export interface CreatePostData {
   title: string;
   content: string;
   tags?: string[];
+  topicIds?: number[];
 }
 
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  errors?: string[];
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  totalItems: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+}

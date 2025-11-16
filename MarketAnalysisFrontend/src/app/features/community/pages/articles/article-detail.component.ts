@@ -112,25 +112,25 @@ export class ArticleDetailComponent implements OnInit {
 
   // Mock articles data (same as ArticlesComponent)
   private articles: Article[] = [
-    {
-      id: 'a1',
-      title: 'Understanding Bitcoin Halvings and Market Impact',
-      summary: 'A comprehensive look at Bitcoin halving cycles and how they historically affect price action and market sentiment.',
-      category: 'Coin',
-      sourceUrl: 'https://coinmarketcap.com/community/articles/6912fc3072417b07898023f5/'
-    },
-    {
-      id: 'a2',
-      title: 'DeFi Protocols: A Beginner Guide',
-      summary: 'Learn about decentralized finance protocols, how they work, and why they are revolutionizing traditional finance.',
-      category: 'Education'
-    },
-    {
-      id: 'a3',
-      title: 'Market Analysis: Q1 2024 Crypto Trends',
-      summary: 'Analyzing the major trends and movements in the cryptocurrency market during the first quarter of 2024.',
-      category: 'Market'
-    }
+    // {
+    //   id: 'a1',
+    //   title: 'Understanding Bitcoin Halvings and Market Impact',
+    //   summary: 'A comprehensive look at Bitcoin halving cycles and how they historically affect price action and market sentiment.',
+    //   category: 'Coin',
+    //   sourceUrl: 'https://coinmarketcap.com/community/articles/6912fc3072417b07898023f5/'
+    // },
+    // {
+    //   id: 'a2',
+    //   title: 'DeFi Protocols: A Beginner Guide',
+    //   summary: 'Learn about decentralized finance protocols, how they work, and why they are revolutionizing traditional finance.',
+    //   category: 'Education'
+    // },
+    // {
+    //   id: 'a3',
+    //   title: 'Market Analysis: Q1 2024 Crypto Trends',
+    //   summary: 'Analyzing the major trends and movements in the cryptocurrency market during the first quarter of 2024.',
+    //   category: 'Market'
+    // }
   ];
 
   constructor(
@@ -141,8 +141,8 @@ export class ArticleDetailComponent implements OnInit {
   ngOnInit(): void {
     const articleId = this.route.snapshot.paramMap.get('id');
     if (articleId) {
-      const foundArticle = this.articles.find(a => a.id === articleId);
-      this.article.set(foundArticle || null);
+      // const foundArticle = this.articles.find(a => a.id === articleId);
+      // this.article.set(foundArticle || null);
     }
   }
 

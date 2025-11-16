@@ -1,4 +1,5 @@
-﻿using MarketAnalysisBackend.Models.DTO;
+﻿using MarketAnalysisBackend.Authorization;
+using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Services.Interfaces.Community;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -159,7 +160,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [RequireRole("Admin")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<TopicDto>>> CreateTopic(
             [FromBody] CreateTopicDto createTopicDto)
@@ -181,7 +182,7 @@ namespace MarketAnalysisBackend.Controllers
         }
 
         // PUT: api/community/topics/{id}
-        [Authorize(Roles = "Admin")]
+        [RequireRole("Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<TopicDto>>> UpdateTopic(
             int id,
@@ -204,7 +205,7 @@ namespace MarketAnalysisBackend.Controllers
         }
 
         // DELETE: api/community/topics/{id}
-        [Authorize(Roles = "Admin")]
+        [RequireRole("Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteTopic(int id)
         {
@@ -225,7 +226,7 @@ namespace MarketAnalysisBackend.Controllers
         }
 
         // POST: api/community/topics/{id}/follow
-        [Authorize]
+        [RequireRole("User")]
         [HttpPost("{id}/follow")]
         public async Task<ActionResult<ApiResponse<bool>>> FollowTopic(int id)
         {

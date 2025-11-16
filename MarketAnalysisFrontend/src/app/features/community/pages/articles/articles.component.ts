@@ -98,60 +98,60 @@ export class ArticlesComponent implements OnInit, DoCheck {
   categories = ['All', 'Coin', 'Market', 'Education'];
 
   articles: Article[] = [
-    {
-      id: 'a1',
-      title: 'Understanding Bitcoin Halvings and Market Impact',
-      summary: 'A comprehensive look at Bitcoin halving cycles and how they historically affect price action and market sentiment.',
-      category: 'Coin'
-    },
-    {
-      id: 'a2',
-      title: 'DeFi Protocols: A Beginner Guide',
-      summary: 'Learn about decentralized finance protocols, how they work, and why they are revolutionizing traditional finance.',
-      category: 'Education'
-    },
-    {
-      id: 'a3',
-      title: 'Market Analysis: Q1 2024 Crypto Trends',
-      summary: 'Analyzing the major trends and movements in the cryptocurrency market during the first quarter of 2024.',
-      category: 'Market'
-    },
-    {
-      id: 'a4',
-      title: 'Ethereum 2.0: What You Need to Know',
-      summary: 'Everything about Ethereum transition to proof-of-stake and what it means for investors and developers.',
-      category: 'Coin'
-    },
-    {
-      id: 'a5',
-      title: 'Technical Analysis Basics for Crypto Trading',
-      summary: 'Master the fundamentals of technical analysis to make better trading decisions in the crypto market.',
-      category: 'Education'
-    },
-    {
-      id: 'a6',
-      title: 'Altcoin Season: Indicators and Strategies',
-      summary: 'Identify altcoin season patterns and learn strategies to capitalize on these market cycles.',
-      category: 'Market'
-    },
-    {
-      id: 'a7',
-      title: 'Solana Ecosystem: Top Projects to Watch',
-      summary: 'Explore the fastest-growing projects in the Solana ecosystem and their potential impact.',
-      category: 'Coin'
-    },
-    {
-      id: 'a8',
-      title: 'Crypto Security: Protecting Your Assets',
-      summary: 'Essential security practices every crypto investor should follow to keep their assets safe.',
-      category: 'Education'
-    },
-    {
-      id: 'a9',
-      title: 'Institutional Adoption: The New Bull Market Driver',
-      summary: 'How institutional investment is reshaping the cryptocurrency market landscape.',
-      category: 'Market'
-    }
+    // {
+    //   id: 'a1',
+    //   title: 'Understanding Bitcoin Halvings and Market Impact',
+    //   summary: 'A comprehensive look at Bitcoin halving cycles and how they historically affect price action and market sentiment.',
+    //   category: 'Coin'
+    // },
+    // {
+    //   id: 'a2',
+    //   title: 'DeFi Protocols: A Beginner Guide',
+    //   summary: 'Learn about decentralized finance protocols, how they work, and why they are revolutionizing traditional finance.',
+    //   category: 'Education'
+    // },
+    // {
+    //   id: 'a3',
+    //   title: 'Market Analysis: Q1 2024 Crypto Trends',
+    //   summary: 'Analyzing the major trends and movements in the cryptocurrency market during the first quarter of 2024.',
+    //   category: 'Market'
+    // },
+    // {
+    //   id: 'a4',
+    //   title: 'Ethereum 2.0: What You Need to Know',
+    //   summary: 'Everything about Ethereum transition to proof-of-stake and what it means for investors and developers.',
+    //   category: 'Coin'
+    // },
+    // {
+    //   id: 'a5',
+    //   title: 'Technical Analysis Basics for Crypto Trading',
+    //   summary: 'Master the fundamentals of technical analysis to make better trading decisions in the crypto market.',
+    //   category: 'Education'
+    // },
+    // {
+    //   id: 'a6',
+    //   title: 'Altcoin Season: Indicators and Strategies',
+    //   summary: 'Identify altcoin season patterns and learn strategies to capitalize on these market cycles.',
+    //   category: 'Market'
+    // },
+    // {
+    //   id: 'a7',
+    //   title: 'Solana Ecosystem: Top Projects to Watch',
+    //   summary: 'Explore the fastest-growing projects in the Solana ecosystem and their potential impact.',
+    //   category: 'Coin'
+    // },
+    // {
+    //   id: 'a8',
+    //   title: 'Crypto Security: Protecting Your Assets',
+    //   summary: 'Essential security practices every crypto investor should follow to keep their assets safe.',
+    //   category: 'Education'
+    // },
+    // {
+    //   id: 'a9',
+    //   title: 'Institutional Adoption: The New Bull Market Driver',
+    //   summary: 'How institutional investment is reshaping the cryptocurrency market landscape.',
+    //   category: 'Market'
+    // }
   ];
 
   constructor(private router: Router) {}

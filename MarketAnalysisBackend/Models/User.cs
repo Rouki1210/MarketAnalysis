@@ -40,6 +40,7 @@ namespace MarketAnalysisBackend.Models
         public virtual ICollection<CommunityNotification> Notifications { get; set; } = new List<CommunityNotification>();
         public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
         public virtual ICollection<TopicFollow> TopicFollows { get; set; } = new List<TopicFollow>();
+        public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
     }
 }

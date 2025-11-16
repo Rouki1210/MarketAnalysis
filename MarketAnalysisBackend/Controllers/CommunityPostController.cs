@@ -1,4 +1,5 @@
-﻿using MarketAnalysisBackend.Models.DTO;
+﻿using MarketAnalysisBackend.Authorization;
+using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Services.Interfaces.Community;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -112,7 +113,7 @@ namespace MarketAnalysisBackend.Controllers
         }
 
 
-        [Authorize]
+        [RequireRole("User")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<CommunityPostDto>>> CreatePost([FromBody] CreatePostDto createPostDto)
         {
@@ -135,7 +136,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize]
+        [RequireRole("User")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<CommunityPostDto>>> UpdatePost(
             int id,
@@ -164,7 +165,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize]
+        [RequireRole("User")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeletePost(int id)
         {
@@ -191,7 +192,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize]
+        [RequireRole("User")]
         [HttpPost("{id}/like")]
         public async Task<ActionResult<ApiResponse<bool>>> ToggleLike(int id)
         {
@@ -212,7 +213,6 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize]
         [HttpPost("{id}/bookmark")]
         public async Task<ActionResult<ApiResponse<bool>>> ToggleBookmark(int id)
         {
@@ -233,7 +233,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [RequireRole("Admin")]
         [HttpPost("{id}/pin")]
         public async Task<ActionResult<ApiResponse<bool>>> TogglePin(int id)
         {

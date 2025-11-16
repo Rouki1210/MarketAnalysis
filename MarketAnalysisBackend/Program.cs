@@ -1,10 +1,11 @@
-using MarketAnalysisBackend.Data;
+﻿using MarketAnalysisBackend.Data;
 using MarketAnalysisBackend.Hubs;
 using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Repositories.Implementations;
 using MarketAnalysisBackend.Repositories.Implementations.Community;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Repositories.Interfaces.Community;
+using MarketAnalysisBackend.Services;
 using MarketAnalysisBackend.Services.Implementations;
 using MarketAnalysisBackend.Services.Implementations.Community;
 using MarketAnalysisBackend.Services.Implementations.Worker;
@@ -121,6 +122,7 @@ builder.Services.AddScoped<ICommunityNotificationService, CommunityNotificationS
 builder.Services.AddScoped<IUserFollowService, UserFollowService>();
 builder.Services.AddScoped<ITopicService, TopicService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 // Background Services
 //builder.Services.AddHostedService<AssetImporterService>();
@@ -233,6 +235,19 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+//using (var scope = app.Services.CreateScope())
+//{
+//    try
+//    {
+//        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//        await RoleSeeder.SeedAsync(context);
+//    }
+//    catch (Exception ex)
+//    {
+//        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+//        logger.LogError(ex, "❌ Lỗi khi seed roles");
+//    }
+//}
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

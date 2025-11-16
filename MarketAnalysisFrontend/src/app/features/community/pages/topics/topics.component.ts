@@ -45,7 +45,7 @@ import { Post } from '../../models/post.model';
           <div class="flex items-start justify-between mb-3">
             <div class="flex items-center space-x-3">
               <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-xl">
-                {{ post.author.avatar }}
+                {{ post.author.avatarEmoji }}
               </div>
               <div>
                 <div class="flex items-center space-x-2">

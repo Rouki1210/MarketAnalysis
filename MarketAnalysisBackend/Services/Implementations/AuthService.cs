@@ -12,17 +12,20 @@ namespace MarketAnalysisBackend.Services.Implementations
         private readonly IUserRepository _userRepo;
         private readonly IWalletService _walletService;
         private readonly ILogger<AuthService> _logger;
+        private readonly IRoleService _roleService;
         private readonly INonceRepository _nonceRepo;
         public AuthService(
             IUserRepository userRepo,
             IWalletService walletService,
             INonceRepository nonceRepo,
+            IRoleService roleService,
             IJwtService _jwt,
             ILogger<AuthService> logger)
         {
             _userRepo = userRepo;
             _walletService = walletService;
             _nonceRepo = nonceRepo;
+            _roleService = roleService;
             _logger = logger;
         }
         public async Task<User?> LoginAsync(LoginDTO dto)
@@ -42,6 +45,7 @@ namespace MarketAnalysisBackend.Services.Implementations
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             var username = string.IsNullOrEmpty(dto.Username) ? GenerateRandomUsername() : dto.Username;
+
             var newUser = new User
             {
                 Email = dto.Email,
@@ -52,7 +56,24 @@ namespace MarketAnalysisBackend.Services.Implementations
                 CreatedAt = DateTime.UtcNow,
                 AuthProvider = "Local"
             };
+
             await _userRepo.CreateAsync(newUser);
+            try
+            {
+                var roleAssigned = await _roleService.AssignRoleAsync(newUser.Id, "User");
+                if (roleAssigned)
+                {
+                    _logger.LogInformation("Assigned the role 'User' to user {UserId}", newUser.Id);
+                }
+                else
+                {
+                    _logger.LogWarning("Can't the assign the role 'User' to user {UserId} - the role may already exist",
+                        newUser.Id);
+                }
+            }catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when assign 'User' to user {UserId}", newUser.Id);
+            }
             return newUser;
         }
         public async Task<bool> ChangePasswordAsync(string username, ChangePasswordDto dto)
@@ -81,10 +102,29 @@ namespace MarketAnalysisBackend.Services.Implementations
             {
                 Email = email,
                 Username = $"google_{Guid.NewGuid().ToString().Substring(0, 6)}",
+                DisplayName = name,
                 CreatedAt = DateTime.UtcNow,
                 AuthProvider = "Google"
             };
             await _userRepo.CreateAsync(newUser);
+            try
+            {
+                var roleAssigned = await _roleService.AssignRoleAsync(newUser.Id, "User");
+                if (roleAssigned)
+                {
+                    _logger.LogInformation("Assigned the role 'User' to user {UserId}", newUser.Id);
+                }
+                else
+                {
+                    _logger.LogWarning("Can't the assign the role 'User' to user {UserId} - the role may already exist",
+                        newUser.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when assign 'User' to user {UserId}", newUser.Id);
+            }
+                
             return newUser;
         }
 
@@ -157,6 +197,22 @@ namespace MarketAnalysisBackend.Services.Implementations
                     AuthProvider = "MetaMask"
                 };
                 await _userRepo.CreateAsync(user);
+                try
+                {
+                    var roleAssigned = await _roleService.AssignRoleAsync(user.Id, "User");
+                    if (roleAssigned)
+                    {
+                        _logger.LogInformation("Assigned the role 'User' to user {UserId}", user.Id);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Can't the assign the role 'User' to user {UserId} - the role may already exist",
+                            user.Id);
+                    }
+                }
+                catch (Exception ex) {
+                    _logger.LogError(ex, "Error when assign 'User' to user {UserId}", user.Id);
+                }
                 _logger.LogInformation($"Created new user for wallet {dto.WalletAddress}");
             }
 

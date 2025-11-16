@@ -830,6 +830,35 @@ namespace MarketAnalysisBackend.Migrations
                     b.ToTable("PricePoints");
                 });
 
+            modelBuilder.Entity("MarketAnalysisBackend.Models.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Roles");
+                });
+
             modelBuilder.Entity("MarketAnalysisBackend.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -902,6 +931,33 @@ namespace MarketAnalysisBackend.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("MarketAnalysisBackend.Models.UserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId", "RoleId")
+                        .IsUnique();
+
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("MarketAnalysisBackend.Models.Watchlist", b =>
@@ -1187,6 +1243,25 @@ namespace MarketAnalysisBackend.Migrations
                     b.Navigation("Asset");
                 });
 
+            modelBuilder.Entity("MarketAnalysisBackend.Models.UserRole", b =>
+                {
+                    b.HasOne("MarketAnalysisBackend.Models.Role", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MarketAnalysisBackend.Models.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MarketAnalysisBackend.Models.Watchlist", b =>
                 {
                     b.HasOne("MarketAnalysisBackend.Models.User", "User")
@@ -1251,6 +1326,11 @@ namespace MarketAnalysisBackend.Migrations
                     b.Navigation("TopicFollows");
                 });
 
+            modelBuilder.Entity("MarketAnalysisBackend.Models.Role", b =>
+                {
+                    b.Navigation("UserRoles");
+                });
+
             modelBuilder.Entity("MarketAnalysisBackend.Models.User", b =>
                 {
                     b.Navigation("Articles");
@@ -1270,6 +1350,8 @@ namespace MarketAnalysisBackend.Migrations
                     b.Navigation("Reactions");
 
                     b.Navigation("TopicFollows");
+
+                    b.Navigation("UserRoles");
 
                     b.Navigation("Watchlists");
                 });

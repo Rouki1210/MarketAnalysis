@@ -1,4 +1,5 @@
-﻿using MarketAnalysisBackend.Models.DTO;
+﻿using MarketAnalysisBackend.Authorization;
+using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Services.Interfaces;
 using MarketAnalysisBackend.Services.Interfaces.Community;
 using Microsoft.AspNetCore.Authorization;
@@ -25,6 +26,7 @@ namespace MarketAnalysisBackend.Controllers
             return int.TryParse(userIdClaim, out var userId) ? userId : null;
         }
 
+        [RequireRole("User")]
         [HttpGet]
         public async Task<ActionResult<ApiResponse<List<NotificationDto>>>> GetNotifications(
             [FromQuery] int page = 1,
@@ -53,6 +55,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
+        [RequireRole("User")]
         [HttpGet("unread-count")]
         public async Task<ActionResult<ApiResponse<int>>> GetUnreadCount()
         {
@@ -73,6 +76,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
+        [RequireRole("User")]
         [HttpPut("{id}/mark-read")]
         public async Task<ActionResult<ApiResponse<bool>>> MarkAsRead(int id)
         {
@@ -96,6 +100,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
+        [RequireRole("User")]
         [HttpPut("mark-all-read")]
         public async Task<ActionResult<ApiResponse<bool>>> MarkAllAsRead()
         {
@@ -115,6 +120,8 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
+
+        [RequireRole("User")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteNotification(int id)
         {
@@ -138,6 +145,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
+        [RequireRole("User")]
         [HttpGet("types")]
         public ActionResult<ApiResponse<List<string>>> GetNotificationTypes()
         {

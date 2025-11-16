@@ -12,7 +12,7 @@ import { AvatarComponent } from '../common/avatar.component';
       <div *ngFor="let post of posts" class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 cursor-pointer" (click)="onSelect(post.id)">
         <div class="flex items-start gap-4">
           <app-avatar 
-            [emoji]="post.author.avatar" 
+            [emoji]="post.author.avatarEmoji" 
             size="md" 
             [verified]="post.author.verified || false">
           </app-avatar>

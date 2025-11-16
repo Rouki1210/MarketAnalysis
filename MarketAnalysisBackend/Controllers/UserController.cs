@@ -1,4 +1,5 @@
-﻿using MarketAnalysisBackend.Models;
+﻿using MarketAnalysisBackend.Authorization;
+using MarketAnalysisBackend.Models;
 using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Repositories.Interfaces;
 using MarketAnalysisBackend.Services.Interfaces;
@@ -27,6 +28,7 @@ namespace MarketAnalysisBackend.Controllers
             _profileSer = profileSer;
         }
 
+        [RequireRole("Admin")]
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
@@ -34,6 +36,7 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(users);
         }
 
+        [RequireRole("Admin")]
         [HttpDelete("delete-all")]
         public async Task<IActionResult> DeleteAllUsers()
         {
@@ -67,6 +70,7 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(user);
         }
 
+        [RequireRole("User")]
         [HttpPut("updateProfile")]
         public async Task<IActionResult> UpdateUser(string token, [FromBody] UpdateProfileDTO updateDto)
         {

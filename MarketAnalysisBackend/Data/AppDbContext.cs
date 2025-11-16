@@ -15,6 +15,8 @@ namespace MarketAnalysisBackend.Data
         public DbSet<Asset> Assets { get; set; }
         public DbSet<PricePoint> PricePoints { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Nonce> Nonces { get; set; }
         public DbSet<Watchlist> Watchlists { get; set; }
         public DbSet<WatchlistItems> WatchlistItems { get; set; }
@@ -45,6 +47,24 @@ namespace MarketAnalysisBackend.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.WalletAddress)
                 .IsUnique();
+
+            modelBuilder.Entity<Role>()
+                .HasIndex(r => r.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<UserRole>(entity =>
+            {
+                entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.UserRoles) 
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Role)
+                    .WithMany(r => r.UserRoles) // Role có nhiều UserRoles
+                    .HasForeignKey(e => e.RoleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<PricePoint>()
                 .HasIndex(p => new { p.AssetId, p.TimestampUtc });

@@ -1,4 +1,5 @@
-﻿using MarketAnalysisBackend.Models.DTO;
+﻿using MarketAnalysisBackend.Authorization;
+using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Services.Interfaces.Community;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -78,7 +79,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize]
+        [RequireRole("User")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<CommentDto>>> CreateCommnent([FromBody] CreateCommentDto createCommentDto)
         {
@@ -95,7 +96,7 @@ namespace MarketAnalysisBackend.Controllers
                     ApiResponse<CommentDto>.SuccessResponse(comment, "Comment created successfully"));
         }
 
-        [Authorize]
+        [RequireRole("User")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<CommentDto>>> UpdateComment(
             int id,
@@ -128,7 +129,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize]
+        [RequireRole("User")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteComment(int id)
         {

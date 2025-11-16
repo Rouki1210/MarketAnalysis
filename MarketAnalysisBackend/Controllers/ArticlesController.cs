@@ -1,4 +1,5 @@
-﻿using MarketAnalysisBackend.Models.DTO;
+﻿using MarketAnalysisBackend.Authorization;
+using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Services.Interfaces.Community;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -90,7 +91,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [RequireRole("Admin")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ArticleDto>>> CreateArticle(
             [FromBody] CreateArticleDto createArticleDto)
@@ -121,7 +122,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [RequireRole("Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<ArticleDto>>> UpdateArticle(
             int id,
@@ -151,7 +152,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [RequireRole("Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteArticle(int id)
         {
