@@ -21,6 +21,11 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OpenAI.Interfaces;
 using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+
+// ✅ CRITICAL: Disable default claim type mapping to prevent JWT claims from being modified
+// Without this, "role" claims might get mapped to different claim types
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -189,10 +194,14 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key)
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+
+        // ✅ Explicitly configure which claim types to use
+        RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+        NameClaimType = System.Security.Claims.ClaimTypes.Name
     };
 
-    // Support for SignalR authentication
+    // Support for SignalR authentication + Debugging events
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -206,6 +215,33 @@ builder.Services.AddAuthentication(options =>
             {
                 context.Token = accessToken;
             }
+            return Task.CompletedTask;
+        },
+
+        // ✅ Log authentication success
+        OnTokenValidated = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            var userId = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var roles = context.Principal?.FindAll(System.Security.Claims.ClaimTypes.Role).Select(c => c.Value);
+            logger.LogInformation("✅ JWT token validated for user {UserId} with roles: [{Roles}]",
+                userId, string.Join(", ", roles ?? new List<string>()));
+            return Task.CompletedTask;
+        },
+
+        // ✅ Log authentication failures
+        OnAuthenticationFailed = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogError("❌ JWT authentication failed: {Error}", context.Exception.Message);
+            return Task.CompletedTask;
+        },
+
+        // ✅ Log when token is missing
+        OnChallenge = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogWarning("⚠️ JWT authentication challenge: {Error}", context.ErrorDescription ?? "No token provided");
             return Task.CompletedTask;
         }
     };
