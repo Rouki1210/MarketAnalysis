@@ -75,30 +75,35 @@ namespace MarketAnalysisBackend.Services.Implementations
         public async Task<List<string>> GetUserRoleAsync(int userId)
         {
             var cacheKey = $"UserRoles_{userId}";
+
+            // Try to get from cache
             if (_cache.TryGetValue(cacheKey, out List<string>? roles))
             {
-                _logger.LogInformation("Cache miss - Query roles for user {UserId}", userId);
-
-                roles = await _context.UserRoles
-                    .Where(u => u.UserId == userId)
-                    .Include(u => u.Role)
-                    .Select(u => u.Role!.Name)
-                    .ToListAsync();
-
-                var cacheOptions = new MemoryCacheEntryOptions()
-                   .SetAbsoluteExpiration(TimeSpan.FromMinutes(15));
-
-                _cache.Set(cacheKey, roles, cacheOptions);
-
-                _logger.LogInformation(" Cached roles for user {UserId}: {Roles}",
-                    userId, string.Join(", ", roles));
-            }
-            else
-            {
-                _logger.LogInformation("Cache hit - Retrieved roles for user {UserId} from cache", userId);
-            }
-
+                // Cache HIT - data found in cache
+                _logger.LogInformation("Cache hit - Retrieved roles for user {UserId} from cache: {Roles}",
+                    userId, string.Join(", ", roles ?? new List<string>()));
                 return roles ?? new List<string>();
+            }
+
+            // Cache MISS - need to query database
+            _logger.LogInformation("Cache miss - Querying database for roles of user {UserId}", userId);
+
+            roles = await _context.UserRoles
+                .Where(u => u.UserId == userId)
+                .Include(u => u.Role)
+                .Select(u => u.Role!.Name)
+                .ToListAsync();
+
+            // Store in cache
+            var cacheOptions = new MemoryCacheEntryOptions()
+               .SetAbsoluteExpiration(TimeSpan.FromMinutes(15));
+
+            _cache.Set(cacheKey, roles, cacheOptions);
+
+            _logger.LogInformation("Cached roles for user {UserId}: {Roles}",
+                userId, string.Join(", ", roles));
+
+            return roles ?? new List<string>();
         }
 
         public async Task<bool> HasRoleAsync(int userId, string roleName)

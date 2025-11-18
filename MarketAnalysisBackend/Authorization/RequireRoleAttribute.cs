@@ -16,52 +16,59 @@ namespace MarketAnalysisBackend.Authorization
             _role = role;
         }
 
-        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+        public Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
             var user = context.HttpContext.User;
+
+            // Check if user is authenticated
             if (!user.Identity?.IsAuthenticated ?? true)
             {
                 context.Result = new UnauthorizedObjectResult(new
                 {
                     success = false,
-                    message = "You need to login to access this source ",
+                    message = "You need to login to access this source",
                     error = "UNAUTHORIZED"
                 });
-                return; 
+                return Task.CompletedTask;
             }
 
+            // Check if user has NameIdentifier claim (required in JWT)
             var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            if (string.IsNullOrEmpty(userIdClaim))
             {
-                // Token không hợp lệ hoặc không có userId
                 context.Result = new UnauthorizedObjectResult(new
                 {
                     success = false,
                     message = "Token is not available",
                     error = "INVALID_TOKEN"
                 });
-                return;
+                return Task.CompletedTask;
             }
 
-            var roleService = context.HttpContext.RequestServices.GetRequiredService<IRoleService>();
+            // ✅ FIX: Read roles from JWT token claims instead of querying database
+            // Check if user has any of the required roles in their JWT token
             foreach (var roleName in _role)
             {
-                bool hasRole = await roleService.HasRoleAsync(userId, roleName);
-                if (hasRole)
+                // Check if user has this role claim
+                if (user.HasClaim(ClaimTypes.Role, roleName))
                 {
-                    return;
+                    // User has the required role - authorization successful
+                    return Task.CompletedTask;
                 }
             }
 
+            // User doesn't have any of the required roles
             context.Result = new ObjectResult(new
             {
                 success = false,
-                message = "You need to login to access this source",
+                message = $"You need one of these roles to access this resource: {string.Join(", ", _role)}",
                 error = "FORBIDDEN"
             })
             {
                 StatusCode = 403
             };
+
+            return Task.CompletedTask;
         }
     }
 }
