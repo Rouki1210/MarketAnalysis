@@ -5,8 +5,8 @@ import { CommunityApiService } from './community-api.service';
 import { ApiResponse} from '../models/post.model';
 import { PaginatedResponse } from '../models/post.model';
 import { tap, catchError, finalize } from 'rxjs/operators';
-import {of } from 'rxjs';
-import { CommunityPostDto } from './community.service';
+import {Observable, of } from 'rxjs';
+import { AppComponent } from '@app/app.component';
 
 
 @Injectable({
@@ -23,7 +23,7 @@ export class PostService {
 
 
   constructor(private apiService: CommunityApiService) {
-    this.loadPosts(); 
+    this.getPosts(); 
   }
 
   // private loadMockPosts(): void {
@@ -67,32 +67,6 @@ export class PostService {
   //   this.postsSignal.set(mockPosts);
   // }
 
-  private maptoPost(data: CommunityPostDto): Post {
-    return {
-      id: data.id.toString(),
-      title: data.title,
-      content: data.content,
-      author: {
-        id: data.authorId,
-        username: data.authorUsername,
-        displayName: data.authorDisplayName,
-        avatarEmoji: data.authorAvatarEmoji,
-        verified: data.authorVerified
-      },
-      likes: data.likes,
-      comments: data.comments,
-      bookmarks: data.bookmarks,
-      shares: data.shares,
-      viewCount: data.viewCount,
-      isPinned: data.isPinned,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-      topics: data.topics,
-      isLiked: data.isLiked,
-      isBookmarked: data.isBookmarked
-      };
-}
-
   public loadPosts(page: number = 1, pageSize: number = 15, sortBy: string = 'CreatedAt'): void {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
@@ -108,12 +82,20 @@ export class PostService {
     this.apiService.get<ApiResponse<PaginatedResponse<Post>>>('/communitypost', params)
       .pipe(
         tap(response => {
-          if (response.success || response.data.data) {
-            const post : Post[] = response.data.data;
+          if (!response.success || response.data?.data) {
+            const post : Post[] = response.data?.data;
             this.postsSignal.set(post);
-            console.log('Posts set in signal:', this.postsSignal());
+            this.loadingSignal.set(false);
           }
         }),
+        catchError(error => {
+          console.error('Error loading posts:', error);
+          this.errorSignal.set(error.message || 'Failed to load posts');
+          return of(null);
+        }),
+        tap(() => {
+          this.loadingSignal.set(false);
+        })
       )
       .subscribe(response => {
         if (!response?.data?.data) {
@@ -131,30 +113,15 @@ export class PostService {
     return this.postsSignal().find(p => p.id === id);
   }
 
-  createPost(data: CreatePostData): Post {
-    const newPost: Post = {
-      id: Date.now().toString(), 
-      title: data.title,
-      content: data.content,
-      author: { id: 1, username: 'You', displayName: 'You', avatarEmoji: '👤' },
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      viewCount: 0,
-      isPinned: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      tags: data.tags || [],
-      isLiked: false,
-      isBookmarked: false
-    };
+  createPost(data: CreatePostData): Observable<ApiResponse<Post>> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
 
-    this.postsSignal.update(posts => [newPost, ...posts]);
-    return newPost;
+    return this.apiService.post<ApiResponse<Post>>('/CommunityPost', data);
   }
 
   toggleLike(postId: string): void {
+    const currentPost = this.getPostById(postId);
     this.postsSignal.update(posts =>
       posts.map(post => {
         if (post.id === postId) {

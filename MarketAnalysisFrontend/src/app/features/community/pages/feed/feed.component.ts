@@ -1,8 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PostService } from '../../services/post.service';
-import { Post, CreatePostData } from '../../models/post.model';
+import { Post } from '../../models/post.model';
 import { ModalService } from '../../services/modal.service';
 import { CreatePostComponent } from '../../components/feed/create-post.component';
 import { FilterBarComponent } from '../../components/feed/filter-bar.component';
@@ -13,9 +13,17 @@ import { ButtonComponent } from '../../components/common/button.component';
 @Component({
   selector: 'app-feed',
   standalone: true,
-  imports: [CommonModule, CreatePostComponent, FilterBarComponent, PostListComponent, SearchBarComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    CreatePostComponent,
+    FilterBarComponent,
+    PostListComponent,
+    SearchBarComponent,
+    ButtonComponent
+  ],
   template: `
     <div>
+
       <!-- Create Post Modal -->
       <app-create-post
         *ngIf="showCreatePost()"
@@ -23,7 +31,7 @@ import { ButtonComponent } from '../../components/common/button.component';
         (close)="onCloseModal()">
       </app-create-post>
 
-      <!-- Search Bar and Create Post Button -->
+      <!-- Search Bar -->
       <div class="mb-6 flex items-center gap-4 bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4">
         <div class="flex-1">
           <app-search-bar
@@ -45,75 +53,57 @@ import { ButtonComponent } from '../../components/common/button.component';
       <!-- Posts List -->
       <app-post-list
         [posts]="filteredPosts()"
-        [loading]="loading()"
+        [loading]="postService.loading()"
         (like)="onLike($event)"
         (bookmark)="onBookmark($event)"
         (select)="onSelectPost($event)">
       </app-post-list>
+
     </div>
-  `,
-  styles: []
+  `
 })
 export class FeedComponent implements OnInit {
-  posts = signal<Post[]>([]);
+
   selectedFilter = signal<string>('trending');
-  showCreatePost = signal<boolean>(false);
-  loading = signal<boolean>(false);
   searchQuery = signal<string>('');
-  filteredPosts = signal<Post[]>([]);
+  showCreatePost = signal<boolean>(false);
 
   constructor(
-    private postService: PostService,
+    public postService: PostService,
     private modalService: ModalService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadPosts();
+    this.postService.loadPosts();
 
-    // Subscribe to modal service
     this.modalService.showCreatePost$.subscribe(show => {
       this.showCreatePost.set(show);
     });
   }
 
-  loadPosts(): void {
-    this.loading.set(true);
-    const allPosts = this.postService.getPosts();
-    this.posts.set(allPosts);
-    this.filterPosts();
-    this.loading.set(false);
-  }
-
-  filterPosts(): void {
+  filteredPosts = computed(() => {
+    const posts = this.postService.posts(); // lấy từ service
     const query = this.searchQuery().toLowerCase();
-    if (!query) {
-      this.filteredPosts.set(this.posts());
-      return;
-    }
-    const filtered = this.posts().filter(post => 
+
+    if (!query) return posts;
+
+    return posts.filter(post =>
       post.title.toLowerCase().includes(query) ||
       post.content.toLowerCase().includes(query) ||
       post.author.username.toLowerCase().includes(query)
     );
-    this.filteredPosts.set(filtered);
-  }
+  });
 
-  onSearchChange(value: string): void {
+  onSearchChange(value: string) {
     this.searchQuery.set(value);
-    this.filterPosts();
   }
 
-  onCreatePostClick(): void {
+  onCreatePostClick() {
     this.modalService.openCreatePost();
   }
 
-  onFilterChange(filter: string): void {
-    this.selectedFilter.set(filter);
-    this.filterPosts();
-  }
-
-  onCreatePost(postData: Partial<Post>): void {
+  onCreatePost(postData: Partial<Post>) {
     if (postData.title && postData.content) {
       this.postService.createPost({
         title: postData.title,
@@ -121,26 +111,26 @@ export class FeedComponent implements OnInit {
         tags: postData.tags || []
       });
       this.modalService.closeCreatePost();
-      this.loadPosts();
     }
   }
 
-  onCloseModal(): void {
-    this.modalService.closeCreatePost();
+  onFilterChange(filter: string) {
+    this.selectedFilter.set(filter);
   }
 
-  onLike(postId: string): void {
+  onLike(postId: string) {
     this.postService.toggleLike(postId);
-    this.loadPosts();
   }
 
-  onBookmark(postId: string): void {
+  onBookmark(postId: string) {
     this.postService.toggleBookmark(postId);
-    this.loadPosts();
   }
 
-  onSelectPost(postId: string): void {
+  onSelectPost(postId: string) {
     this.router.navigate(['/community/post', postId]);
   }
-}
 
+  onCloseModal() {
+    this.modalService.closeCreatePost();
+  }
+}
