@@ -31,7 +31,7 @@ namespace MarketAnalysisBackend.Controllers
             {
                 var currentUserId = GetCurrentUserId();
                 var posts = await _post.GetPostsAsync(request, currentUserId);
-                return Ok(posts);
+                return Ok(ApiResponse<PaginatedResponse<CommunityPostDto>>.SuccessResponse(posts));
             }
             catch (Exception ex)
             {

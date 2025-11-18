@@ -1,10 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import { Post, CreatePostData } from '../models/post.model';
-import { HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 import { CommunityApiService } from './community-api.service';
-import { ApiResponse} from '@app/core/models/common.model';
+import { ApiResponse} from '../models/post.model';
 import { PaginatedResponse } from '../models/post.model';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, finalize } from 'rxjs/operators';
+import {of } from 'rxjs';
+import { CommunityPostDto } from './community.service';
 
 
 @Injectable({
@@ -21,96 +23,109 @@ export class PostService {
 
 
   constructor(private apiService: CommunityApiService) {
-    this.loadMockPosts();
-    this.loadPosts();
+    this.loadPosts(); 
   }
 
-  private loadMockPosts(): void {
-    const mockPosts: Post[] = [
-      // {
-      //   id: 'p1',
-      //   title: 'Bitcoin hits key resistance — what is next?',
-      //   content: 'BTC approaches $70k again as on-chain metrics show strong accumulation. Will bulls break through?',
-      //   author: { id: 1, username: 'CryptoAnalyst', displayName: 'CryptoAnalyst', avatarEmoji: '🟧', verified: true },
-      //   likes: 128,
-      //   comments: 34,
-      //   bookmarks: 12,
-      //   shares: 9,
-      //   createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      //   updatedAt: new Date().toISOString(),
-      //   tags: ['BTC', 'Market'],
-      //   isLiked: false,
-      //   isBookmarked: false
-      // },
-      // {
-      //   id: 'p2',
-      //   title: 'ETH staking update and L2 momentum',
-      //   content: 'Ethereum staking continues to grow while L2 activity sets new highs. Key protocols to watch.',
-      //   author: { id: 2, username: 'DeFiWatcher', avatarEmoji: '🟪' },
-      //   likes: 76,
-      //   comments: 18,
-      //   bookmarks: 8,
-      //   shares: 5,
-      //   createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-      //   updatedAt: new Date().toISOString(),
-      //   tags: ['ETH', 'DeFi'],
-      //   isLiked: false,
-      //   isBookmarked: false
-      // },
-      // {
-      //   id: 'p3',
-      //   title: 'Altcoin season indicators heating up',
-      //   content: 'Several metrics suggest altcoins may be gearing up for a strong run. Here is what to watch.',
-      //   author: { id: 3, username: 'AltcoinGuru', avatarEmoji: '🟩', verified: true },
-      //   likes: 92,
-      //   comments: 27,
-      //   bookmarks: 15,
-      //   shares: 11,
-      //   createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-      //   updatedAt: new Date().toISOString(),
-      //   tags: ['Altcoins', 'Market'],
-      //   isLiked: false,
-      //   isBookmarked: false
-      // }
-    ];
+  // private loadMockPosts(): void {
+  //   const mockPosts: Post[] = [
+  //     {
+  //       id: "1",
+  //       title: 'Bitcoin hits key resistance — what is next?',
+  //       content: 'BTC approaches $70k again as on-chain metrics show strong accumulation. Will bulls break through?',
+  //       author: { id: 1, username: 'CryptoAnalyst', displayName: 'CryptoAnalyst', avatarEmoji: '🟧', verified: true },
+  //       likes: 128,
+  //       comments: 34,
+  //       bookmarks: 12,
+  //       shares: 9,
+  //       viewCount: 102,
+  //       isPinned: false,
+  //       createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  //       updatedAt: new Date().toISOString(),
+  //       tags: ['BTC', 'Market'],
+  //       isLiked: false,
+  //       isBookmarked: false
+  //     },
+  //     {
+  //       id: Date.now().toString(),
+  //       title: 'Altcoin season indicators heating up',
+  //       content: 'Several metrics suggest altcoins may be gearing up for a strong run. Here is what to watch.',
+  //       author: { id: 3, username: 'AltcoinGuru', displayName: 'AltcoinGuru', avatarEmoji: '🟩', verified: true },
+  //       likes: 92,
+  //       comments: 27,
+  //       bookmarks: 15,
+  //       viewCount:  97,
+  //       isPinned: false,
+  //       shares: 11,
+  //       createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+  //       updatedAt: new Date().toISOString(),
+  //       tags: ['Altcoins', 'Market'],
+  //       isLiked: false,
+  //       isBookmarked: false
+  //     }
+  //   ];
 
-    this.postsSignal.set(mockPosts);
-  }
+  //   this.postsSignal.set(mockPosts);
+  // }
 
-  getPosts(): Post[] {
-    this.loadPosts();
-    return this.postsSignal();
-  }
+  private maptoPost(data: CommunityPostDto): Post {
+    return {
+      id: data.id.toString(),
+      title: data.title,
+      content: data.content,
+      author: {
+        id: data.authorId,
+        username: data.authorUsername,
+        displayName: data.authorDisplayName,
+        avatarEmoji: data.authorAvatarEmoji,
+        verified: data.authorVerified
+      },
+      likes: data.likes,
+      comments: data.comments,
+      bookmarks: data.bookmarks,
+      shares: data.shares,
+      viewCount: data.viewCount,
+      isPinned: data.isPinned,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      topics: data.topics,
+      isLiked: data.isLiked,
+      isBookmarked: data.isBookmarked
+      };
+}
 
-  loadPosts(page: number = 1, pageSize: number = 10, sortBy: string = 'createdAt'): void {
-    // This is a mock implementation. Replace with actual API call.
+  public loadPosts(page: number = 1, pageSize: number = 15, sortBy: string = 'CreatedAt'): void {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('pageSize', pageSize.toString())
-      .set('sortBy', sortBy);
+    const params = new HttpParams({
+      fromObject: {
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        sortBy
+      }
+    });
 
-    this.apiService.get<ApiResponse<PaginatedResponse<Post>>>('/CommunityPost', { params })
+    this.apiService.get<ApiResponse<PaginatedResponse<Post>>>('/communitypost', params)
       .pipe(
         tap(response => {
-          if (response && response.data?.data) {
-            console.log('Posts loaded:', response);
-            this.postsSignal.set(response.data.data);
+          if (response.success || response.data.data) {
+            const post : Post[] = response.data.data;
+            this.postsSignal.set(post);
+            console.log('Posts set in signal:', this.postsSignal());
           }
-          this.loadingSignal.set(false);
         }),
-        // catchError(error => {
-        //   console.error('Error loading posts:', error);
-        //   this.errorSignal.set(error.message || 'Failed to load posts');
-        //   this.loadingSignal.set(false);
-        //   // Fallback to mock data
-        //   this.loadMockPosts();
-        //   return null;
-        // })
-      ).subscribe();
+      )
+      .subscribe(response => {
+        if (!response?.data?.data) {
+          return;
+        }
+      });
   }
+
+  getPosts(): Post[] {
+    return this.postsSignal();
+  }
+
 
   getPostById(id: string): Post | undefined {
     return this.postsSignal().find(p => p.id === id);
@@ -118,7 +133,7 @@ export class PostService {
 
   createPost(data: CreatePostData): Post {
     const newPost: Post = {
-      id: `p${Date.now()}`,
+      id: Date.now().toString(), 
       title: data.title,
       content: data.content,
       author: { id: 1, username: 'You', displayName: 'You', avatarEmoji: '👤' },
@@ -172,7 +187,19 @@ export class PostService {
   }
 
   deletePost(postId: string): void {
+    const deletedPost = this.getPostById(postId);
     this.postsSignal.update(posts => posts.filter(p => p.id !== postId));
-  }
-}
 
+    this.apiService.delete<ApiResponse<boolean>>(`/CommunityPost/${postId}`).pipe(
+      catchError(error => {
+        console.error('Error deleting post:', error);
+        if (deletedPost) {
+            this.postsSignal.update(posts => [deletedPost, ...posts]);
+          }
+          this.errorSignal.set(error.message || 'Failed to delete post');
+          return of(null);
+        })
+      ).subscribe();
+  }
+
+}
