@@ -14,14 +14,16 @@ namespace MarketAnalysisBackend.Services.Implementations
     {
         private readonly IConfiguration _config;
         private readonly ILogger<JwtService> _logger;
+        private readonly IRoleService _roleService;
 
-        public JwtService(IConfiguration config, ILogger<JwtService> logger)
+        public JwtService(IConfiguration config, ILogger<JwtService> logger, IRoleService roleService)
         {
             _config = config;
             _logger = logger;
+            _roleService = roleService;
         }
 
-        public string GenerateToken(User user)
+        public async Task<string> GenerateToken(User user)
         {
             // Validate configuration
             var jwtKey = _config["Jwt:Key"];
@@ -41,6 +43,9 @@ namespace MarketAnalysisBackend.Services.Implementations
             if (string.IsNullOrEmpty(jwtAudience))
                 throw new InvalidOperationException("JWT Audience is not configured");
 
+            // Get user roles
+            var roles = await _roleService.GetUserRoleAsync(user.Id);
+
             // Build claims
             var claims = new List<Claim>
             {
@@ -53,6 +58,12 @@ namespace MarketAnalysisBackend.Services.Implementations
                 new Claim("displayName", user.DisplayName ?? user.Username),
                 new Claim("authProvider", user.AuthProvider)
             };
+
+            // Add role claims
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             // Create signing credentials
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
@@ -78,8 +89,8 @@ namespace MarketAnalysisBackend.Services.Implementations
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
             _logger.LogInformation(
-                "Generated JWT token for user {UserId} ({Username}). Issuer: {Issuer}, Audience: {Audience}, Expires: {Expires}",
-                user.Id, user.Username, jwtIssuer, jwtAudience, expires);
+                "Generated JWT token for user {UserId} ({Username}) with roles [{Roles}]. Issuer: {Issuer}, Audience: {Audience}, Expires: {Expires}",
+                user.Id, user.Username, string.Join(", ", roles), jwtIssuer, jwtAudience, expires);
 
             return tokenString;
         }

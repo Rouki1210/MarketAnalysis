@@ -41,7 +41,7 @@ namespace MarketAnalysisBackend.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterDTO dto)
         {
             var user = await _authService.RegisterAsync(dto);
-            var token = _jwtService.GenerateToken(user);
+            var token = await _jwtService.GenerateToken(user);
             return Ok(new { success = true, user.Username, token });
         }
 
@@ -53,7 +53,7 @@ namespace MarketAnalysisBackend.Controllers
             {
                 return Unauthorized(new { message = "Invalid credentials" });
             }
-            var token = _jwtService.GenerateToken(user);
+            var token = await _jwtService.GenerateToken(user);
             return Ok(new { success = true, user.Username, token });
         }
 
@@ -124,7 +124,7 @@ namespace MarketAnalysisBackend.Controllers
                 };
                 await _userRepository.CreateAsync(user);
             }
-            var token = _jwtService.GenerateToken(user);
+            var token = await _jwtService.GenerateToken(user);
 
             // TODO: Create or update user in your database, issue your JWT token, etc.
             return Ok(new
@@ -161,7 +161,7 @@ namespace MarketAnalysisBackend.Controllers
             try
             {
                 var user = await _authService.MetaMaskLoginAsync(request);
-                var token = _jwtService.GenerateToken(user);
+                var token = await _jwtService.GenerateToken(user);
 
                 var response = new AuthResponseDTO
                 {
