@@ -1,91 +1,139 @@
-﻿using MarketAnalysisBackend.Services.Implementations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Security.Claims;
 
-
 namespace MarketAnalysisBackend.Authorization
 {
+    /// <summary>
+    /// Custom authorization attribute that validates user roles from JWT token claims.
+    /// This attribute reads role claims directly from the decoded JWT token without querying the database.
+    ///
+    /// Usage:
+    ///   [RequireRole("Admin")]
+    ///   [RequireRole("Admin", "Moderator")]  // User needs at least one of these roles
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
-    public class RequireRoleAttribute : Attribute, IAsyncAuthorizationFilter
+    public class RequireRoleAttribute : Attribute, IAuthorizationFilter
     {
-        private readonly string[] _role;
+        private readonly string[] _requiredRoles;
 
-        public RequireRoleAttribute(params string[] role)
+        /// <summary>
+        /// Initializes a new instance of RequireRoleAttribute.
+        /// </summary>
+        /// <param name="roles">One or more role names. User must have at least one of these roles.</param>
+        /// <exception cref="ArgumentNullException">Thrown when roles is null</exception>
+        /// <exception cref="ArgumentException">Thrown when no roles are specified</exception>
+        public RequireRoleAttribute(params string[] roles)
         {
-            _role = role;
+            if (roles == null || roles.Length == 0)
+            {
+                throw new ArgumentException("At least one role must be specified", nameof(roles));
+            }
+
+            _requiredRoles = roles;
         }
 
-        public Task OnAuthorizationAsync(AuthorizationFilterContext context)
+        /// <summary>
+        /// Called when authorization is required. Validates that the user has at least one of the required roles
+        /// by reading claims from the JWT token.
+        /// </summary>
+        public void OnAuthorization(AuthorizationFilterContext context)
         {
             var user = context.HttpContext.User;
-            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<RequireRoleAttribute>>();
+            var logger = context.HttpContext.RequestServices.GetService<ILogger<RequireRoleAttribute>>();
 
-            // Check if user is authenticated
-            if (!user.Identity?.IsAuthenticated ?? true)
+            // ============================================================================
+            // STEP 1: Verify user is authenticated
+            // ============================================================================
+            if (user?.Identity?.IsAuthenticated != true)
             {
-                logger.LogWarning("❌ Authorization failed: User not authenticated");
+                logger?.LogWarning("❌ Authorization failed: User not authenticated");
+
                 context.Result = new UnauthorizedObjectResult(new
                 {
                     success = false,
-                    message = "You need to login to access this source",
+                    message = "Authentication required. Please login to access this resource.",
                     error = "UNAUTHORIZED"
                 });
-                return Task.CompletedTask;
+                return;
             }
 
-            // Check if user has NameIdentifier claim (required in JWT)
+            // ============================================================================
+            // STEP 2: Extract userId from JWT token claims
+            // ============================================================================
             var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             if (string.IsNullOrEmpty(userIdClaim))
             {
-                logger.LogWarning("❌ Authorization failed: Missing NameIdentifier claim");
+                logger?.LogWarning("❌ Authorization failed: Missing NameIdentifier claim in JWT token");
+
                 context.Result = new UnauthorizedObjectResult(new
                 {
                     success = false,
-                    message = "Token is not available",
+                    message = "Invalid authentication token. Missing user identifier.",
                     error = "INVALID_TOKEN"
                 });
-                return Task.CompletedTask;
+                return;
             }
 
-            // 🔍 DEBUG: Log ALL claims in the token to see what was decoded
-            var allClaims = user.Claims.Select(c => $"{c.Type} = {c.Value}").ToList();
-            logger.LogInformation("🔍 User {UserId} claims: [{Claims}]", userIdClaim, string.Join(", ", allClaims));
+            // ============================================================================
+            // STEP 3: Log all claims for debugging (helps identify claim type issues)
+            // ============================================================================
+            var allClaims = user.Claims.Select(c => $"{c.Type}={c.Value}").ToList();
+            logger?.LogInformation("🔍 User {UserId} JWT claims: [{Claims}]",
+                userIdClaim, string.Join(", ", allClaims));
 
-            // ✅ FIX: Read roles from JWT token claims instead of querying database
-            // Check if user has any of the required roles in their JWT token
-            logger.LogInformation("🔍 Checking for required roles: [{RequiredRoles}]", string.Join(", ", _role));
+            // ============================================================================
+            // STEP 4: Check if user has any of the required roles from JWT claims
+            // ============================================================================
+            logger?.LogInformation("🔍 Checking for required roles: [{RequiredRoles}]",
+                string.Join(", ", _requiredRoles));
 
-            foreach (var roleName in _role)
+            foreach (var roleName in _requiredRoles)
             {
-                // Try to find role claim with exact match
-                var hasRole = user.HasClaim(ClaimTypes.Role, roleName);
-                logger.LogInformation("🔍 HasClaim(ClaimTypes.Role='{ClaimType}', '{RoleName}'): {HasRole}",
-                    ClaimTypes.Role, roleName, hasRole);
+                // Check both claim type formats because JWT tokens may use either:
+                // 1. Full URI: "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                // 2. Short form: "role"
+                // This depends on how the token was serialized and the DefaultInboundClaimTypeMap setting
+
+                var hasRoleFullUri = user.HasClaim(ClaimTypes.Role, roleName);
+                var hasRoleShortForm = user.HasClaim("role", roleName);
+                var hasRole = hasRoleFullUri || hasRoleShortForm;
+
+                logger?.LogDebug("🔍 Role '{RoleName}' check: Full URI={FullUri}, Short form={ShortForm}, Result={Result}",
+                    roleName, hasRoleFullUri, hasRoleShortForm, hasRole);
 
                 if (hasRole)
                 {
-                    // User has the required role - authorization successful
-                    logger.LogInformation("✅ Authorization SUCCESS: User {UserId} has role '{Role}'", userIdClaim, roleName);
-                    return Task.CompletedTask;
+                    logger?.LogInformation("✅ Authorization SUCCESS: User {UserId} has role '{RoleName}'",
+                        userIdClaim, roleName);
+                    return; // Authorization successful
                 }
             }
 
-            // User doesn't have any of the required roles
-            logger.LogWarning("❌ Authorization FAILED: User {UserId} does not have any required roles [{RequiredRoles}]",
-                userIdClaim, string.Join(", ", _role));
+            // ============================================================================
+            // STEP 5: User doesn't have any required roles - deny access
+            // ============================================================================
+            var userRoles = user.Claims
+                .Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
+                .Select(c => c.Value)
+                .ToList();
+
+            logger?.LogWarning("❌ Authorization FAILED: User {UserId} does not have required roles. " +
+                "Required: [{RequiredRoles}], User has: [{UserRoles}]",
+                userIdClaim,
+                string.Join(", ", _requiredRoles),
+                userRoles.Count > 0 ? string.Join(", ", userRoles) : "None");
 
             context.Result = new ObjectResult(new
             {
                 success = false,
-                message = $"You need one of these roles to access this resource: {string.Join(", ", _role)}",
+                message = $"Access denied. Required role(s): {string.Join(" or ", _requiredRoles)}",
                 error = "FORBIDDEN"
             })
             {
                 StatusCode = 403
             };
-
-            return Task.CompletedTask;
         }
     }
 }
