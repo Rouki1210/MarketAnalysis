@@ -32,9 +32,15 @@ namespace MarketAnalysisBackend.Services.Implementations
             }
             return null;
         }
-        public Task<User?> EditInforUser(string? walletaddress)
+
+        public async Task<User?> GetUserById(int id)
         {
-            throw new NotImplementedException();
+            var user = await _userRepo.GetByIdAsync(id);
+            if (user == null)
+            {
+                throw new NotImplementedException();
+            }
+            return user;
         }
 
         public Task<User?> EditInforUser()

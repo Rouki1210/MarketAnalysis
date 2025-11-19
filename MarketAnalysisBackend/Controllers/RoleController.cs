@@ -108,7 +108,7 @@ namespace MarketAnalysisBackend.Controllers
                     }
                 }
 
-                var user = await _userService.GetUserByEmailorUsername(userId.ToString());
+                var user = await _userService.GetUserById(userId);
                 if (user == null)
                 {
                     return NotFound(ApiResponse<UserRolesDto>.ErrorResponse(

@@ -6,6 +6,7 @@ namespace MarketAnalysisBackend.Services.Interfaces
     {
         Task<User?> GetUserByEmailorUsername(string? emailorusername);
         Task<User?> GetUserByWalletAddress(string? walletaddress);
+        Task<User?> GetUserById(int id);
         Task<User?> EditInforUser();
     }
 }

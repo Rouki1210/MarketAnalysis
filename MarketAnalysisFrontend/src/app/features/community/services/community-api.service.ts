@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -68,6 +68,9 @@ export class CommunityApiService {
     return this.http.post<T>(`${this.baseURL}${url}`, data, {
       headers: this.getHeaders()
     }).pipe(
+      tap((response: any) => {
+        console.log(`✅ POST ${url} Success:`, response);
+      }),
       catchError(this.handleError.bind(this))
     );
   }
@@ -76,6 +79,9 @@ export class CommunityApiService {
     return this.http.put<T>(`${this.baseURL}${url}`, data, {
       headers: this.getHeaders()
     }).pipe(
+      tap((response: any) => {
+        console.log(`✅ PUT ${url} Success:`, response);
+      }),
       catchError(this.handleError.bind(this))
     );
   }
@@ -84,8 +90,28 @@ export class CommunityApiService {
     return this.http.delete<T>(`${this.baseURL}${url}`, {
       headers: this.getHeaders()
     }).pipe(
+      tap((response: any) => {
+        console.log(`✅ DELETE ${url} Success:`, response);
+      }),
       catchError(this.handleError.bind(this))
     );
+  }
+
+  isAuthenticated(): boolean {
+    const token = localStorage.getItem('token');
+    return !!token;
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  setToken(token: string): void {
+    localStorage.setItem('token', token);
+  }
+
+  removeToken(): void {
+    localStorage.removeItem('token');
   }
 }
 
