@@ -165,7 +165,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [RequireRole("User")]
+        [RequireRole("User", "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeletePost(int id)
         {
@@ -190,6 +190,25 @@ namespace MarketAnalysisBackend.Controllers
             {
                 return StatusCode(500, ApiResponse<bool>.ErrorResponse("Failed to delete post"));
             }
+        }
+
+        [HttpGet("test-require-role")]
+        [RequireRole("Admin")]
+        public IActionResult TestRequireRole()
+        {
+            var userId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userName = User?.FindFirst(ClaimTypes.Name)?.Value;
+            var roles = User?.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+
+            return Ok(new
+            {
+                success = true,
+                message = "✅ RequireRole check passed!",
+                userId = userId,
+                userName = userName,
+                roles = roles,
+                requiredRole = "Admin"
+            });
         }
 
         [RequireRole("User")]

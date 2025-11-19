@@ -137,8 +137,8 @@ var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecr
 
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"];
-var jwtIssuer = builder.Configuration["Authentication:Jwt:Issuer"];
-var jwtAudience = builder.Configuration["Authentication:Jwt:Audience"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
 
 //builder.Services.AddAuthentication(options =>
 //{
@@ -261,9 +261,8 @@ app.MapHub<PriceHub>("/pricehub");
 app.MapHub<GlobalMetric>("/globalmetrichub");
 app.MapHub <AlertHub>("/alerthub");
 
-app.UseAuthentication();
-
 app.UseHttpsRedirection();
+app.UseAuthentication();
 
 app.UseAuthorization();
 

@@ -75,15 +75,15 @@ namespace MarketAnalysisBackend.Services.Implementations
         public async Task<List<string>> GetUserRoleAsync(int userId)
         {
             var cacheKey = $"UserRoles_{userId}";
-            if (_cache.TryGetValue(cacheKey, out List<string>? roles))
-            {
-                _logger.LogInformation("Cache miss - Query roles for user {UserId}", userId);
-
-                roles = await _context.UserRoles
+            var roles = await _context.UserRoles
                     .Where(u => u.UserId == userId)
                     .Include(u => u.Role)
                     .Select(u => u.Role!.Name)
                     .ToListAsync();
+            if (_cache.TryGetValue(cacheKey, out List<string>? role))
+            {
+                _logger.LogInformation("Cache miss - Query roles for user {UserId}", userId);
+
 
                 var cacheOptions = new MemoryCacheEntryOptions()
                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(15));

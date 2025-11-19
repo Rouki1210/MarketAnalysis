@@ -5,7 +5,8 @@ namespace MarketAnalysisBackend.Services.Interfaces
 {
     public interface IJwtService
     {
-        string GenerateToken(User user);
+        Task<string> GenerateToken(User user);
         ClaimsPrincipal? GetPrincipalFromToken(string token);
+        string GenerateRefreshToken();
     }
 }
