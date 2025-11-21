@@ -15,7 +15,6 @@ namespace MarketAnalysisBackend.Controllers
             _watchlistSer = watchlistSer;
         }
 
-        [RequireRole("User")]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetWatchlistsByUserId(int userId)
         {
@@ -23,7 +22,6 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(watchlists);
         }
 
-        [RequireRole("User")]
         [HttpPost("{userId}/create")]
         public async Task<IActionResult> CreateWatchlist(int userId, string name)
         {
@@ -38,7 +36,6 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [RequireRole("User")]
         [HttpPost("{userId}/watchlist-default")]
         public async Task<IActionResult> CreateDefaultWatchlist(int userId, int assetId)
         {
@@ -53,7 +50,6 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [RequireRole("User")]
         [HttpPost("{watchlistId}/add/{assetId}")]
         public async Task<IActionResult> AddAssetToWatchlist(int watchlistId, int assetId)
         {
@@ -68,7 +64,7 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [RequireRole("User")]
+
         [HttpGet("{watchlistId}")]
         public async Task<IActionResult> GetWatchlistById(int watchlistId)
         {
@@ -78,7 +74,6 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(new { success = true, data = watchlist });
         }
 
-        [RequireRole("User")]
         [HttpDelete("{watchlistId}/remove/{assetId}")]
         public async Task<IActionResult> RemoveAssetFromWatchlist(int watchlistId, int assetId)
         {
@@ -93,7 +88,6 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [RequireRole("User")]
         [HttpGet("user/{userId}/default")]
         public async Task<IActionResult> GetOrCreateDefaultWatchlist(int userId)
         {
@@ -108,7 +102,6 @@ namespace MarketAnalysisBackend.Controllers
             }
         }
 
-        [RequireRole("User")]
         [HttpPost("user/{userId}/toggle/{assetId}")]
         public async Task<IActionResult> ToggleAssetInDefaultWatchlist(int userId, int assetId)
         {

@@ -25,6 +25,8 @@ namespace MarketAnalysisBackend.Data
         public DbSet<GlobalAlertEvent> GlobalAlertEvents { get; set; }
         public DbSet<UserAlertView> UserAlertView { get; set; }
         public DbSet<PriceCache> PriceCaches { get; set; }
+        public DbSet<UserAlert> UserAlerts { get; set; }
+        public DbSet<UserAlertHistories> UserAlertHistories { get; set; }
 
         //Community DbSets
         public DbSet<CommunityPost> CommunityPosts { get; set; }
@@ -118,6 +120,30 @@ namespace MarketAnalysisBackend.Data
             modelBuilder.Entity<WatchlistItems>()
                 .HasIndex(wi => new { wi.WatchlistId, wi.AssetId })
                 .IsUnique();
+
+            modelBuilder.Entity<UserAlert>(entity =>
+            {
+                entity.HasIndex(e => new { e.UserId, e.IsActive });
+                entity.HasIndex(e => new { e.AssetId, e.IsActive });
+                entity.HasIndex(e => e.CreatedAt);
+                entity.HasIndex(e => new { e.UserId, e.AssetId, e.AlertType });
+
+                entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Asset).WithMany().HasForeignKey(e => e.AssetId).OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<UserAlertHistories>(entity =>
+            {
+                entity.HasIndex(e => e.UserAlertId);
+                entity.HasIndex(e => new { e.UserId, e.TriggeredAt }).IsDescending(false, true);
+                entity.HasIndex(e => new { e.AssetId, e.TriggeredAt }).IsDescending(false, true);
+                entity.HasIndex(e => e.TriggeredAt).IsDescending();
+                entity.HasIndex(e => new { e.UserId, e.ViewAt });
+
+                entity.HasOne(e => e.UserAlert).WithMany(a => a.History).HasForeignKey(e => e.UserAlertId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Asset).WithMany().HasForeignKey(e => e.AssetId).OnDelete(DeleteBehavior.Restrict);
+            });
 
             // CommunityPost configurations
             modelBuilder.Entity<CommunityPost>(entity =>

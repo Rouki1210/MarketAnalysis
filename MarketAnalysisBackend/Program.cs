@@ -88,6 +88,8 @@ builder.Services.AddScoped<IWatchlistRepository, WatchlistRepository>();
 builder.Services.AddScoped<INonceRepository, NonceRepository>();
 builder.Services.AddScoped<IPriceCacheRepository, PriceCacheRepository>();
 builder.Services.AddScoped<IGlobalAlertRepository, GlobalAlertRepository>();
+builder.Services.AddScoped<IUserAlertRepository, UserAlertRepository>();
+builder.Services.AddScoped<IUserAlertHistoryRepository, UserAlertHistoryRepository>();
 
 builder.Services.AddScoped<ICommunityPostRepository, CommunityPostRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
@@ -115,6 +117,7 @@ builder.Services.AddScoped<IPriceCacheService, PriceCacheService>();
 builder.Services.AddScoped<IAlertEvaluationService, AlertEvaluationService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IGlobalAlertOrchestrationService, GlobalAlertOrchestrationService>();
+builder.Services.AddScoped<IUserAlertService, UserAlertService>();
 
 builder.Services.AddScoped<ICommunityPostService, CommunityPostService>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
@@ -123,6 +126,7 @@ builder.Services.AddScoped<IUserFollowService, UserFollowService>();
 builder.Services.AddScoped<ITopicService, TopicService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+
 
 // Background Services
 //builder.Services.AddHostedService<AssetImporterService>();

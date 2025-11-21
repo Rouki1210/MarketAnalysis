@@ -189,6 +189,141 @@ namespace MarketAnalysisBackend.Migrations
                     b.ToTable("PriceCaches");
                 });
 
+            modelBuilder.Entity("MarketAnalysisBackend.Models.Alert.UserAlert", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AlertType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("AssetId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AssetSymbol")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRepeating")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal?>("LastKnownPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("LastPriceCheckAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LastTriggedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("TargetPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("TriggerCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("AssetId", "IsActive");
+
+                    b.HasIndex("UserId", "IsActive");
+
+                    b.HasIndex("UserId", "AssetId", "AlertType");
+
+                    b.ToTable("UserAlerts");
+                });
+
+            modelBuilder.Entity("MarketAnalysisBackend.Models.Alert.UserAlertHistories", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("ActualPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("AlertType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("AssetId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AssetSymbol")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NotificationError")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NotificationMethod")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("PriceDifference")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("TargetPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("TriggeredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("TriggeredPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("UserAlertId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ViewAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("WasNotified")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TriggeredAt")
+                        .IsDescending();
+
+                    b.HasIndex("UserAlertId");
+
+                    b.HasIndex("AssetId", "TriggeredAt")
+                        .IsDescending(false, true);
+
+                    b.HasIndex("UserId", "TriggeredAt")
+                        .IsDescending(false, true);
+
+                    b.HasIndex("UserId", "ViewAt");
+
+                    b.ToTable("UserAlertHistories");
+                });
+
             modelBuilder.Entity("MarketAnalysisBackend.Models.Alert.UserAlertView", b =>
                 {
                     b.Property<string>("Id")
@@ -1057,6 +1192,52 @@ namespace MarketAnalysisBackend.Migrations
                     b.Navigation("Asset");
                 });
 
+            modelBuilder.Entity("MarketAnalysisBackend.Models.Alert.UserAlert", b =>
+                {
+                    b.HasOne("MarketAnalysisBackend.Models.Asset", "Asset")
+                        .WithMany()
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MarketAnalysisBackend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Asset");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MarketAnalysisBackend.Models.Alert.UserAlertHistories", b =>
+                {
+                    b.HasOne("MarketAnalysisBackend.Models.Asset", "Asset")
+                        .WithMany()
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MarketAnalysisBackend.Models.Alert.UserAlert", "UserAlert")
+                        .WithMany("History")
+                        .HasForeignKey("UserAlertId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MarketAnalysisBackend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Asset");
+
+                    b.Navigation("User");
+
+                    b.Navigation("UserAlert");
+                });
+
             modelBuilder.Entity("MarketAnalysisBackend.Models.Alert.UserAlertView", b =>
                 {
                     b.HasOne("MarketAnalysisBackend.Models.Alert.GlobalAlertEvent", "AlertEvent")
@@ -1299,6 +1480,11 @@ namespace MarketAnalysisBackend.Migrations
             modelBuilder.Entity("MarketAnalysisBackend.Models.Alert.GlobalAlertEvent", b =>
                 {
                     b.Navigation("UserViews");
+                });
+
+            modelBuilder.Entity("MarketAnalysisBackend.Models.Alert.UserAlert", b =>
+                {
+                    b.Navigation("History");
                 });
 
             modelBuilder.Entity("MarketAnalysisBackend.Models.Asset", b =>
