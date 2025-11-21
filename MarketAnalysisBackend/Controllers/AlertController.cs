@@ -1,6 +1,8 @@
 ﻿using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Services;
+using MarketAnalysisBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MarketAnalysisBackend.Controllers
 {
@@ -10,15 +12,17 @@ namespace MarketAnalysisBackend.Controllers
     {
         private readonly IUserAlertService _userAlertService;
         private readonly ILogger<AlertController> _logger;
-        public AlertController(IUserAlertService userAlertService, ILogger<AlertController> logger)
+        private readonly IJwtService _jwtService;
+        public AlertController(IUserAlertService userAlertService, ILogger<AlertController> logger, IJwtService jwt)
         {
             _userAlertService = userAlertService;
             _logger = logger;
+            _jwtService = jwt;
         }
-        private int GetUserId()
+        private int GetCurrentUserId()
         {
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
-            return int.TryParse(userIdClaim?.Value, out int userId) ? userId : 0;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out var userId) ? userId : 0;
         }
 
         [HttpPost]
@@ -29,7 +33,7 @@ namespace MarketAnalysisBackend.Controllers
         {
             try
             {
-                var userId = GetUserId();
+                var userId = GetCurrentUserId();
                 if (userId == 0)
                 {
                     return Unauthorized(new { message = "Invalid user" });
@@ -62,7 +66,7 @@ namespace MarketAnalysisBackend.Controllers
         {
             try
             {
-                var userId = GetUserId();
+                var userId = GetCurrentUserId();
                 if (userId == 0)
                 {
                     return Unauthorized(new { message = "Invalid user" });
@@ -86,7 +90,7 @@ namespace MarketAnalysisBackend.Controllers
         {
             try
             {
-                var userId = GetUserId();
+                var userId = GetCurrentUserId();
                 if (userId == 0)
                 {
                     return Unauthorized(new { message = "Invalid user" });
@@ -116,7 +120,7 @@ namespace MarketAnalysisBackend.Controllers
         {
             try
             {
-                var userId = GetUserId();
+                var userId = GetCurrentUserId();
                 if (userId == 0)
                 {
                     return Unauthorized(new { message = "Invalid user" });
@@ -150,7 +154,7 @@ namespace MarketAnalysisBackend.Controllers
         {
             try
             {
-                var userId = GetUserId();
+                var userId = GetCurrentUserId();
                 if (userId == 0)
                 {
                     return Unauthorized(new { message = "Invalid user" });
@@ -178,7 +182,7 @@ namespace MarketAnalysisBackend.Controllers
         {
             try
             {
-                var userId = GetUserId();
+                var userId = GetCurrentUserId();
                 if (userId == 0)
                 {
                     return Unauthorized(new { message = "Invalid user" });
@@ -201,7 +205,7 @@ namespace MarketAnalysisBackend.Controllers
         {
             try
             {
-                var userId = GetUserId();
+                var userId = GetCurrentUserId();
                 if (userId == 0)
                 {
                     return Unauthorized(new { message = "Invalid user" });
