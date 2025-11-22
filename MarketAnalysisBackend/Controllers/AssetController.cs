@@ -32,13 +32,24 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(asset);
         }
 
-        [HttpGet("{pagination}")]
+        [HttpGet("{pagination:int}")]
         public async Task<IActionResult> GetAssetsPaged(int pagination = 1)
         {
             var pageSize = 15; // Define a default page size
 
             var pagedAssets = await _assetService.GetByPagination(pagination, pageSize);
             return Ok(pagedAssets);
+        }
+
+        [HttpGet("{symbol}")]
+        public async Task<IActionResult> GetAssetBySymbol(string symbol)
+        {
+            var asset = await _assetService.GetAssetBySymbolAsync(symbol);
+            if (asset == null)
+            {
+                return NotFound(new { message = $"Asset '{symbol}' not found" });
+            }
+            return Ok(asset);
         }
 
         [HttpDelete]

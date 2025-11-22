@@ -130,8 +130,8 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 
 // Background Services
 //builder.Services.AddHostedService<AssetImporterService>();
-//builder.Services.AddHostedService<PriceDataCollector>();
-//builder.Services.AddHostedService<GlobalMetricService>();
+builder.Services.AddHostedService<PriceDataCollector>();
+builder.Services.AddHostedService<GlobalMetricService>();
 //builder.Services.AddScoped<IGlobalAlertOrchestrationService, MockGlobalAlertOrchestrationService>();
 //builder.Services.AddHostedService<GlobalAlertDetectorService>();
 
@@ -259,7 +259,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAngular");
+app.UseCors(policy => policy
+    .SetIsOriginAllowed(_ => true)
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials());
+
+app.UseWebSockets();
 
 app.MapHub<PriceHub>("/pricehub");
 app.MapHub<GlobalMetric>("/globalmetrichub");

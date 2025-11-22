@@ -1,6 +1,7 @@
 ﻿using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MarketAnalysisBackend.Controllers
 {
@@ -17,7 +18,8 @@ namespace MarketAnalysisBackend.Controllers
         }
         private int GetUserId()
         {
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            // Use ClaimTypes.NameIdentifier instead of "UserId"
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             return int.TryParse(userIdClaim?.Value, out int userId) ? userId : 0;
         }
 
