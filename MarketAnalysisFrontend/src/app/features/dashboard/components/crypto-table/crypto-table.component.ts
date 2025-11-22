@@ -75,6 +75,7 @@ export class CryptoTableComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private watchlistService: WatchlistService,
+    private alertService: AlertService,
     private router: Router
   ) {}
 
@@ -82,6 +83,7 @@ export class CryptoTableComponent implements OnInit {
     this.loadCoins();
     this.apiService.startGlobalMetricSignalR();
     this.apiService.startSignalR(this.currentGroup);
+    this.alertService.startConnection();
     
     // Subscribe to watchlist changes
     this.watchlistService.watchlistIds$.subscribe(ids => {

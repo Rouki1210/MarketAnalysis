@@ -10,9 +10,11 @@ namespace MarketAnalysisBackend.Repositories.Implementations
     public class UserAlertRepository : GenericRepository<UserAlert>, IUserAlertRepository
     {
         private readonly AppDbContext _context;
-        public UserAlertRepository(AppDbContext context) : base(context)
+        private readonly IWatchlistRepository _watchlist;
+        public UserAlertRepository(AppDbContext context, IWatchlistRepository watchlist) : base(context)
         {
             _context = context;
+            _watchlist = watchlist;
         }
 
         public async Task<int> CountByUserIdAsync(int userId)
@@ -27,6 +29,7 @@ namespace MarketAnalysisBackend.Repositories.Implementations
                 .Where(a => a.IsActive)
                 .ToListAsync();
         }
+
 
         public async Task<UserAlert?> GetByIdWithAssetAsync(int id)
         {

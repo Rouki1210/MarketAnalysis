@@ -75,6 +75,8 @@ builder.Services.Configure<OpenAISettings>(
 );
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAiAnalysisService, AiAnalysisService>();
+builder.Services.AddSingleton<IActiveUserService, ActiveUserService>();
+
 
 builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
@@ -90,6 +92,7 @@ builder.Services.AddScoped<IPriceCacheRepository, PriceCacheRepository>();
 builder.Services.AddScoped<IGlobalAlertRepository, GlobalAlertRepository>();
 builder.Services.AddScoped<IUserAlertRepository, UserAlertRepository>();
 builder.Services.AddScoped<IUserAlertHistoryRepository, UserAlertHistoryRepository>();
+builder.Services.AddScoped<IWatchlistPriceMonitorService ,WatchlistPriceMonitorService>();
 
 builder.Services.AddScoped<ICommunityPostRepository, CommunityPostRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
@@ -129,11 +132,12 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 
 
 // Background Services
-//builder.Services.AddHostedService<AssetImporterService>();
+builder.Services.AddHostedService<AssetImporterService>();
 builder.Services.AddHostedService<PriceDataCollector>();
 builder.Services.AddHostedService<GlobalMetricService>();
-//builder.Services.AddScoped<IGlobalAlertOrchestrationService, MockGlobalAlertOrchestrationService>();
-//builder.Services.AddHostedService<GlobalAlertDetectorService>();
+builder.Services.AddScoped<IGlobalAlertOrchestrationService, MockGlobalAlertOrchestrationService>();
+builder.Services.AddHostedService<GlobalAlertDetectorService>();
+builder.Services.AddHostedService<UserAlertBackgroundService>();
 
 // Google Authentication
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
@@ -270,6 +274,7 @@ app.UseWebSockets();
 app.MapHub<PriceHub>("/pricehub");
 app.MapHub<GlobalMetric>("/globalmetrichub");
 app.MapHub <AlertHub>("/alerthub");
+app.MapHub<UserAlertHub>("/useralerthub");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PostService } from '../../services/post.service';
 import { Post } from '../../models/post.model';
+import { CommunityService } from '../../services/community.service';
 
 @Component({
   selector: 'app-topics',
@@ -123,9 +124,17 @@ export class TopicsComponent {
 
   constructor(
     private postService: PostService,
+    private communityService: CommunityService,
     private router: Router
   ) {
     this.posts.set(this.postService.getPosts());
+    this.communityService.getAllTopics().subscribe((topics) => {
+      this.topics = topics.map(topic => ({
+        name: topic.name,
+        icon: topic.icon,
+        count: postService.getPosts().filter(post => post.topics?.includes(topic)).length || 0
+      }));
+    });
   }
 
   openPost(postId: string): void {
