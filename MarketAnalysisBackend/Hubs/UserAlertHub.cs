@@ -6,9 +6,9 @@ namespace MarketAnalysisBackend.Hubs
     [Authorize]
     public class UserAlertHub : Hub
     {
-        private readonly ILogger<AlertHub> _logger;
+        private readonly ILogger<UserAlertHub> _logger;
 
-        public UserAlertHub(ILogger<AlertHub> logger)
+        public UserAlertHub(ILogger<UserAlertHub> logger)
         {
             _logger = logger;
         }

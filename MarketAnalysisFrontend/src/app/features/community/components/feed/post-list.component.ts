@@ -17,7 +17,7 @@ import { AvatarComponent } from '../common/avatar.component';
             [verified]="post.author.verified || false">
           </app-avatar>
           
-          <div class="flex-1">
+          <div class="flex-1" (click)="onSelect($event, post.id)">
             <div class="flex items-center gap-2 mb-2 flex-wrap">
               <h3 class="text-white font-semibold whitespace-nowrap">{{ post.author.username }}</h3>
               <span *ngIf="post.author.verified" class="text-blue-400 text-sm">✓</span>

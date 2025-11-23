@@ -26,47 +26,6 @@ export class PostService {
     this.getPosts(); 
   }
 
-  // private loadMockPosts(): void {
-  //   const mockPosts: Post[] = [
-  //     {
-  //       id: "1",
-  //       title: 'Bitcoin hits key resistance — what is next?',
-  //       content: 'BTC approaches $70k again as on-chain metrics show strong accumulation. Will bulls break through?',
-  //       author: { id: 1, username: 'CryptoAnalyst', displayName: 'CryptoAnalyst', avatarEmoji: '🟧', verified: true },
-  //       likes: 128,
-  //       comments: 34,
-  //       bookmarks: 12,
-  //       shares: 9,
-  //       viewCount: 102,
-  //       isPinned: false,
-  //       createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-  //       updatedAt: new Date().toISOString(),
-  //       tags: ['BTC', 'Market'],
-  //       isLiked: false,
-  //       isBookmarked: false
-  //     },
-  //     {
-  //       id: Date.now().toString(),
-  //       title: 'Altcoin season indicators heating up',
-  //       content: 'Several metrics suggest altcoins may be gearing up for a strong run. Here is what to watch.',
-  //       author: { id: 3, username: 'AltcoinGuru', displayName: 'AltcoinGuru', avatarEmoji: '🟩', verified: true },
-  //       likes: 92,
-  //       comments: 27,
-  //       bookmarks: 15,
-  //       viewCount:  97,
-  //       isPinned: false,
-  //       shares: 11,
-  //       createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-  //       updatedAt: new Date().toISOString(),
-  //       tags: ['Altcoins', 'Market'],
-  //       isLiked: false,
-  //       isBookmarked: false
-  //     }
-  //   ];
-
-  //   this.postsSignal.set(mockPosts);
-  // }
-
   public loadPosts(page: number = 1, pageSize: number = 15, sortBy: string = 'CreatedAt'): void {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
@@ -82,7 +41,7 @@ export class PostService {
     this.apiService.get<ApiResponse<PaginatedResponse<Post>>>('/communitypost', params)
       .pipe(
         tap(response => {
-          if (!response.success || response.data?.data) {
+          if (response.success || response.data?.data) {
             const post : Post[] = response.data?.data;
             this.postsSignal.set(post);
             this.loadingSignal.set(false);

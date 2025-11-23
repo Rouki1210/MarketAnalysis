@@ -50,8 +50,35 @@ namespace MarketAnalysisBackend.Controllers
                 if (post == null)
                     return NotFound(ApiResponse<CommunityPostDto>.ErrorResponse("Post not found"));
 
-                // Map to DTO (you'll need to implement this mapping)
-                return Ok(ApiResponse<CommunityPostDto>.SuccessResponse(null!, "Post retrieved successfully"));
+                var dto = new CommunityPostDto
+                {
+                    Id = post.Id,
+                    Title = post.Title,
+                    Content = post.Content,
+                    Author = new UserBasicDto
+                    {
+                        Id = post.User.Id,
+                        Username = post.User.Username,
+                        DisplayName = post.User.DisplayName,
+                        AvatarEmoji = post.User.AvartarUrl,
+                    },
+                    Likes = post.LikeCount,
+                    Comments = post.CommentCount,
+                    Bookmarks = post.BookmarksCount,
+                    Tags = post.Tags.Select(t => t.TagName).ToList(),
+                    Topics = post.Topics.Select(t => new TopicBasicDto
+                    {
+                        Id = t.Topic.Id,
+                        Name = t.Topic.Name,
+                    }).ToList(),
+                    CreatedAt = post.CreatedAt,
+                    UpdatedAt = post.UpdatedAt,
+                    ViewCount = post.ViewCount,
+                    IsPinned = post.IsPinned,
+                    IsLiked = post.Reactions.Any(r => r.UserId == currentUserId && r.ReactionType == "like"),
+                    IsBookmarked = post.Bookmarks.Any(b => b.UserId == currentUserId)
+                };
+                return Ok(ApiResponse<CommunityPostDto>.SuccessResponse(dto, "Post retrieved successfully"));
             }
             catch (Exception ex)
             {

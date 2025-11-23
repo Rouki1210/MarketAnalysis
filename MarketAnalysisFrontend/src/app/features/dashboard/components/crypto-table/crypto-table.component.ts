@@ -82,8 +82,9 @@ export class CryptoTableComponent implements OnInit {
   ngOnInit(): void {
     this.loadCoins();
     this.apiService.startGlobalMetricSignalR();
+    this.alertService.startUserConnection();
     this.apiService.startSignalR(this.currentGroup);
-    this.alertService.startConnection();
+    this.alertService.startGlobalConnection();
     
     // Subscribe to watchlist changes
     this.watchlistService.watchlistIds$.subscribe(ids => {

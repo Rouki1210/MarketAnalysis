@@ -43,7 +43,6 @@
         public int Id { get; set; }
         public int PostId { get; set; }
         public UserBasicDto Author { get; set; } = new();
-        public int? ParentCommentId { get; set; }
         public string Content { get; set; } = string.Empty;
         public int Likes { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -55,7 +54,6 @@
     public class CreateCommentDto
     {
         public int PostId { get; set; }
-        public int? ParentCommentId { get; set; }
         public string Content { get; set; } = string.Empty;
     }
 

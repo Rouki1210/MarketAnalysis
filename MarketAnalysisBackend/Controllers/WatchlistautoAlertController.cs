@@ -13,12 +13,10 @@ namespace MarketAnalysisBackend.Controllers
     public class WatchlistautoAlertController : ControllerBase
     {
         private readonly ILogger<WatchlistautoAlertController> _logger;
-        private readonly WatchlistPriceMonitorService _monitorService;
         private readonly IUserAlertHistoryRepository _historyRepository;
-        public WatchlistautoAlertController(ILogger<WatchlistautoAlertController> logger, WatchlistPriceMonitorService monitorServic, IUserAlertHistoryRepository historyRepository)
+        public WatchlistautoAlertController(ILogger<WatchlistautoAlertController> logger, IUserAlertHistoryRepository historyRepository)
         {
             _logger = logger;
-            _monitorService = monitorServic;
             _historyRepository = historyRepository;
         }
 

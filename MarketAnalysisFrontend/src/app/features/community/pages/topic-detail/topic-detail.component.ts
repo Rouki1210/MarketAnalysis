@@ -1,5 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CommunityService } from '../../services/community.service';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
@@ -82,39 +83,15 @@ export class TopicDetailComponent implements OnInit {
   liked = signal(false);
   bookmarked = signal(false);
 
-  comments = signal<CommentItem[]>([
-    { id: 'c1', author: 'Alice', avatar: '🟣', text: 'Great insights!', createdAt: '2h ago' },
-    { id: 'c2', author: 'Bob', avatar: '🟠', text: 'Thanks for sharing!', createdAt: '1h ago' }
-  ]);
+  comments = signal<CommentItem[]>([]);
   newComment = '';
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private communityService: CommunityService) { }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') || '';
-    const dataset: Record<string, { title: string; content: string; createdAt: string; likes: number; bookmarks: number; }> = {
-      p1: {
-        title: 'Bitcoin hits key resistance — what is next?',
-        content: 'BTC approaches $70k again as on-chain metrics show strong accumulation. Will bulls break through?',
-        createdAt: '2h ago',
-        likes: 128,
-        bookmarks: 12
-      },
-      p2: {
-        title: 'ETH staking update and L2 momentum',
-        content: 'Ethereum staking continues to grow while L2 activity sets new highs. Key protocols to watch.',
-        createdAt: '7h ago',
-        likes: 76,
-        bookmarks: 22
-      },
-      p3: {
-        title: 'Altcoin rotation starting?',
-        content: 'Small caps show strength as BTC dominance stalls. Is an alt season brewing?',
-        createdAt: '1d ago',
-        likes: 51,
-        bookmarks: 8
-      }
-    };
+    this.loadPost(parseInt(id));
+    const dataset: Record<string, { title: string; content: string; createdAt: string; likes: number; bookmarks: number; }> = {};
 
     const data = dataset[id];
     if (!data) {
@@ -129,19 +106,36 @@ export class TopicDetailComponent implements OnInit {
     this.bookmarks.set(data.bookmarks);
   }
 
+  loadPost(id: number): void {
+    // Simulated data loading logic
+    this.communityService.getPostById(id).subscribe(post => {
+      console.log('Loaded post:', post);
+      if (post) {
+        this.title.set(post.title);
+        this.content.set(post.content);
+        this.createdAt.set(post.createdAt);
+        this.likes.set(post.likes);
+        this.bookmarks.set(post.bookmarks);
+        this.liked.set(post.isLiked || false);
+        this.bookmarked.set(post.isBookmarked || false);
+      } else {
+        this.postExists.set(false);
+      }
+    });
+
+  }
+
   likeClasses = signal('');
   bookmarkClasses = signal('');
 
   ngDoCheck(): void {
     this.likeClasses.set(
-      `flex items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
-        this.liked() ? 'text-red-400 bg-red-400/10' : 'text-gray-400 hover:text-white hover:bg-white/10'
+      `flex items-center gap-1 px-3 py-1 rounded-lg transition-colors ${this.liked() ? 'text-red-400 bg-red-400/10' : 'text-gray-400 hover:text-white hover:bg-white/10'
       }`
     );
-    
+
     this.bookmarkClasses.set(
-      `flex items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
-        this.bookmarked() ? 'text-yellow-400 bg-yellow-400/10' : 'text-gray-400 hover:text-white hover:bg-white/10'
+      `flex items-center gap-1 px-3 py-1 rounded-lg transition-colors ${this.bookmarked() ? 'text-yellow-400 bg-yellow-400/10' : 'text-gray-400 hover:text-white hover:bg-white/10'
       }`
     );
   }

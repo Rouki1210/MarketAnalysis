@@ -4,7 +4,7 @@ import { WatchlistCoin, WatchlistDto, ToggleAssetResponse, WatchlistResponse } f
 import { Coin } from '../models/coin.model';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 /**
  * WatchlistService
@@ -18,6 +18,22 @@ import { HttpClient } from '@angular/common/http';
 })
 export class WatchlistService {
   private readonly apiUrl = 'https://localhost:7175/api/Watchlist';
+
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+      console.log('🔑 Token attached to Watchlist request');
+    } else {
+      console.warn('⚠️  No token found for Watchlist request');
+    }
+
+    return headers;
+  }
 
   // Observable state for watchlist coin IDs (asset IDs from backend)
   private watchlistIdsSubject = new BehaviorSubject<number[]>([]);
