@@ -248,11 +248,16 @@ namespace MarketAnalysisBackend.Services.Implementations
                 await _alertHistoryRepository.AddAsync(history);
                 await _alertHistoryRepository.SaveChangesAsync();
 
+                // Get asset name for notification
+                var asset = await _context.Assets.FirstOrDefaultAsync(a => a.Id == assetId);
+                var assetName = asset?.Name ?? assetSymbol;
+
                 await _hubContext.Clients.Group($"user_{userId}")
                     .SendAsync("ReceiveAlert", new
                     {
                         id = history.Id,
                         assetSymbol = assetSymbol,
+                        assetName = assetName,
                         targetPrice = target.Price,
                         actualPrice = currentPrice,
                         alertType = "AUTO_WATCHLIST",

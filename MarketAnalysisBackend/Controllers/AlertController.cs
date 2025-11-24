@@ -1,6 +1,7 @@
 ﻿using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Services;
 using MarketAnalysisBackend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -8,6 +9,7 @@ namespace MarketAnalysisBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class AlertController : Controller
     {
         private readonly IUserAlertService _userAlertService;

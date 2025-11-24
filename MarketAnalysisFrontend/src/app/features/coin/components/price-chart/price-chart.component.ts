@@ -1,18 +1,29 @@
-import { Component, Input, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  OnDestroy,
+  AfterViewInit,
+  ViewChild,
+  ElementRef,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardComponent } from '../../../../shared/components/card/card.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ChartService } from '../../../../core/services/chart.service';
 import { ChartTimeframe } from '../../../../core/models/common.model';
-import { 
-  createChart, 
-  IChartApi, 
-  ISeriesApi, 
-  CandlestickData, 
-  LineData, 
+import { CreateAlertModalComponent } from '../create-alert-modal/create-alert-modal.component';
+import { ApiService } from '../../../../core/services/api.service';
+import {
+  createChart,
+  IChartApi,
+  ISeriesApi,
+  CandlestickData,
+  LineData,
   HistogramData,
   UTCTimestamp,
-  CrosshairMode 
+  CrosshairMode,
 } from 'lightweight-charts';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -28,9 +39,14 @@ interface TooltipData {
 @Component({
   selector: 'app-price-chart',
   standalone: true,
-  imports: [CommonModule, CardComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    CardComponent,
+    ButtonComponent,
+    CreateAlertModalComponent,
+  ],
   templateUrl: './price-chart.component.html',
-  styleUrls: ['./price-chart.component.css']
+  styleUrls: ['./price-chart.component.css'],
 })
 export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() symbol!: string;
@@ -49,16 +65,33 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
   error: string | null = null;
   tooltipData: TooltipData | null = null;
   showTooltip = false;
+  isAlertModalOpen = false;
+  assetId?: number;
+  currentPrice?: number;
 
-  constructor(private chartService: ChartService) {}
+  constructor(
+    private chartService: ChartService,
+    private apiService: ApiService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    // Chart will be initialized in ngAfterViewInit
+    // Get asset ID for this symbol
+    this.apiService.coins$.subscribe((coins) => {
+      const coin = coins.find((c) => c.symbol === this.symbol);
+      if (coin) {
+        this.assetId = Number(coin.id);
+        this.currentPrice = coin.price ? Number(coin.price) : undefined;
+      }
+    });
   }
 
   ngAfterViewInit(): void {
     this.initChart();
-    this.loadChartData();
+    // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+    setTimeout(() => {
+      this.loadChartData();
+    }, 0);
   }
 
   ngOnDestroy(): void {
@@ -127,7 +160,10 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
-      const series = this.selectedChartType === 'candlestick' ? this.candlestickSeries : this.lineSeries;
+      const series =
+        this.selectedChartType === 'candlestick'
+          ? this.candlestickSeries
+          : this.lineSeries;
       if (!series) return;
 
       const data = param.seriesData.get(series) as any;
@@ -145,7 +181,7 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Handle window resize
-    const resizeObserver = new ResizeObserver(entries => {
+    const resizeObserver = new ResizeObserver((entries) => {
       if (this.chart && entries.length > 0) {
         const { width } = entries[0].contentRect;
         this.chart.applyOptions({ width });
@@ -158,8 +194,12 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.chart || !this.symbol) return;
 
     this.isLoading = true;
-    const { from, to } = this.chartService.getDateRangeFromTimeframe(this.selectedTimeframe);
-    const apiTimeframe = this.chartService.getAPITimeframe(this.selectedTimeframe);
+    const { from, to } = this.chartService.getDateRangeFromTimeframe(
+      this.selectedTimeframe
+    );
+    const apiTimeframe = this.chartService.getAPITimeframe(
+      this.selectedTimeframe
+    );
 
     if (this.selectedChartType === 'candlestick') {
       this.loadCandlestickData(apiTimeframe, from, to);
@@ -209,7 +249,8 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
 
-    this.chartService.getOHLCData(this.symbol, timeframe, from, to)
+    this.chartService
+      .getOHLCData(this.symbol, timeframe, from, to)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
@@ -220,8 +261,9 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
           }
 
           const candlestickData: CandlestickData[] = data
-            .map(item => ({
-              time: (new Date(item.periodStart).getTime() / 1000) as UTCTimestamp,
+            .map((item) => ({
+              time: (new Date(item.periodStart).getTime() /
+                1000) as UTCTimestamp,
               open: Number(item.open),
               high: Number(item.high),
               low: Number(item.low),
@@ -230,10 +272,14 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
             .sort((a, b) => (a.time as number) - (b.time as number));
 
           const volumeData: HistogramData[] = data
-            .map(item => ({
-              time: (new Date(item.periodStart).getTime() / 1000) as UTCTimestamp,
+            .map((item) => ({
+              time: (new Date(item.periodStart).getTime() /
+                1000) as UTCTimestamp,
               value: Number(item.volume),
-              color: item.close >= item.open ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'
+              color:
+                item.close >= item.open
+                  ? 'rgba(16, 185, 129, 0.3)'
+                  : 'rgba(239, 68, 68, 0.3)',
             }))
             .sort((a, b) => (a.time as number) - (b.time as number));
 
@@ -243,7 +289,7 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
           if (this.volumeSeries) {
             this.volumeSeries.setData(volumeData);
           }
-          
+
           this.chart?.timeScale().fitContent();
           this.error = null;
           this.isLoading = false;
@@ -252,7 +298,7 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
           console.error('Error loading candlestick data:', err);
           this.error = 'Failed to load chart data';
           this.isLoading = false;
-        }
+        },
       });
   }
 
@@ -279,7 +325,8 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
 
-    this.chartService.getPriceData(this.symbol, from, to)
+    this.chartService
+      .getPriceData(this.symbol, from, to)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
@@ -290,7 +337,7 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
           }
 
           const lineData: LineData[] = data
-            .map(item => ({
+            .map((item) => ({
               time: (new Date(item.timestamp).getTime() / 1000) as UTCTimestamp,
               value: Number(item.price),
             }))
@@ -299,7 +346,7 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
           if (this.lineSeries) {
             this.lineSeries.setData(lineData);
           }
-          
+
           this.chart?.timeScale().fitContent();
           this.error = null;
           this.isLoading = false;
@@ -308,7 +355,7 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
           console.error('Error loading line data:', err);
           this.error = 'Failed to load chart data';
           this.isLoading = false;
-        }
+        },
       });
   }
 
@@ -318,8 +365,21 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   toggleChartType(): void {
-    this.selectedChartType = this.selectedChartType === 'line' ? 'candlestick' : 'line';
+    this.selectedChartType =
+      this.selectedChartType === 'line' ? 'candlestick' : 'line';
     this.loadChartData();
   }
-}
 
+  openAlertModal(): void {
+    this.isAlertModalOpen = true;
+  }
+
+  closeAlertModal(): void {
+    this.isAlertModalOpen = false;
+  }
+
+  onAlertCreated(): void {
+    alert('Alert created successfully!');
+    // Alert created successfully (notification handled by modal)
+  }
+}

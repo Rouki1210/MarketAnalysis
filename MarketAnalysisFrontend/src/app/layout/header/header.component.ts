@@ -12,15 +12,29 @@ import { Currency, Theme } from '../../core/models/common.model';
 import { WatchlistCoin } from '../../core/models/watchlist.model';
 import { Observable } from 'rxjs';
 import { CompactNumberPipe } from '../../shared/pipes/compact-number.pipe';
+import { AlertButtonComponent } from './components/alert-button/alert-button.component';
+import { AlertDropdownComponent } from './components/alert-dropdown/alert-dropdown.component';
+import { AlertManagementModalComponent } from './components/alert-management-modal/alert-management-modal.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, AuthModalComponent, CompactNumberPipe],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    ButtonComponent,
+    AuthModalComponent,
+    CompactNumberPipe,
+    AlertButtonComponent,
+    AlertDropdownComponent,
+    AlertManagementModalComponent,
+  ],
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent implements OnDestroy {
+  showAlertDropdown = signal(false);
   // UI State
   searchQuery = '';
   showSettingsMenu = signal(false);
@@ -56,8 +70,7 @@ export class HeaderComponent implements OnDestroy {
 
   // Search
   onSearch(): void {
-    console.log('Search:', this.searchQuery);
-    // TODO: Implement search functionality
+    // Implement search functionality
   }
 
   // Authentication
@@ -73,7 +86,7 @@ export class HeaderComponent implements OnDestroy {
 
   // Settings Menu
   toggleSettingsMenu(): void {
-    this.showSettingsMenu.update(value => !value);
+    this.showSettingsMenu.update((value) => !value);
     this.showCryptoMenu.set(false);
     this.showExchangeMenu.set(false);
     this.showCommunityMenu.set(false);
@@ -85,7 +98,7 @@ export class HeaderComponent implements OnDestroy {
 
   // Crypto Menu
   toggleCryptoMenu(): void {
-    this.showCryptoMenu.update(value => !value);
+    this.showCryptoMenu.update((value) => !value);
     this.showSettingsMenu.set(false);
     this.showExchangeMenu.set(false);
     this.showCommunityMenu.set(false);
@@ -128,7 +141,7 @@ export class HeaderComponent implements OnDestroy {
 
   // Watchlist Dropdown
   toggleWatchlistDropdown(): void {
-    this.showWatchlistDropdown.update(value => !value);
+    this.showWatchlistDropdown.update((value) => !value);
     this.showSettingsMenu.set(false);
     this.showCryptoMenu.set(false);
     this.showExchangeMenu.set(false);
@@ -187,12 +200,20 @@ export class HeaderComponent implements OnDestroy {
 
   // System Theme Management
   private initializeSystemThemeListener(): void {
-    this.systemThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    this.systemThemeMediaQuery.addEventListener('change', this.handleSystemThemeChange);
+    this.systemThemeMediaQuery = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    );
+    this.systemThemeMediaQuery.addEventListener(
+      'change',
+      this.handleSystemThemeChange
+    );
   }
 
   private cleanupSystemThemeListener(): void {
-    this.systemThemeMediaQuery?.removeEventListener('change', this.handleSystemThemeChange);
+    this.systemThemeMediaQuery?.removeEventListener(
+      'change',
+      this.handleSystemThemeChange
+    );
   }
 
   private handleSystemThemeChange = (e: MediaQueryListEvent): void => {
@@ -213,7 +234,25 @@ export class HeaderComponent implements OnDestroy {
     if (!target.closest('.settings-menu-container')) {
       this.closeSettingsMenu();
     }
+    if (!target.closest('.alert-menu-container')) {
+      this.showAlertDropdown.set(false);
+    }
     // Watchlist dropdown is now hover-based, no click outside needed
   }
-}
 
+  toggleAlertDropdown() {
+    this.showAlertDropdown.update((v) => !v);
+  }
+
+  // Alert Management Modal
+  isAlertManagementModalOpen = signal(false);
+
+  openAlertManagementModal(): void {
+    this.isAlertManagementModalOpen.set(true);
+    this.closeSettingsMenu();
+  }
+
+  closeAlertManagementModal(): void {
+    this.isAlertManagementModalOpen.set(false);
+  }
+}
