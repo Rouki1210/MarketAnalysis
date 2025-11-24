@@ -24,7 +24,7 @@ export const communityRoutes: Routes = [
       },
       {
         path: 'topic/:id',
-        loadComponent: () => import('./pages/topic-detail/topic-detail.component').then(m => m.TopicDetailComponent)
+        loadComponent: () => import('./pages/post-detail/post-detail.component').then(m => m.TopicDetailComponent)
       },
       {
         path: 'articles',
@@ -56,7 +56,7 @@ export const communityRoutes: Routes = [
       },
       {
         path: 'post/:id',
-        loadComponent: () => import('./pages/topic-detail/topic-detail.component').then(m => m.TopicDetailComponent)
+        loadComponent: () => import('./pages/post-detail/post-detail.component').then(m => m.TopicDetailComponent)
       }
     ]
   }

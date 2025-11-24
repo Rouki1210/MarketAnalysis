@@ -11,6 +11,8 @@ export interface Topic {
   name: string;
   slug: string;
   icon: string;
+  postCount: number;
+  followersCount?: number;
   description?: string;
 }
 
