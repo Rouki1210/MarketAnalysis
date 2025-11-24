@@ -564,12 +564,10 @@
           />
         </div>
         
-        <app-button variant="ghost" size="icon" class="hidden sm:flex">
-          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-          </svg>
-        </app-button>
+        <div class="relative alert-menu-container hidden sm:block">
+          <app-alert-button (toggle)="toggleAlertDropdown()"></app-alert-button>
+          <app-alert-dropdown *ngIf="showAlertDropdown()"></app-alert-dropdown>
+        </div>
         
         <!-- Show Login button if not authenticated -->
         <app-button 
@@ -706,6 +704,17 @@
               </div>
             </div>
 
+            <!-- Alert Management (if authenticated) -->
+            <button 
+              *ngIf="authService.isAuthenticated()"
+              (click)="openAlertManagementModal()"
+              class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors text-left"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-foreground">Alert Management</span>
+              </div>
+            </button>
+
             <!-- Settings (if authenticated) -->
             <button 
               *ngIf="authService.isAuthenticated()"
@@ -729,6 +738,11 @@
     </div>
   </div>
 </header>
+
+<app-alert-management-modal
+  [isOpen]="isAlertManagementModalOpen()"
+  (close)="closeAlertManagementModal()">
+</app-alert-management-modal>
 
 <!-- Auth Modal -->
 <app-auth-modal 

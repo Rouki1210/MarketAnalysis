@@ -133,8 +133,8 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 
 // Background Services
 //builder.Services.AddHostedService<AssetImporterService>();
-//builder.Services.AddHostedService<PriceDataCollector>();
-//builder.Services.AddHostedService<GlobalMetricService>();
+builder.Services.AddHostedService<PriceDataCollector>();
+builder.Services.AddHostedService<GlobalMetricService>();
 //builder.Services.AddScoped<IGlobalAlertOrchestrationService, MockGlobalAlertOrchestrationService>();
 builder.Services.AddHostedService<GlobalAlertDetectorService>();
 builder.Services.AddHostedService<UserAlertBackgroundService>();
@@ -210,8 +210,8 @@ builder.Services.AddAuthentication(options =>
             if (!string.IsNullOrEmpty(accessToken) &&
                 (path.StartsWithSegments("/pricehub") ||
                  path.StartsWithSegments("/globalmetrichub") ||
-                 path.StartsWithSegments("/alerthub")) ||
-                 path.StartsWithSegments("/useralerthub")) 
+                 path.StartsWithSegments("/alerthub") ||
+                 path.StartsWithSegments("/useralerthub"))) 
    
             {
                 context.Token = accessToken;

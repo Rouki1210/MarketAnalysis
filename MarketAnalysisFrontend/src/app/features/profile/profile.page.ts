@@ -14,12 +14,14 @@ interface ProfileData {
   website: string;
 }
 
+import { AlertListComponent } from './components/alert-list/alert-list.component';
+
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AlertListComponent],
   templateUrl: './profile.page.html',
-  styleUrls: ['./profile.page.css']
+  styleUrls: ['./profile.page.css'],
 })
 export class ProfilePage implements OnInit {
   // UI State
@@ -31,7 +33,6 @@ export class ProfilePage implements OnInit {
   bio = signal('');
   birthday = signal('');
   website = signal('');
-
 
   constructor(public authService: AuthService) {}
 
@@ -49,19 +50,21 @@ export class ProfilePage implements OnInit {
     const profileData = this.getProfileData();
     console.log('Saving profile:', profileData);
 
-    this.authService.updateUserInfo(
-      profileData.displayName,
-      profileData.bio,
-      profileData.birthday,
-      profileData.website
-    ).subscribe({
-      next: () => {
-        this.showSuccess('Profile updated successfully!');
-      },
-      error: () => {
-        console.error('Failed to update profile');
-      }
-    });
+    this.authService
+      .updateUserInfo(
+        profileData.displayName,
+        profileData.bio,
+        profileData.birthday,
+        profileData.website
+      )
+      .subscribe({
+        next: () => {
+          this.showSuccess('Profile updated successfully!');
+        },
+        error: () => {
+          console.error('Failed to update profile');
+        },
+      });
   }
 
   onEditAvatar(): void {
@@ -79,7 +82,7 @@ export class ProfilePage implements OnInit {
     this.authService.getUserInfo().subscribe({
       next: (data) => {
         console.log('User info loaded:', data.user.id);
-        if(data?.user){
+        if (data?.user) {
           this.displayName.set(data.user.displayName || '');
           this.username.set(data.user.username || '');
           this.bio.set(data.user.bio || '');
@@ -89,7 +92,7 @@ export class ProfilePage implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load user info:', err);
-      }
+      },
     });
   }
 
@@ -99,7 +102,7 @@ export class ProfilePage implements OnInit {
       username: this.username(),
       bio: this.bio(),
       birthday: this.birthday(),
-      website: this.website()
+      website: this.website(),
     };
   }
 

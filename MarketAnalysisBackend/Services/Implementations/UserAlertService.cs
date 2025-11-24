@@ -1,8 +1,9 @@
-﻿
-using MarketAnalysisBackend.Data;
+﻿using MarketAnalysisBackend.Data;
+using MarketAnalysisBackend.Hubs;
 using MarketAnalysisBackend.Models.Alert;
 using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Repositories.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace MarketAnalysisBackend.Services.Implementations
@@ -13,6 +14,7 @@ namespace MarketAnalysisBackend.Services.Implementations
         private readonly IUserAlertHistoryRepository _historyRepository;
         private readonly AppDbContext _context;
         private readonly ILogger<UserAlertService> _logger;
+        private readonly IHubContext<UserAlertHub> _hubContext;
 
         private const int MAX_ALERTS_PER_USER = 50;
         private const decimal REACHES_THRESHOLD_PERCENT = 0.1m;
@@ -21,12 +23,14 @@ namespace MarketAnalysisBackend.Services.Implementations
             IUserAlertRepository alertRepository,
             IUserAlertHistoryRepository historyRepository,
             AppDbContext context,
-            ILogger<UserAlertService> logger)
+            ILogger<UserAlertService> logger,
+            IHubContext<UserAlertHub> hubContext)
         {
             _alertRepository = alertRepository;
             _historyRepository = historyRepository;
             _context = context;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         public async Task<UserAlertResponseDto> CreateAlertAsync(int userId, CreateUserAlertDto dto)
@@ -37,6 +41,12 @@ namespace MarketAnalysisBackend.Services.Implementations
                 if(userAlertCount >= MAX_ALERTS_PER_USER)
                 {
                     throw new InvalidOperationException($"Maximum alert limit of {MAX_ALERTS_PER_USER} reached");
+                }
+
+                var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+                if (!userExists)
+                {
+                    throw new ArgumentException("User not found");
                 }
 
                 var asset = await _context.Assets.FindAsync(dto.AssetId);
@@ -61,9 +71,11 @@ namespace MarketAnalysisBackend.Services.Implementations
                     AlertType = dto.AlertType.ToUpper(),
                     TargetPrice = dto.TargetPrice,
                     IsRepeating = dto.IsRepeating,
-                    Note = dto.Note,
+                    Note = dto.Note ?? string.Empty,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow,
+                    LastTriggedAt = DateTime.UtcNow.AddDays(-1), // Avoids MinValue issues and Cooldown
+                    LastPriceCheckAt = DateTime.UtcNow.AddDays(-1),
                     TriggerCount = 0
                 };
 
@@ -372,7 +384,40 @@ namespace MarketAnalysisBackend.Services.Implementations
                 "Alert {AlertId} triggered for user {UserId}. Asset: {Symbol}, Target: {Target}, Actual: {Actual}",
                 alert.Id, alert.UserId, alert.AssetSymbol, alert.TargetPrice, actualPrice);
 
-            // TODO: Send notification via SignalR
+            // Send SignalR notification
+            try
+            {
+                var asset = await _context.Assets.FindAsync(alert.AssetId);
+                var assetName = asset?.Name ?? alert.AssetSymbol;
+
+                await _hubContext.Clients.Group($"user_{alert.UserId}")
+                    .SendAsync("ReceiveAlert", new
+                    {
+                        id = history.Id,
+                        assetSymbol = alert.AssetSymbol,
+                        assetName = assetName,
+                        targetPrice = alert.TargetPrice,
+                        actualPrice = actualPrice,
+                        alertType = alert.AlertType,
+                        triggeredAt = history.TriggeredAt,
+                        priceDifference = history.PriceDifference
+                    });
+
+                // Update notification status
+                history.WasNotified = true;
+                history.NotificationMethod = "SIGNALR";
+                await _historyRepository.UpdateAsync(history);
+
+                _logger.LogInformation(
+                    "📤 SignalR notification sent for alert {AlertId} to user_{UserId}",
+                    alert.Id, alert.UserId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send SignalR notification for alert {AlertId}", alert.Id);
+                history.NotificationMethod = "FAILED";
+                history.NotificationError = ex.Message;
+            }
         }
 
         private UserAlertResponseDto MapToDto(UserAlert alert)

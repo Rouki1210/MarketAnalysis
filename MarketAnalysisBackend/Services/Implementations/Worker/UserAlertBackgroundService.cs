@@ -32,16 +32,20 @@ namespace MarketAnalysisBackend.Services.Implementations.Worker
 
                 try
                 {
-                    _logger.LogDebug("🔍 Bắt đầu kiểm tra giá watchlist...");
+                    _logger.LogDebug("🔍 Bắt đầu kiểm tra giá watchlist và user alerts...");
 
                     // Tạo scope mới cho mỗi lần check
                     using (var scope = _serviceProvider.CreateScope())
                     {
+                        // 1. Watchlist Auto Alerts
                         var monitorService = scope.ServiceProvider
-                            .GetRequiredService<WatchlistPriceMonitorService>();
-
-                        // HÀM CHÍNH: Theo dõi tất cả watchlist và tạo alert tự động
+                            .GetRequiredService<IWatchlistPriceMonitorService>();
                         await monitorService.MonitorAllWatchlistPricesAsync();
+
+                        // 2. User Custom Price Alerts
+                        var userAlertService = scope.ServiceProvider
+                            .GetRequiredService<IUserAlertService>();
+                        await userAlertService.CheckAndTriggerAlertsAsync();
                     }
 
                     var duration = DateTime.UtcNow - startTime;
@@ -49,7 +53,7 @@ namespace MarketAnalysisBackend.Services.Implementations.Worker
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "❌ Lỗi khi theo dõi watchlist prices");
+                    _logger.LogError(ex, "❌ Lỗi khi theo dõi watchlist prices và user alerts");
                 }
 
                 // Đợi đến lần check tiếp theo

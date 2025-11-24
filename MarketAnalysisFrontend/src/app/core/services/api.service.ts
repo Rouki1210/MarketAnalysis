@@ -79,12 +79,9 @@ export class ApiService {
     this.hubConnection
       .start()
       .then(async () => {
-        console.log('SignalR Connected');
-        // for (const symbol of symbols) {
-        //   await this.hubConnection.invoke('JoinAssetGroup', symbol);
-        // }
+        console.log('✅ SignalR PriceHub Connected');
       })
-      .catch((err) => console.error('SignalR Error:', err));
+      .catch((err) => console.error('❌ SignalR PriceHub Error:', err));
 
     this.hubConnection.on('ReceiveMessage', (message: any) => {
       const data = message.data;
@@ -182,28 +179,16 @@ export class ApiService {
   }
 
   getCoinBySymbol(symbol: string): Observable<CoinDetail> {
-    console.log('Fetching coin data for symbol:', symbol);
-
     // Wait for coins to be loaded (non-empty array), then find the coin
     return this.coins$.pipe(
-      // Wait until we have at least some coins loaded
       filter((coins) => coins.length > 0),
-      // Take only the first emission with data
       first(),
       map((coins) => {
-        console.log('Coins loaded, searching for:', symbol);
-        console.log('Available coins:', coins.map((c) => c.symbol).join(', '));
-
         const foundCoin = coins.find((c) => c.symbol === symbol);
         if (!foundCoin) {
-          console.error(
-            `Coin ${symbol} not found in:`,
-            coins.map((c) => c.symbol)
-          );
+          console.error(`Coin ${symbol} not found`);
           throw new Error(`Coin with symbol ${symbol} not found`);
         }
-
-        console.log('Found coin:', foundCoin);
 
         // Helper function to parse numeric values from formatted strings
         const parseValue = (str: string | undefined): number => {
@@ -257,7 +242,6 @@ export class ApiService {
   }
 
   getMarketPairs(symbol: string): Observable<Market[]> {
-    console.log('Fetching market pairs for symbol:', symbol);
     // Backend doesn't have this endpoint yet, return empty array
     return of([]);
   }
@@ -287,9 +271,9 @@ export class ApiService {
     this.globalMetricsHubConnection
       .start()
       .then(() => {
-        console.log('Global Metrics SignalR Connected');
+        console.log('✅ Global Metrics SignalR Connected');
       })
-      .catch((err) => console.error('Global Metrics SignalR Error:', err));
+      .catch((err) => console.error('❌ Global Metrics SignalR Error:', err));
 
     this.globalMetricsHubConnection.on(
       'ReceiveGlobalMetric',

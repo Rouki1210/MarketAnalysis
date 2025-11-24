@@ -1,6 +1,19 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest, map, catchError, of, tap } from 'rxjs';
-import { WatchlistCoin, WatchlistDto, ToggleAssetResponse, WatchlistResponse } from '../models/watchlist.model';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  map,
+  catchError,
+  of,
+  tap,
+} from 'rxjs';
+import {
+  WatchlistCoin,
+  WatchlistDto,
+  ToggleAssetResponse,
+  WatchlistResponse,
+} from '../models/watchlist.model';
 import { Coin } from '../models/coin.model';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
@@ -14,7 +27,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
  * - Providing real-time coin data for watchlist items
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WatchlistService {
   private readonly apiUrl = 'https://localhost:7175/api/Watchlist';
@@ -22,14 +35,11 @@ export class WatchlistService {
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     let headers = new HttpHeaders({
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     });
 
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
-      console.log('🔑 Token attached to Watchlist request');
-    } else {
-      console.warn('⚠️  No token found for Watchlist request');
     }
 
     return headers;
@@ -52,13 +62,17 @@ export class WatchlistService {
     this.setupWatchlistDataSync();
 
     // Watch for user info changes (better than isAuthenticated signal)
-    this.authService.currentUser$.subscribe(userInfo => {
+    this.authService.currentUser$.subscribe((userInfo) => {
       console.log('🔄 User info changed:', userInfo);
 
       if (userInfo && userInfo.id) {
         // User logged in and we have user ID
-        console.log('👤 User logged in with ID:', userInfo.id, '- loading watchlist...');
-        this.loadWatchlistFromDatabase();
+        console.log(
+          '👤 User logged in with ID:',
+          userInfo.id,
+          '- loading watchlist...'
+        );
+        this.loadWatchlistFromDatabase(userInfo.id);
       } else {
         // User logged out or no user info
         console.log('👋 No user info, clearing watchlist...');
@@ -77,28 +91,17 @@ export class WatchlistService {
   /**
    * Load watchlist from database for current user
    */
-  private loadWatchlistFromDatabase(): void {
-    const userId = this.getUserId();
-    console.log('🔍 loadWatchlistFromDatabase called, userId:', userId);
-
-    if (!userId) {
-      console.warn('⚠️ Cannot load watchlist: User ID not available');
-      this.watchlistIdsSubject.next([]);
-      return;
-    }
-
-    console.log(`📡 Fetching watchlist for user ${userId}...`);
-    this.http.get<WatchlistResponse>(`${this.apiUrl}/user/${userId}/default`)
+  private loadWatchlistFromDatabase(userId: number): void {
+    this.http
+      .get<WatchlistResponse>(`${this.apiUrl}/user/${userId}/default`)
       .pipe(
-        tap(response => {
-          console.log('📦 Watchlist API response:', response);
+        tap((response) => {
           if (response.success && response.data) {
-            const assetIds = response.data.assets.map(a => a.id);
+            const assetIds = response.data.assets.map((a) => a.id);
             this.watchlistIdsSubject.next(assetIds);
-            console.log(`✅ Watchlist loaded from database: ${assetIds.length} items`, assetIds);
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('❌ Error loading watchlist from database:', error);
           this.watchlistIdsSubject.next([]);
           return of(null);
@@ -125,16 +128,19 @@ export class WatchlistService {
     }
 
     // Call API to toggle asset
-    this.http.post<ToggleAssetResponse>(`${this.apiUrl}/user/${userId}/toggle/${coinId}`, {})
+    this.http
+      .post<ToggleAssetResponse>(
+        `${this.apiUrl}/user/${userId}/toggle/${coinId}`,
+        {}
+      )
       .pipe(
-        tap(response => {
+        tap((response) => {
           if (response.success) {
-            const assetIds = response.watchlist.assets.map(a => a.id);
+            const assetIds = response.watchlist.assets.map((a) => a.id);
             this.watchlistIdsSubject.next(assetIds);
-            console.log(`✅ Asset ${response.added ? 'added to' : 'removed from'} watchlist`);
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('❌ Error toggling watchlist:', error);
           return of(null);
         })
@@ -171,41 +177,40 @@ export class WatchlistService {
    */
   private setupWatchlistDataSync(): void {
     // Combine watchlist IDs with coin data from API
-    combineLatest([
-      this.watchlistIds$,
-      this.apiService.coins$
-    ]).pipe(
-      map(([watchlistIds, allCoins]) => {
-        // Filter coins that are in the watchlist
-        const watchlistCoins: WatchlistCoin[] = watchlistIds
-          .map(assetId => {
-            // Find coin by asset ID (which matches coin.id from backend)
-            const coin = allCoins.find(c => Number(c.id) === assetId);
+    combineLatest([this.watchlistIds$, this.apiService.coins$])
+      .pipe(
+        map(([watchlistIds, allCoins]) => {
+          // Filter coins that are in the watchlist
+          const watchlistCoins: WatchlistCoin[] = watchlistIds
+            .map((assetId) => {
+              // Find coin by asset ID (which matches coin.id from backend)
+              const coin = allCoins.find((c) => Number(c.id) === assetId);
 
-            if (!coin) {
-              return null;
-            }
+              if (!coin) {
+                return null;
+              }
 
-            return {
-              id: coin.id,
-              name: coin.name,
-              symbol: coin.symbol,
-              icon: coin.icon,
-              rank: coin.rank,
-              marketCap: coin.marketCap,
-              price: coin.price,
-              change24h: coin.change24h,
-              isPositive24h: coin.isPositive24h,
-              sparklineData: coin.sparklineData
-            } as WatchlistCoin;
-          })
-          .filter(coin => coin !== null) as WatchlistCoin[];
+              return {
+                id: coin.id,
+                name: coin.name,
+                symbol: coin.symbol,
+                icon: coin.icon,
+                rank: coin.rank,
+                marketCap: coin.marketCap,
+                price: coin.price,
+                change24h: coin.change24h,
+                isPositive24h: coin.isPositive24h,
+                sparklineData: coin.sparklineData,
+              } as WatchlistCoin;
+            })
+            .filter((coin) => coin !== null) as WatchlistCoin[];
 
-        return watchlistCoins;
-      })
-    ).subscribe(watchlistCoins => {
-      this.watchlistCoinsSubject.next(watchlistCoins);
-    });
+          return watchlistCoins;
+        })
+      )
+      .subscribe((watchlistCoins) => {
+        this.watchlistCoinsSubject.next(watchlistCoins);
+      });
   }
 
   /**

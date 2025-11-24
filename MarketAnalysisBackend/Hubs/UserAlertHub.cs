@@ -52,6 +52,11 @@ namespace MarketAnalysisBackend.Hubs
         {
             await Clients.Caller.SendAsync("UnreadCount", 0);
         }
+
+        public async Task SendUnreadCountToUser(string userId, int count)
+        {
+            await Clients.Group($"user_{userId}").SendAsync("UnreadCount", count);
+        }
     }
 
     public class AlertNotificationDto

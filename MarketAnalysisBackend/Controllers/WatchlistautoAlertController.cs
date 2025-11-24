@@ -38,6 +38,7 @@ namespace MarketAnalysisBackend.Controllers
                 }
 
                 var alerts = await _historyRepository.GetAllAsync();
+                alerts = alerts.Where(a => a.UserId == userId).ToList();
 
                 var results = alerts
                     .OrderByDescending(h => h.TriggeredAt)
@@ -100,6 +101,94 @@ namespace MarketAnalysisBackend.Controllers
             {
                 _logger.LogError(ex, "Error getting alerts by asset");
                 return StatusCode(500, new { message = "Failed to retrieve alerts" });
+            }
+        }
+
+        [HttpPost("{id}/mark-viewed")]
+        public async Task<IActionResult> MarkAsViewed(int id)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                if (userId == null)
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                var alert = await _historyRepository.GetByIdAsync(id);
+                if (alert == null)
+                {
+                    return NotFound(new { message = "Alert not found" });
+                }
+
+                if (alert.UserId != userId)
+                {
+                    return Forbid();
+                }
+
+                alert.WasNotified = true;
+                alert.ViewAt = DateTime.UtcNow;
+                await _historyRepository.UpdateAsync(alert);
+
+                return Ok(new { message = "Alert marked as viewed" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error marking alert as viewed");
+                return StatusCode(500, new { message = "Failed to mark alert as viewed" });
+            }
+        }
+
+        [HttpPost("mark-all-viewed")]
+        public async Task<IActionResult> MarkAllAsViewed()
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                if (userId == null)
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                var alerts = await _historyRepository.GetAllAsync();
+                var userAlerts = alerts.Where(a => a.UserId == userId && !a.WasNotified).ToList();
+
+                foreach (var alert in userAlerts)
+                {
+                    alert.WasNotified = true;
+                    alert.ViewAt = DateTime.UtcNow;
+                    await _historyRepository.UpdateAsync(alert);
+                }
+
+                return Ok(new { message = $"Marked {userAlerts.Count} alerts as viewed" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error marking all alerts as viewed");
+                return StatusCode(500, new { message = "Failed to mark alerts as viewed" });
+            }
+        }
+
+        [HttpGet("unread-count")]
+        public async Task<IActionResult> GetUnreadCount()
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                if (userId == null)
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                var alerts = await _historyRepository.GetAllAsync();
+                var unreadCount = alerts.Count(a => a.UserId == userId && !a.WasNotified);
+
+                return Ok(new { count = unreadCount });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting unread count");
+                return StatusCode(500, new { message = "Failed to get unread count" });
             }
         }
     }
