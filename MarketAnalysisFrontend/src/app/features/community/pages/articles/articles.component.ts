@@ -2,6 +2,7 @@ import { Component, signal, OnInit, DoCheck } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Article } from '../../models/post.model';
+import { CommunityService } from '../../services/community.service';
 
 @Component({
   selector: 'app-articles',
@@ -122,44 +123,25 @@ export class ArticlesComponent implements OnInit, DoCheck {
     //   summary: 'Everything about Ethereum transition to proof-of-stake and what it means for investors and developers.',
     //   category: 'Coin'
     // },
-    // {
-    //   id: 'a5',
-    //   title: 'Technical Analysis Basics for Crypto Trading',
-    //   summary: 'Master the fundamentals of technical analysis to make better trading decisions in the crypto market.',
-    //   category: 'Education'
-    // },
-    // {
-    //   id: 'a6',
-    //   title: 'Altcoin Season: Indicators and Strategies',
-    //   summary: 'Identify altcoin season patterns and learn strategies to capitalize on these market cycles.',
-    //   category: 'Market'
-    // },
-    // {
-    //   id: 'a7',
-    //   title: 'Solana Ecosystem: Top Projects to Watch',
-    //   summary: 'Explore the fastest-growing projects in the Solana ecosystem and their potential impact.',
-    //   category: 'Coin'
-    // },
-    // {
-    //   id: 'a8',
-    //   title: 'Crypto Security: Protecting Your Assets',
-    //   summary: 'Essential security practices every crypto investor should follow to keep their assets safe.',
-    //   category: 'Education'
-    // },
-    // {
-    //   id: 'a9',
-    //   title: 'Institutional Adoption: The New Bull Market Driver',
-    //   summary: 'How institutional investment is reshaping the cryptocurrency market landscape.',
-    //   category: 'Market'
-    // }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private communityService: CommunityService) {}
 
   filteredArticles = signal<Article[]>(this.articles);
 
   ngOnInit(): void {
     this.updateFilteredArticles();
+    this.loadArticles();
+  }
+
+  loadArticles(): void {
+    this.communityService.getArticles().subscribe({
+  next: (articles) => {
+    this.articles = articles.data;
+  },
+  error: (err) => console.error(err)
+});
+
   }
 
   ngDoCheck(): void {

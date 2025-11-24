@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Article } from '../../models/post.model';
+import { CommunityService } from '../../services/community.service';
 
 @Component({
   selector: 'app-article-detail',
@@ -135,6 +136,7 @@ export class ArticleDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private communityService: CommunityService,
     private router: Router
   ) {}
 
@@ -144,6 +146,20 @@ export class ArticleDetailComponent implements OnInit {
       // const foundArticle = this.articles.find(a => a.id === articleId);
       // this.article.set(foundArticle || null);
     }
+    this.loadArticle();
+  }
+
+  loadArticle(): void {
+    const articleid = this.route.snapshot.paramMap.get('id');
+    this.communityService.getArticleById(parseInt(articleid!)).subscribe({
+      next: (article) => {
+        this.article.set(article);
+      },
+      error: (err) => {
+        console.error(err);
+        this.article.set(null);
+      }
+    });
   }
 
   goBack(): void {
