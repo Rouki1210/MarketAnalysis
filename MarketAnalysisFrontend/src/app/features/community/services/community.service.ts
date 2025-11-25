@@ -27,7 +27,6 @@ export interface UpdatePostDto {
 export interface CreateCommentDto {
     postId: number;
     content: string;
-    parentCommentId?: number;
 }
 
 export interface UpdateCommentDto {

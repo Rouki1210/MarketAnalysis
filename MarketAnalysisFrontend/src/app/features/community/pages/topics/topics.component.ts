@@ -1,9 +1,18 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { PostService } from '../../services/post.service';
 import { Post } from '../../models/post.model';
 import { CommunityService } from '../../services/community.service';
+import { PostService } from '../../services/post.service';
+
+// Define Topic interface
+interface Topic {
+  id: number;
+  name: string;
+  slug: string;
+  icon: string;
+  description?: string;
+}
 
 @Component({
   selector: 'app-topics',
@@ -20,14 +29,35 @@ import { CommunityService } from '../../services/community.service';
       </div>
 
       <!-- Topic Categories -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="mb-8">
+        <h2 class="text-xl font-bold text-foreground mb-4">Popular Topics</h2>
+        
+        <!-- Loading Topics -->
+        <div *ngIf="topicsLoading()" class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mb-2"></div>
+          <p class="text-muted-foreground text-sm">Loading topics...</p>
+        </div>
+
+        <!-- Topics Grid -->
         <div 
-          *ngFor="let topic of topics"
-          class="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors cursor-pointer"
+          *ngIf="!topicsLoading() && topics().length > 0"
+          class="grid grid-cols-2 md:grid-cols-4 gap-4"
         >
-          <div class="text-4xl mb-3">{{ topic.icon }}</div>
-          <h3 class="font-semibold text-foreground mb-1">{{ topic.name }}</h3>
-          <p class="text-sm text-muted-foreground">{{ topic.count }} posts</p>
+          <div 
+            *ngFor="let topic of topics()"
+            (click)="openTopic(topic.id)"
+            class="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors cursor-pointer"
+          >
+            <div class="text-4xl mb-3">{{ topic.icon || '📌' }}</div>
+            <h3 class="font-semibold text-foreground mb-1">{{ topic.name }}</h3>
+            <p class="text-sm text-muted-foreground">{{ getPostCount(topic.id) }} posts</p>
+          </div>
+        </div>
+
+        <!-- No Topics -->
+        <div *ngIf="!topicsLoading() && topics().length === 0" class="text-center py-8">
+          <div class="text-4xl mb-2">📭</div>
+          <p class="text-muted-foreground">No topics available</p>
         </div>
       </div>
 
@@ -36,7 +66,14 @@ import { CommunityService } from '../../services/community.service';
         <h2 class="text-2xl font-bold text-foreground mb-4">Recent Discussions</h2>
       </div>
 
-      <div class="space-y-4">
+      <!-- Loading Posts -->
+      <div *ngIf="postsLoading()" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+        <p class="text-muted-foreground">Loading posts...</p>
+      </div>
+
+      <!-- Posts List -->
+      <div class="space-y-4" *ngIf="!postsLoading() && posts().length > 0">
         <div 
           *ngFor="let post of posts()"
           (click)="openPost(post.id)"
@@ -45,8 +82,8 @@ import { CommunityService } from '../../services/community.service';
           <!-- Post Header -->
           <div class="flex items-start justify-between mb-3">
             <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-xl">
-                {{ post.author.avatarEmoji }}
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl">
+                {{ post.author.avatarEmoji || '👤' }}
               </div>
               <div>
                 <div class="flex items-center space-x-2">
@@ -97,6 +134,26 @@ import { CommunityService } from '../../services/community.service';
           </div>
         </div>
       </div>
+
+      <!-- No Posts -->
+      <div *ngIf="!postsLoading() && posts().length === 0" class="text-center py-12">
+        <div class="text-6xl mb-4">📭</div>
+        <h3 class="text-xl font-semibold text-foreground mb-2">No posts yet</h3>
+        <p class="text-muted-foreground">Be the first to create a post!</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error()" class="text-center py-12">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h3 class="text-xl font-semibold text-foreground mb-2">Something went wrong</h3>
+        <p class="text-muted-foreground mb-4">{{ error() }}</p>
+        <button 
+          (click)="loadData()"
+          class="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+        >
+          Try Again
+        </button>
+      </div>
     </div>
   `,
   styles: [`
@@ -108,41 +165,89 @@ import { CommunityService } from '../../services/community.service';
     }
   `]
 })
-export class TopicsComponent {
+export class TopicsComponent implements OnInit {
+  // State - QUAN TRỌNG: Dùng signal cho reactive
   posts = signal<Post[]>([]);
-
-  topics = [
-    { name: 'Bitcoin', icon: '₿', count: 1234 },
-    { name: 'Ethereum', icon: 'Ξ', count: 892 },
-    { name: 'DeFi', icon: '🏦', count: 567 },
-    { name: 'NFTs', icon: '🎨', count: 423 },
-    { name: 'Trading', icon: '📈', count: 789 },
-    { name: 'News', icon: '📰', count: 654 },
-    { name: 'Education', icon: '📚', count: 321 },
-    { name: 'Altcoins', icon: '🪙', count: 456 }
-  ];
+  topics = signal<Topic[]>([]); 
+  arrayPosts: Post[] = [];
+  
+  // Loading states
+  postsLoading = signal(false);
+  topicsLoading = signal(false);
+  error = signal<string | null>(null);
 
   constructor(
-    private postService: PostService,
     private communityService: CommunityService,
+    private postService: PostService,
     private router: Router
-  ) {
-    this.posts.set(this.postService.getPosts());
-    this.communityService.getAllTopics().subscribe((topics) => {
-      this.topics = topics.map(topic => ({
-        name: topic.name,
-        icon: topic.icon,
-        count: postService.getPosts().filter(post => post.topics?.includes(topic)).length || 0
-      }));
+  ) {}
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(): void {
+    this.error.set(null);
+    this.loadTopics();
+    this.loadPosts();
+  }
+
+  // Load topics từ API
+  loadTopics(): void {
+    this.topicsLoading.set(true);
+
+    this.communityService.getAllTopics().subscribe({
+      next: (topics: Topic[]) => {
+        console.log('✅ Loaded topics:', topics);
+        this.topics.set(topics);  
+        this.topicsLoading.set(false);
+      },
+      error: (err) => {
+        console.error('❌ Error loading topics:', err);
+        this.topicsLoading.set(false);
+      }
     });
   }
 
-  openPost(postId: string): void {
-    // Navigate to post detail or open modal
-    console.log('Open post:', postId);
+  // Load posts từ API
+  loadPosts(): void {
+    this.postsLoading.set(true);
+    this.error.set(null);
+    this.postService.loadPosts();
+
+    const interval = setInterval(() => {
+      const loadedPosts = this.postService.getPosts();
+      if (loadedPosts.length > 0 || this.postService.error()) {
+      this.posts.set(loadedPosts);
+      this.postsLoading.set(false);
+
+      if (this.postService.error()) {
+        this.error.set('Failed to load posts. Please try again later.');
+      }
+      clearInterval(interval);
+    }}, 200);
   }
 
+  openPost(postId: string): void {
+    console.log('Navigate to post:', postId);
+    this.router.navigate(['/community/post', postId]);
+  }
+
+  openTopic(topicId: number): void {
+    console.log('Navigate to topic:', topicId);
+  }
+
+  // Đếm số posts có topic này
+  getPostCount(topicId: number): number {
+    return this.posts().filter(post => 
+      post.topics?.some(t => t.id === topicId)
+    ).length;
+  }
+
+  // Format time ago
   getTimeAgo(dateString: string): string {
+    if (!dateString) return '';
+    
     const date = new Date(dateString);
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
@@ -153,4 +258,3 @@ export class TopicsComponent {
     return `${Math.floor(seconds / 86400)}d ago`;
   }
 }
-
