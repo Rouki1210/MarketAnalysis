@@ -41,6 +41,20 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(pagedAssets);
         }
 
+        [HttpGet("new")]
+        public async Task<IActionResult> GetAssetsByDate()
+        {
+            var newAssets = await _assetService.GetAllAssetByDateAsynnc();
+            return Ok(newAssets);
+        }
+
+        [HttpGet("view")]
+        public async Task<IActionResult> GetAssetsByView()
+        {
+            var viewedAssets = await _assetService.GetAllAssetByViewAsynnc();
+            return Ok(viewedAssets);
+        }
+
         [HttpGet("{symbol}")]
         public async Task<IActionResult> GetAssetBySymbol(string symbol)
         {

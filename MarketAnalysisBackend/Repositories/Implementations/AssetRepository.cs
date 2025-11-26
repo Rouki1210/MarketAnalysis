@@ -21,6 +21,11 @@ namespace MarketAnalysisBackend.Repositories.Implementations
             await _context.SaveChangesAsync();
         }
 
+        public async Task<Asset?> GetAssetBySymbolAsync(string symbol)
+        {
+            return await _context.Assets.FirstOrDefaultAsync(a => a.Symbol.ToLower() == symbol.ToLower());
+        }
+
         public async Task<IEnumerable<Asset>> GetByPagination(int from, int to)
         {
             var totalItems = await _context.Assets.CountAsync();
