@@ -1,19 +1,26 @@
 <header class="bg-card border-b border-border sticky top-0 z-[100]">
-  <div class="flex items-center justify-between mx-auto px-3 lg:px-4 xl:px-6 py-3">
+  <div
+    class="flex items-center justify-between mx-auto px-3 lg:px-4 xl:px-6 py-3"
+  >
     <!-- Logo and Navigation -->
     <div class="flex items-center space-x-6 lg:space-x-8">
       <a routerLink="/" class="flex items-center space-x-2 flex-shrink-0">
-        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+        <div
+          class="w-8 h-8 bg-primary rounded-full flex items-center justify-center"
+        >
           <span class="text-primary-foreground font-bold text-sm">C</span>
         </div>
-        <span class="text-lg lg:text-xl font-bold text-foreground hidden sm:block">CoinMarketCap</span>
+        <span
+          class="text-lg lg:text-xl font-bold text-foreground hidden sm:block"
+          >CoinMarketCap</span
+        >
       </a>
 
       <nav class="hidden lg:flex items-center space-x-4 xl:space-x-6">
         <div class="relative crypto-menu-container">
-          <a 
+          <a
             (mouseenter)="openCryptoMenu()"
-            routerLinkActive="text-foreground" 
+            routerLinkActive="text-foreground"
             class="text-sm text-muted-foreground hover:text-blue-500 transition-colors whitespace-nowrap cursor-pointer"
           >
             Cryptocurrencies
@@ -29,262 +36,705 @@
             <div class="grid grid-cols-4 gap-0">
               <!-- Cryptocurrencies Column -->
               <div class="p-6 border-r border-border">
-                <h3 class="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Cryptocurrencies</h3>
+                <h3
+                  class="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider"
+                >
+                  Cryptocurrencies
+                </h3>
                 <div class="space-y-1">
-                  <a routerLink="/markets" (click)="closeCryptoMenu()" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    routerLink="/markets"
+                    (click)="closeCryptoMenu()"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <path d="M3 3h18v18H3z"></path>
                         <path d="M3 9h18M9 21V9"></path>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Ranking</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Ranking</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Categories</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Categories</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Historical Snapshots</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Historical Snapshots</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <path d="M12 2v20M2 12h20"></path>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Token unlocks</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Token unlocks</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                        ></path>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Yield</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Yield</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <circle cx="12" cy="12" r="10"></circle>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Real-World Assets</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Real-World Assets</span
+                    >
                   </a>
                 </div>
               </div>
 
               <!-- Leaderboards Column -->
               <div class="p-6 border-r border-border">
-                <h3 class="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Leaderboards</h3>
+                <h3
+                  class="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider"
+                >
+                  Leaderboards
+                </h3>
                 <div class="space-y-1">
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
                         <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Trending</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Trending</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Upcoming</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Upcoming</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        <path
+                          d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                        ></path>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Recently Added</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Recently Added</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline
+                          points="22 12 18 12 15 21 9 3 6 12 2 12"
+                        ></polyline>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Gainers & Losers</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Gainers & Losers</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                        ></path>
                         <circle cx="12" cy="12" r="3"></circle>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Most Visited</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Most Visited</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                        ></path>
                         <polyline points="17 8 12 3 7 8"></polyline>
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Community Sentiment</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Community Sentiment</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <polyline points="19 12 12 19 5 12"></polyline>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Chain Ranking</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Chain Ranking</span
+                    >
                   </a>
                 </div>
               </div>
 
               <!-- Market Overview Column -->
               <div class="p-6 border-r border-border">
-                <h3 class="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Market Overview</h3>
+                <h3
+                  class="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider"
+                >
+                  Market Overview
+                </h3>
                 <div class="space-y-1">
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline
+                          points="22 12 18 12 15 21 9 3 6 12 2 12"
+                        ></polyline>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Market Overview</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Market Overview</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <circle cx="12" cy="12" r="10"></circle>
                         <circle cx="12" cy="12" r="6"></circle>
                         <circle cx="12" cy="12" r="2"></circle>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">CoinMarketCap 20 Index</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >CoinMarketCap 20 Index</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <circle cx="12" cy="12" r="10"></circle>
                         <circle cx="12" cy="12" r="6"></circle>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">CoinMarketCap 100 Index</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >CoinMarketCap 100 Index</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Fear and Greed Index</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Fear and Greed Index</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                        ></path>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Altcoin Season Index</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Altcoin Season Index</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <circle cx="12" cy="12" r="10"></circle>
                         <path d="M12 6v6l4 2"></path>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Bitcoin Dominance</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Bitcoin Dominance</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline
+                          points="23 6 13.5 15.5 8.5 10.5 1 18"
+                        ></polyline>
                         <polyline points="17 6 23 6 23 12"></polyline>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Crypto ETFs</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Crypto ETFs</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline
+                          points="22 12 18 12 15 21 9 3 6 12 2 12"
+                        ></polyline>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Market Cycle Indicators</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Market Cycle Indicators</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <line x1="18" y1="20" x2="18" y2="10"></line>
                         <line x1="12" y1="20" x2="12" y2="4"></line>
                         <line x1="6" y1="20" x2="6" y2="14"></line>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Relative Strength Index (RSI)</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Relative Strength Index (RSI)</span
+                    >
                   </a>
                 </div>
               </div>
 
               <!-- Treasuries & NFT Column -->
               <div class="p-6">
-                <h3 class="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Treasuries</h3>
+                <h3
+                  class="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider"
+                >
+                  Treasuries
+                </h3>
                 <div class="space-y-1 mb-6">
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <circle cx="12" cy="12" r="10"></circle>
                         <path d="M12 6v6l4 2"></path>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Bitcoin Treasuries</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Bitcoin Treasuries</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        ></rect>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">BNB Treasuries</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >BNB Treasuries</span
+                    >
                   </a>
                 </div>
 
-                <h3 class="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">NFT</h3>
+                <h3
+                  class="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider"
+                >
+                  NFT
+                </h3>
                 <div class="space-y-1">
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <circle cx="12" cy="12" r="10"></circle>
                         <path d="M12 16v-4"></path>
                         <path d="M12 8h.01"></path>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Overall NFT Stats</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Overall NFT Stats</span
+                    >
                   </a>
-                  <a href="#" class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group">
-                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <a
+                    href="#"
+                    class="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    <div
+                      class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        ></rect>
                         <circle cx="8.5" cy="8.5" r="1.5"></circle>
                         <polyline points="21 15 16 10 5 21"></polyline>
                       </svg>
                     </div>
-                    <span class="text-sm text-foreground group-hover:text-primary transition-colors">Upcoming Sales</span>
+                    <span
+                      class="text-sm text-foreground group-hover:text-primary transition-colors"
+                      >Upcoming Sales</span
+                    >
                   </a>
                 </div>
               </div>
@@ -293,9 +743,9 @@
         </div>
 
         <div class="relative exchange-menu-container">
-          <a 
+          <a
             (mouseenter)="openExchangeMenu()"
-            routerLinkActive="text-foreground" 
+            routerLinkActive="text-foreground"
             class="text-sm text-muted-foreground hover:text-blue-500 transition-colors whitespace-nowrap cursor-pointer"
           >
             Exchanges
@@ -309,26 +759,78 @@
             class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[220px] bg-card border border-border rounded-xl shadow-xl overflow-hidden z-[110]"
           >
             <div class="py-2 px-2">
-              <h3 class="text-xs font-semibold text-muted-foreground mb-2 px-3 uppercase tracking-wider">Centralized Exchanges</h3>
+              <h3
+                class="text-xs font-semibold text-muted-foreground mb-2 px-3 uppercase tracking-wider"
+              >
+                Centralized Exchanges
+              </h3>
               <div class="space-y-0.5">
-                <a href="#" (click)="closeExchangeMenu()" class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group">
-                  <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                      <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                <a
+                  href="#"
+                  (click)="closeExchangeMenu()"
+                  class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group"
+                >
+                  <div
+                    class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-4 h-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <rect
+                        x="2"
+                        y="2"
+                        width="20"
+                        height="8"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <rect
+                        x="2"
+                        y="14"
+                        width="20"
+                        height="8"
+                        rx="2"
+                        ry="2"
+                      ></rect>
                       <line x1="6" y1="6" x2="6.01" y2="6"></line>
                       <line x1="6" y1="18" x2="6.01" y2="18"></line>
                     </svg>
                   </div>
-                  <span class="text-sm text-foreground group-hover:text-primary transition-colors font-medium">Spot</span>
+                  <span
+                    class="text-sm text-foreground group-hover:text-primary transition-colors font-medium"
+                    >Spot</span
+                  >
                 </a>
-                <a href="#" (click)="closeExchangeMenu()" class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group">
-                  <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                <a
+                  href="#"
+                  (click)="closeExchangeMenu()"
+                  class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group"
+                >
+                  <div
+                    class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-4 h-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <polyline
+                        points="22 12 18 12 15 21 9 3 6 12 2 12"
+                      ></polyline>
                     </svg>
                   </div>
-                  <span class="text-sm text-foreground group-hover:text-primary transition-colors font-medium">Derivatives</span>
+                  <span
+                    class="text-sm text-foreground group-hover:text-primary transition-colors font-medium"
+                    >Derivatives</span
+                  >
                 </a>
               </div>
             </div>
@@ -336,10 +838,10 @@
         </div>
 
         <div class="relative community-menu-container">
-          <a 
+          <a
             routerLink="/community/home"
             (mouseenter)="openCommunityMenu()"
-            routerLinkActive="text-foreground" 
+            routerLinkActive="text-foreground"
             class="text-sm text-muted-foreground hover:text-blue-500 transition-colors whitespace-nowrap cursor-pointer"
           >
             Community
@@ -354,56 +856,142 @@
           >
             <div class="py-2 px-2">
               <div class="space-y-0.5">
-                <a routerLink="/community/feed" (click)="closeCommunityMenu()" class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group">
-                  <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <a
+                  routerLink="/community/feed"
+                  (click)="closeCommunityMenu()"
+                  class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group"
+                >
+                  <div
+                    class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-4 h-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                      <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                      <path
+                        d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"
+                      ></path>
                       <line x1="6" y1="1" x2="6" y2="4"></line>
                       <line x1="10" y1="1" x2="10" y2="4"></line>
                       <line x1="14" y1="1" x2="14" y2="4"></line>
                     </svg>
                   </div>
-                  <span class="text-sm text-foreground group-hover:text-primary transition-colors font-medium">Feeds</span>
+                  <span
+                    class="text-sm text-foreground group-hover:text-primary transition-colors font-medium"
+                    >Feeds</span
+                  >
                 </a>
-                <a routerLink="/community/topics" (click)="closeCommunityMenu()" class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group">
-                  <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                <a
+                  routerLink="/community/topics"
+                  (click)="closeCommunityMenu()"
+                  class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group"
+                >
+                  <div
+                    class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-4 h-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"
+                      ></path>
                       <line x1="4" y1="22" x2="4" y2="15"></line>
                     </svg>
                   </div>
-                  <span class="text-sm text-foreground group-hover:text-primary transition-colors font-medium">Topics</span>
+                  <span
+                    class="text-sm text-foreground group-hover:text-primary transition-colors font-medium"
+                    >Topics</span
+                  >
                 </a>
-                <a href="#" (click)="closeCommunityMenu()" class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group">
-                  <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <a
+                  href="#"
+                  (click)="closeCommunityMenu()"
+                  class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group"
+                >
+                  <div
+                    class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-4 h-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <circle cx="12" cy="12" r="10"></circle>
                       <polygon points="10 8 16 12 10 16 10 8"></polygon>
                     </svg>
                   </div>
-                  <span class="text-sm text-foreground group-hover:text-primary transition-colors font-medium">Lives</span>
+                  <span
+                    class="text-sm text-foreground group-hover:text-primary transition-colors font-medium"
+                    >Lives</span
+                  >
                 </a>
-                <a routerLink="/community/articles" (click)="closeCommunityMenu()" class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group">
-                  <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <a
+                  routerLink="/community/articles"
+                  (click)="closeCommunityMenu()"
+                  class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group"
+                >
+                  <div
+                    class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-4 h-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                      ></path>
                       <polyline points="14 2 14 8 20 8"></polyline>
                       <line x1="16" y1="13" x2="8" y2="13"></line>
                       <line x1="16" y1="17" x2="8" y2="17"></line>
                       <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
                   </div>
-                  <span class="text-sm text-foreground group-hover:text-primary transition-colors font-medium">Articles</span>
+                  <span
+                    class="text-sm text-foreground group-hover:text-primary transition-colors font-medium"
+                    >Articles</span
+                  >
                 </a>
-                <a href="#" (click)="closeCommunityMenu()" class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group">
-                  <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <a
+                  href="#"
+                  (click)="closeCommunityMenu()"
+                  class="flex items-center space-x-3 py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors group"
+                >
+                  <div
+                    class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-4 h-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
                       <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
                     </svg>
                   </div>
-                  <span class="text-sm text-foreground group-hover:text-primary transition-colors font-medium">Sentiment</span>
+                  <span
+                    class="text-sm text-foreground group-hover:text-primary transition-colors font-medium"
+                    >Sentiment</span
+                  >
                 </a>
               </div>
             </div>
@@ -417,14 +1005,23 @@
       <div class="flex items-center space-x-1 lg:space-x-2">
         <!-- Watchlist Dropdown Container -->
         <div class="relative watchlist-dropdown-container">
-          <app-button 
-            variant="ghost" 
-            size="sm" 
+          <app-button
+            variant="ghost"
+            size="sm"
             class="hidden md:flex"
             (mouseenter)="openWatchlistDropdown()"
           >
-            <svg class="w-4 h-4 lg:mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            <svg
+              class="w-4 h-4 lg:mr-1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              ></polygon>
             </svg>
             <span class="hidden lg:inline">Watchlist</span>
           </app-button>
@@ -437,14 +1034,25 @@
             class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[500px] bg-card border border-border rounded-xl shadow-xl overflow-hidden z-[110]"
           >
             <!-- Header with Title and Full View -->
-            <div class="flex items-center justify-between p-4 border-b border-border">
-              <h3 class="text-lg font-semibold text-foreground">My Main Watchlist</h3>
-              <a 
-                href="#" 
+            <div
+              class="flex items-center justify-between p-4 border-b border-border"
+            >
+              <h3 class="text-lg font-semibold text-foreground">
+                My Main Watchlist
+              </h3>
+              <a
+                href="#"
                 class="text-sm text-primary hover:text-primary/80 transition-colors font-medium inline-flex items-center"
               >
                 Full View
-                <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg
+                  class="w-4 h-4 ml-1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
                   <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
               </a>
@@ -453,20 +1061,39 @@
             <!-- Watchlist Content -->
             <div class="max-h-[400px] overflow-y-auto custom-scrollbar">
               <!-- Empty State -->
-              <div *ngIf="(watchlistCoins$ | async)?.length === 0" class="flex flex-col items-center justify-center py-16 px-6">
-                <div class="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-4">
-                  <svg class="w-8 h-8 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              <div
+                *ngIf="(watchlistCoins$ | async)?.length === 0"
+                class="flex flex-col items-center justify-center py-16 px-6"
+              >
+                <div
+                  class="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-4"
+                >
+                  <svg
+                    class="w-8 h-8 text-yellow-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                    ></polygon>
                   </svg>
                 </div>
-                <p class="text-lg font-medium text-foreground mb-1">Add Coins to Your Watchlist</p>
-                <p class="text-sm text-muted-foreground text-center">Click the star icon next to any coin to add it to your watchlist</p>
+                <p class="text-lg font-medium text-foreground mb-1">
+                  Add Coins to Your Watchlist
+                </p>
+                <p class="text-sm text-muted-foreground text-center">
+                  Click the star icon next to any coin to add it to your
+                  watchlist
+                </p>
               </div>
 
               <!-- Coin List -->
               <div *ngIf="(watchlistCoins$ | async)?.length! > 0" class="p-4">
                 <!-- Column Headers -->
-                <div class="grid grid-cols-[2fr_1.2fr_1fr_0.8fr] gap-4 px-3 py-2 text-xs text-muted-foreground font-semibold border-b border-border mb-2">
+                <div
+                  class="grid grid-cols-[2fr_1.2fr_1fr_0.8fr] gap-4 px-3 py-2 text-xs text-muted-foreground font-semibold border-b border-border mb-2"
+                >
                   <div>Name</div>
                   <div class="text-right">Market Cap</div>
                   <div class="text-right">Price</div>
@@ -474,61 +1101,73 @@
                 </div>
 
                 <!-- Coin Cards -->
-                <div 
-                  *ngFor="let coin of (watchlistCoins$ | async)"
+                <div
+                  *ngFor="let coin of watchlistCoins$ | async"
                   (click)="navigateToCoinFromWatchlist(coin.id)"
                   class="grid grid-cols-[2fr_1.2fr_1fr_0.8fr] gap-4 px-3 py-3 rounded-lg hover:bg-muted/40 transition-colors cursor-pointer items-center"
                 >
                   <!-- Coin Name & Icon -->
                   <div class="flex items-center space-x-3 min-w-0">
-                    <div class="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden bg-primary">
-                      <img 
-                        *ngIf="coin.icon" 
-                        [src]="coin.icon" 
+                    <div
+                      class="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden bg-primary"
+                    >
+                      <img
+                        *ngIf="coin.icon"
+                        [src]="coin.icon"
                         [alt]="coin.name"
                         class="w-full h-full object-cover"
                       />
                     </div>
                     <div class="min-w-0 flex-1">
-                      <div class="text-sm font-semibold text-foreground truncate">{{ coin.name }}</div>
-                      <div class="text-xs text-muted-foreground font-medium">{{ coin.symbol }}</div>
+                      <div
+                        class="text-sm font-semibold text-foreground truncate"
+                      >
+                        {{ coin.name }}
+                      </div>
+                      <div class="text-xs text-muted-foreground font-medium">
+                        {{ coin.symbol }}
+                      </div>
                     </div>
                   </div>
 
                   <!-- Market Cap -->
                   <div class="text-right">
-                    <div class="text-sm text-foreground font-medium">{{ coin.marketCap | compactNumber }}</div>
+                    <div class="text-sm text-foreground font-medium">
+                      {{ coin.marketCap | compactNumber }}
+                    </div>
                   </div>
 
                   <!-- Price -->
                   <div class="text-right">
-                    <div class="text-sm font-semibold text-foreground">{{ coin.price }}</div>
+                    <div class="text-sm font-semibold text-foreground">
+                      {{ coin.price }}
+                    </div>
                   </div>
 
                   <!-- 24h Change -->
                   <div class="text-right">
-                    <div 
+                    <div
                       class="inline-flex items-center justify-end text-sm font-semibold w-full"
                       [ngClass]="getPercentClass(coin.isPositive24h)"
                     >
-                      <svg 
+                      <svg
                         *ngIf="coin.isPositive24h"
-                        class="w-3 h-3 mr-0.5" 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
+                        class="w-3 h-3 mr-0.5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
                         stroke-width="2"
                       >
                         <polyline points="18 15 12 9 6 15"></polyline>
                       </svg>
-                      <svg 
+                      <svg
                         *ngIf="!coin.isPositive24h"
-                        class="w-3 h-3 mr-0.5" 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
+                        class="w-3 h-3 mr-0.5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
                         stroke-width="2"
                       >
                         <polyline points="6 9 12 15 18 9"></polyline>
@@ -543,52 +1182,144 @@
         </div>
 
         <app-button variant="ghost" size="sm" class="hidden md:flex">
-          <svg class="w-4 h-4 lg:mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            class="w-4 h-4 lg:mr-1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
             <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
           </svg>
           <span class="hidden lg:inline">Portfolio</span>
         </app-button>
 
-        <div class="relative hidden lg:block">
-          <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" 
-               xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="relative search-container">
+          <svg
+            class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <circle cx="11" cy="11" r="8"></circle>
             <path d="m21 21-4.35-4.35"></path>
           </svg>
-          <input 
+          <input
             [(ngModel)]="searchQuery"
-            (keyup.enter)="onSearch()"
-            placeholder="Search" 
-            class="pl-10 w-48 xl:w-64 h-9 bg-input border border-border rounded-md text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" 
+            (keyup)="onSearch()"
+            placeholder="Search"
+            class="pl-10 w-48 xl:w-64 h-9 bg-input border border-border rounded-md text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
+
+          <!-- Search Results Dropdown -->
+          <div
+            *ngIf="showSearchResults()"
+            class="absolute left-0 top-full mt-2 w-80 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-[120]"
+          >
+            <div class="max-h-[400px] overflow-y-auto custom-scrollbar">
+              <!-- Loading State -->
+              <div
+                *ngIf="isSearching()"
+                class="p-4 text-center text-muted-foreground text-sm"
+              >
+                Searching...
+              </div>
+
+              <!-- No Results -->
+              <div
+                *ngIf="!isSearching() && searchResults().length === 0"
+                class="p-4 text-center text-muted-foreground text-sm"
+              >
+                No coins found
+              </div>
+
+              <!-- Results List -->
+              <div *ngIf="!isSearching() && searchResults().length > 0">
+                <div
+                  *ngFor="let coin of searchResults()"
+                  (click)="navigateToCoin(coin)"
+                  class="flex items-center space-x-3 p-3 hover:bg-muted/40 cursor-pointer transition-colors border-b border-border last:border-0"
+                >
+                  <div
+                    class="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden bg-primary"
+                  >
+                    <img
+                      *ngIf="coin.icon"
+                      [src]="coin.icon"
+                      [alt]="coin.name"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-semibold text-foreground truncate">
+                      {{ coin.name }}
+                    </div>
+                    <div class="text-xs text-muted-foreground font-medium">
+                      {{ coin.symbol }}
+                    </div>
+                  </div>
+
+                  <!-- Price and Change -->
+                  <div class="text-right">
+                    <div class="text-sm font-medium text-foreground">
+                      {{ coin.price }}
+                    </div>
+                    <div
+                      class="text-xs font-medium"
+                      [ngClass]="getPercentClass(coin.isPositive24h)"
+                    >
+                      {{ coin.change24h }}
+                    </div>
+                  </div>
+                  <div
+                    class="text-xs font-medium bg-muted px-2 py-1 rounded text-muted-foreground"
+                  >
+                    #{{ coin.rank }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        
+
         <div class="relative alert-menu-container hidden sm:block">
           <app-alert-button (toggle)="toggleAlertDropdown()"></app-alert-button>
           <app-alert-dropdown *ngIf="showAlertDropdown()"></app-alert-dropdown>
         </div>
-        
+
         <!-- Show Login button if not authenticated -->
-        <app-button 
-          *ngIf="!authService.isAuthenticated()" 
-          size="sm" 
+        <app-button
+          *ngIf="!authService.isAuthenticated()"
+          size="sm"
           (click)="openAuthModal('login')"
         >
           Log In
         </app-button>
-        
+
         <!-- Settings Menu Button (always visible) -->
         <div class="relative settings-menu-container">
-          <app-button 
-            variant="ghost" 
-            size="icon" 
+          <app-button
+            variant="ghost"
+            size="icon"
             (click)="toggleSettingsMenu()"
             class="flex"
           >
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="w-5 h-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <circle cx="12" cy="12" r="3"></circle>
-              <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m-2 2l-4.2 4.2m13.2-5.2l-6 0m-6 0l-6 0m13.2 5.2l-4.2-4.2m-2-2l-4.2-4.2"></path>
+              <path
+                d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m-2 2l-4.2 4.2m13.2-5.2l-6 0m-6 0l-6 0m13.2 5.2l-4.2-4.2m-2-2l-4.2-4.2"
+              ></path>
             </svg>
           </app-button>
 
@@ -598,16 +1329,25 @@
             class="absolute right-0 top-full mt-2 w-96 bg-card border border-border rounded-lg shadow-lg overflow-hidden z-[110]"
           >
             <!-- User Info Section (if authenticated) -->
-            <div *ngIf="authService.isAuthenticated()" class="p-4 border-b border-border">
+            <div
+              *ngIf="authService.isAuthenticated()"
+              class="p-4 border-b border-border"
+            >
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <div
+                  class="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0"
+                >
                   <span class="text-primary-foreground font-semibold text-lg">
-                    {{ (authService.currentUser()?.name || 'U').charAt(0).toUpperCase() }}
+                    {{
+                      (authService.currentUser()?.name || "U")
+                        .charAt(0)
+                        .toUpperCase()
+                    }}
                   </span>
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="font-medium text-foreground truncate">
-                    Hi, {{ authService.currentUser()?.name || 'User' }}
+                    Hi, {{ authService.currentUser()?.name || "User" }}
                   </div>
                   <div class="text-sm text-muted-foreground truncate">
                     {{ authService.currentUser()?.email }}
@@ -617,15 +1357,18 @@
             </div>
 
             <!-- Auth Buttons Section (if not authenticated) -->
-            <div *ngIf="!authService.isAuthenticated()" class="p-5 border-b border-border">
+            <div
+              *ngIf="!authService.isAuthenticated()"
+              class="p-5 border-b border-border"
+            >
               <div class="flex items-center space-x-3">
-                <button 
+                <button
                   (click)="openAuthModal('login')"
                   class="flex-1 px-5 py-2.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
                   Log In
                 </button>
-                <button 
+                <button
                   (click)="openAuthModal('signup')"
                   class="flex-1 px-5 py-2.5 border border-border rounded-md text-sm font-medium hover:bg-muted/40 transition-colors"
                 >
@@ -635,12 +1378,21 @@
             </div>
 
             <!-- Language Section -->
-            <button class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors rounded-lg">
+            <button
+              class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors rounded-lg"
+            >
               <div class="flex items-center justify-between">
                 <span class="text-sm text-muted-foreground">Language</span>
                 <div class="flex items-center text-sm text-foreground">
                   <span>{{ selectedLanguage() }}</span>
-                  <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    class="w-4 h-4 ml-1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
                 </div>
@@ -648,17 +1400,28 @@
             </button>
 
             <!-- Currency Section -->
-            <button class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors rounded-lg">
+            <button
+              class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors rounded-lg"
+            >
               <div class="flex items-center justify-between">
                 <span class="text-sm text-muted-foreground">Currency</span>
                 <div class="flex items-center text-sm text-foreground">
                   <div class="flex items-center">
-                    <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
+                    <div
+                      class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center"
+                    >
                       <span class="text-white text-xs font-bold">$</span>
                     </div>
                     <span>{{ currencyService.currency() }}</span>
                   </div>
-                  <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    class="w-4 h-4 ml-1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
                 </div>
@@ -668,29 +1431,47 @@
             <!-- Theme Section -->
             <div class="px-5 py-4">
               <div class="flex items-center justify-between gap-4">
-                <span class="text-sm text-muted-foreground whitespace-nowrap">Theme</span>
+                <span class="text-sm text-muted-foreground whitespace-nowrap"
+                  >Theme</span
+                >
                 <div class="flex items-center bg-muted/50 rounded-md p-1 gap-1">
-                  <button 
+                  <button
                     (click)="selectTheme('light')"
-                    [class.bg-card]="themeService.theme() === 'light' && !isSystemTheme()"
-                    [class.shadow-sm]="themeService.theme() === 'light' && !isSystemTheme()"
-                    [class.text-foreground]="themeService.theme() === 'light' && !isSystemTheme()"
-                    [class.text-muted-foreground]="!(themeService.theme() === 'light' && !isSystemTheme())"
+                    [class.bg-card]="
+                      themeService.theme() === 'light' && !isSystemTheme()
+                    "
+                    [class.shadow-sm]="
+                      themeService.theme() === 'light' && !isSystemTheme()
+                    "
+                    [class.text-foreground]="
+                      themeService.theme() === 'light' && !isSystemTheme()
+                    "
+                    [class.text-muted-foreground]="
+                      !(themeService.theme() === 'light' && !isSystemTheme())
+                    "
                     class="px-4 py-1.5 rounded text-sm font-medium transition-all"
                   >
                     Light
                   </button>
-                  <button 
+                  <button
                     (click)="selectTheme('dark')"
-                    [class.bg-card]="themeService.theme() === 'dark' && !isSystemTheme()"
-                    [class.shadow-sm]="themeService.theme() === 'dark' && !isSystemTheme()"
-                    [class.text-foreground]="themeService.theme() === 'dark' && !isSystemTheme()"
-                    [class.text-muted-foreground]="!(themeService.theme() === 'dark' && !isSystemTheme())"
+                    [class.bg-card]="
+                      themeService.theme() === 'dark' && !isSystemTheme()
+                    "
+                    [class.shadow-sm]="
+                      themeService.theme() === 'dark' && !isSystemTheme()
+                    "
+                    [class.text-foreground]="
+                      themeService.theme() === 'dark' && !isSystemTheme()
+                    "
+                    [class.text-muted-foreground]="
+                      !(themeService.theme() === 'dark' && !isSystemTheme())
+                    "
                     class="px-4 py-1.5 rounded text-sm font-medium transition-all"
                   >
                     Dark
                   </button>
-                  <button 
+                  <button
                     (click)="selectSystemTheme()"
                     [class.bg-card]="isSystemTheme()"
                     [class.shadow-sm]="isSystemTheme()"
@@ -705,7 +1486,7 @@
             </div>
 
             <!-- Alert Management (if authenticated) -->
-            <button 
+            <button
               *ngIf="authService.isAuthenticated()"
               (click)="openAlertManagementModal()"
               class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors text-left"
@@ -716,7 +1497,7 @@
             </button>
 
             <!-- Settings (if authenticated) -->
-            <button 
+            <button
               *ngIf="authService.isAuthenticated()"
               (click)="goToProfile()"
               class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors text-left"
@@ -725,7 +1506,7 @@
             </button>
 
             <!-- Log Out (if authenticated) -->
-            <button 
+            <button
               *ngIf="authService.isAuthenticated()"
               (click)="logout()"
               class="w-full px-5 py-3.5 hover:bg-muted/40 transition-colors text-left border-t border-border"
@@ -741,12 +1522,12 @@
 
 <app-alert-management-modal
   [isOpen]="isAlertManagementModalOpen()"
-  (close)="closeAlertManagementModal()">
+  (close)="closeAlertManagementModal()"
+>
 </app-alert-management-modal>
 
 <!-- Auth Modal -->
-<app-auth-modal 
-  *ngIf="authService.showAuthModal()" 
+<app-auth-modal
+  *ngIf="authService.showAuthModal()"
   (close)="authService.closeAuthModal()"
 ></app-auth-modal>
-

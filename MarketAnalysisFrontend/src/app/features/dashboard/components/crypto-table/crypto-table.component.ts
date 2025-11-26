@@ -1,4 +1,11 @@
-import { Component, OnInit, signal, HostListener, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  signal,
+  HostListener,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
@@ -26,26 +33,26 @@ interface MenuPosition {
   standalone: true,
   imports: [CommonModule, ButtonComponent, CardComponent, SparklineComponent],
   templateUrl: './crypto-table.component.html',
-  styleUrls: ['./crypto-table.component.css']
+  styleUrls: ['./crypto-table.component.css'],
 })
 export class CryptoTableComponent implements OnInit {
   @ViewChild('moreButton') moreButton!: ElementRef<HTMLButtonElement>;
-  
+
   // Make Math available in template
   Math = Math;
-  
+
   // Data properties
   coins: Coin[] = [];
   metrics: MarketOverview[] = [];
   filteredCoins: Coin[] = [];
   paginatedCoins: Coin[] = [];
-  
+
   // Pagination properties
   currentPage = 1;
   itemsPerPage = 15;
   totalPages = 0;
   private currentGroup: string[] = [];
-  
+
   // UI state
   selectedNetwork = 'All Networks';
   selectedTab = 'Top';
@@ -54,9 +61,27 @@ export class CryptoTableComponent implements OnInit {
   watchlistIds: number[] = [];
   isLoading: boolean = true;
 
+  // Sorting
+  sortField: 'rank' | 'marketCap' | 'volume' = 'rank';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   // Constants
-  readonly networks = ['All Networks', 'Bitcoin', 'Ethereum', 'BSC', 'Solana', 'Base'];
-  readonly tabs = ['Top', 'Trending', 'Most Visited', 'New', 'Gainers', 'Real-World Assets'];
+  readonly networks = [
+    'All Networks',
+    'Bitcoin',
+    'Ethereum',
+    'BSC',
+    'Solana',
+    'Base',
+  ];
+  readonly tabs = [
+    'Top',
+    'Trending',
+    'Most Visited',
+    'New',
+    'Gainers',
+    'Real-World Assets',
+  ];
   readonly additionalNetworks: Network[] = [
     { name: 'Arbitrum', icon: '🔷', color: 'bg-blue-500' },
     { name: 'Avalanche', icon: '🔺', color: 'bg-red-500' },
@@ -68,8 +93,12 @@ export class CryptoTableComponent implements OnInit {
     { name: 'PulseChain', icon: '💜', color: 'bg-purple-600' },
     { name: 'Ethereum Classic', icon: '💎', color: 'bg-indigo-500' },
     { name: 'BNB Chain', icon: '🟡', color: 'bg-yellow-500' },
-    { name: 'Solana', icon: '🌈', color: 'bg-gradient-to-r from-purple-500 to-blue-500' },
-    { name: 'Base', icon: '🔵', color: 'bg-blue-600' }
+    {
+      name: 'Solana',
+      icon: '🌈',
+      color: 'bg-gradient-to-r from-purple-500 to-blue-500',
+    },
+    { name: 'Base', icon: '🔵', color: 'bg-blue-600' },
   ];
 
   constructor(
@@ -85,9 +114,9 @@ export class CryptoTableComponent implements OnInit {
     this.alertService.startUserConnection();
     this.apiService.startSignalR(this.currentGroup);
     this.alertService.startGlobalConnection();
-    
+
     // Subscribe to watchlist changes
-    this.watchlistService.watchlistIds$.subscribe(ids => {
+    this.watchlistService.watchlistIds$.subscribe((ids) => {
       this.watchlistIds = ids;
     });
   }
@@ -102,10 +131,10 @@ export class CryptoTableComponent implements OnInit {
       error: (err) => {
         console.error('Error loading coins:', err);
         this.isLoading = false;
-      }
+      },
     });
 
-    this.apiService.coins$.subscribe(coins => {
+    this.apiService.coins$.subscribe((coins) => {
       this.coins = coins;
       this.applyFilter();
       if (coins.length > 0) {
@@ -126,11 +155,51 @@ export class CryptoTableComponent implements OnInit {
     // TODO: Load different data based on selected tab
   }
 
+  sortBy(field: 'rank' | 'marketCap' | 'volume'): void {
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortDirection = 'desc'; // Default to desc for metrics
+    }
+    this.applyFilter();
+  }
+
+  private parseCurrency(value: string): number {
+    return Number(value.replace(/[^0-9.-]+/g, ''));
+  }
+
   private applyFilter(): void {
-    this.filteredCoins = this.selectedNetwork === 'All Networks'
-      ? this.coins
-      : this.coins.filter(coin => coin.network === this.selectedNetwork);
-    
+    let result =
+      this.selectedNetwork === 'All Networks'
+        ? [...this.coins]
+        : this.coins.filter((coin) => coin.network === this.selectedNetwork);
+
+    // Apply sorting
+    result.sort((a, b) => {
+      let valA: number;
+      let valB: number;
+
+      switch (this.sortField) {
+        case 'marketCap':
+          valA = this.parseCurrency(a.marketCap || '0');
+          valB = this.parseCurrency(b.marketCap || '0');
+          break;
+        case 'volume':
+          valA = this.parseCurrency(a.volume || '0');
+          valB = this.parseCurrency(b.volume || '0');
+          break;
+        case 'rank':
+        default:
+          valA = Number(a.rank);
+          valB = Number(b.rank);
+          break;
+      }
+
+      return this.sortDirection === 'asc' ? valA - valB : valB - valA;
+    });
+
+    this.filteredCoins = result;
     this.updatePagination();
   }
 
@@ -142,9 +211,9 @@ export class CryptoTableComponent implements OnInit {
     this.totalPages = Math.ceil(this.filteredCoins.length / this.itemsPerPage);
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedCoins = this.filteredCoins.slice(startIndex, endIndex); 
+    this.paginatedCoins = this.filteredCoins.slice(startIndex, endIndex);
 
-    this.currentGroup = this.paginatedCoins.map(coin => coin.symbol);
+    this.currentGroup = this.paginatedCoins.map((coin) => coin.symbol);
     this.apiService.startSignalR(this.currentGroup);
     await this.apiService.joinAssetGroup(this.currentGroup);
   }
@@ -173,7 +242,7 @@ export class CryptoTableComponent implements OnInit {
   getPageNumbers(): number[] {
     const pages: number[] = [];
     const maxVisiblePages = 5;
-    
+
     if (this.totalPages <= maxVisiblePages) {
       // Show all pages if total is less than max visible
       for (let i = 1; i <= this.totalPages; i++) {
@@ -182,30 +251,30 @@ export class CryptoTableComponent implements OnInit {
     } else {
       // Show first page
       pages.push(1);
-      
+
       // Calculate range around current page
       let start = Math.max(2, this.currentPage - 1);
       let end = Math.min(this.totalPages - 1, this.currentPage + 1);
-      
+
       // Add ellipsis after first page if needed
       if (start > 2) {
         pages.push(-1); // -1 represents ellipsis
       }
-      
+
       // Add middle pages
       for (let i = start; i <= end; i++) {
         pages.push(i);
       }
-      
+
       // Add ellipsis before last page if needed
       if (end < this.totalPages - 1) {
         pages.push(-1); // -1 represents ellipsis
       }
-      
+
       // Show last page
       pages.push(this.totalPages);
     }
-    
+
     return pages;
   }
 
@@ -237,7 +306,7 @@ export class CryptoTableComponent implements OnInit {
     if (!this.showNetworkMenu()) {
       this.calculateMenuPosition();
     }
-    this.showNetworkMenu.update(value => !value);
+    this.showNetworkMenu.update((value) => !value);
   }
 
   private calculateMenuPosition(): void {
@@ -245,10 +314,10 @@ export class CryptoTableComponent implements OnInit {
 
     const buttonRect = this.moreButton.nativeElement.getBoundingClientRect();
     const MENU_GAP = 8;
-    
+
     this.menuPosition = {
       left: buttonRect.left,
-      top: buttonRect.bottom + MENU_GAP
+      top: buttonRect.bottom + MENU_GAP,
     };
   }
 
@@ -269,7 +338,7 @@ export class CryptoTableComponent implements OnInit {
     const target = event.target as HTMLElement;
     const isClickInsideButton = target.closest('.network-more-btn');
     const isClickInsideMenu = target.closest('.network-menu-container');
-    
+
     if (!isClickInsideButton && !isClickInsideMenu) {
       this.closeNetworkMenu();
     }
@@ -283,4 +352,3 @@ export class CryptoTableComponent implements OnInit {
     }
   }
 }
-

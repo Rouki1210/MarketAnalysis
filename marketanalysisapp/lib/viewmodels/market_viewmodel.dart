@@ -36,6 +36,10 @@ class MarketViewModel extends ChangeNotifier {
       'Top'; // Top, Trending, Most Visited, New, Gainers, Real-World Assets
   bool _isRealtimeConnected = false;
 
+  // Sorting
+  String _sortField = 'rank'; // rank, marketCap, volume
+  bool _sortAscending = true;
+
   // Getters
   MarketDataState get state => _state;
   List<Coin> get coins => _filteredCoins.isNotEmpty ? _filteredCoins : _coins;
@@ -45,6 +49,8 @@ class MarketViewModel extends ChangeNotifier {
   bool get isRealtimeConnected => _isRealtimeConnected;
   String get searchQuery => _searchQuery;
   String get selectedTab => _selectedTab;
+  String get sortField => _sortField;
+  bool get sortAscending => _sortAscending;
 
   /// Initialize SignalR real-time connections
   Future<void> _initializeRealtime() async {
@@ -294,6 +300,18 @@ class MarketViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sort by field
+  void sortBy(String field) {
+    if (_sortField == field) {
+      _sortAscending = !_sortAscending;
+    } else {
+      _sortField = field;
+      _sortAscending = false; // Default to desc for metrics
+    }
+    _applyFilters();
+    notifyListeners();
+  }
+
   /// Apply filters based on search and tab selection
   void _applyFilters() {
     List<Coin> filtered = List.from(_coins);
@@ -306,41 +324,88 @@ class MarketViewModel extends ChangeNotifier {
       }).toList();
     }
 
-    // Apply tab filter
-    switch (_selectedTab) {
-      case 'Trending':
-        // Sort by 24h volume (trending coins usually have high volume)
-        filtered.sort((a, b) => b.volume24h.compareTo(a.volume24h));
-        break;
-      case 'Most Visited':
-        // TODO: Implement most visited tracking
-        // For now, show top coins
-        filtered.sort((a, b) => (a.rank ?? 999).compareTo(b.rank ?? 999));
-        break;
-      case 'New':
-        // TODO: Implement new listings tracking
-        // For now, show by rank reversed
-        filtered.sort((a, b) => (b.rank ?? 0).compareTo(a.rank ?? 0));
-        break;
-      case 'Gainers':
-        // Sort by 24h change (positive)
-        filtered = filtered.where((coin) => coin.change24h > 0).toList();
-        filtered.sort((a, b) => b.change24h.compareTo(a.change24h));
-        break;
-      case 'Real-World Assets':
-        // TODO: Implement RWA filtering
-        // For now, filter by specific symbols (example)
-        filtered = filtered
-            .where(
-              (coin) => ['USDT', 'USDC', 'DAI', 'PAXG'].contains(coin.symbol),
-            )
-            .toList();
-        break;
-      case 'Top':
-      default:
-        // Sort by rank (top coins)
-        filtered.sort((a, b) => (a.rank ?? 999).compareTo(b.rank ?? 999));
-        break;
+    // Apply tab filter (only if not explicitly sorting by other fields)
+    if (_sortField == 'rank') {
+      switch (_selectedTab) {
+        case 'Trending':
+          filtered.sort((a, b) => b.volume24h.compareTo(a.volume24h));
+          break;
+        case 'Most Visited':
+          // Mock: Sort by volume as a proxy for popularity
+          filtered.sort((a, b) => b.volume24h.compareTo(a.volume24h));
+          break;
+        case 'New':
+          // Sort by creation date descending
+          filtered.sort((a, b) {
+            final dateA = a.createdAt ?? DateTime(2000);
+            final dateB = b.createdAt ?? DateTime(2000);
+            return dateB.compareTo(dateA);
+          });
+          break;
+        case 'Gainers':
+          // Sort by 24h change (positive)
+          filtered = filtered.where((coin) => coin.change24h > 0).toList();
+          filtered.sort((a, b) => b.change24h.compareTo(a.change24h));
+          break;
+        case 'Real-World Assets':
+          // RWA Tokens
+          final rwaSymbols = [
+            'ONDO',
+            'CFG',
+            'MPL',
+            'GFI',
+            'TRU',
+            'PRO',
+            'RIO',
+            'NXRA',
+            'CPOOL',
+            'BOSON',
+            'IXS',
+            'DEXTF',
+            'LAND',
+            'PROPC',
+            'ELAND',
+            'RWA',
+            'USDT',
+            'USDC',
+            'DAI',
+            'PAXG',
+          ];
+          filtered = filtered
+              .where((coin) => rwaSymbols.contains(coin.symbol))
+              .toList();
+          break;
+        case 'Top':
+        default:
+          // Sort by rank (top coins)
+          filtered.sort((a, b) => (a.rank ?? 999).compareTo(b.rank ?? 999));
+          break;
+      }
+    }
+
+    // Apply explicit sorting
+    if (_sortField != 'rank') {
+      filtered.sort((a, b) {
+        double valA = 0;
+        double valB = 0;
+
+        switch (_sortField) {
+          case 'marketCap':
+            valA = a.marketCap;
+            valB = b.marketCap;
+            break;
+          case 'volume':
+            valA = a.volume24h;
+            valB = b.volume24h;
+            break;
+        }
+
+        return _sortAscending ? valA.compareTo(valB) : valB.compareTo(valA);
+      });
+    } else if (_selectedTab == 'Top') {
+      // Explicit rank sort for Top tab if needed, or default
+      // If sortField is rank, we might want to respect sortAscending too
+      // But usually rank is always asc. Let's leave tab logic above for now.
     }
 
     _filteredCoins = filtered;

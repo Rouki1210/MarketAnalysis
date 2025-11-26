@@ -20,6 +20,7 @@ class ApiEndpoints {
   // Asset endpoints
   static const String assets = '/Asset';
   static String assetBySymbol(String symbol) => '/Asset/$symbol';
+  static String searchAssets(String query) => '/Asset/search?query=$query';
 
   // Price endpoints
   static const String prices = '/Prices';

@@ -52,18 +52,35 @@
 
     <!-- Table Action Buttons -->
     <div class="flex items-center space-x-2">
-      <app-button variant="ghost" size="sm" class="text-muted-foreground">
+      <app-button 
+        variant="ghost" 
+        size="sm" 
+        [class.text-primary]="sortField === 'marketCap'"
+        [class.text-muted-foreground]="sortField !== 'marketCap'"
+        (click)="sortBy('marketCap')">
         <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
         <span class="hidden sm:inline">Market Cap</span>
+        <span *ngIf="sortField === 'marketCap'" class="ml-1 text-xs">
+          {{ sortDirection === 'asc' ? '↑' : '↓' }}
+        </span>
       </app-button>
       
-      <app-button variant="ghost" size="sm" class="text-muted-foreground hidden sm:flex">
+      <app-button 
+        variant="ghost" 
+        size="sm" 
+        class="hidden sm:flex"
+        [class.text-primary]="sortField === 'volume'"
+        [class.text-muted-foreground]="sortField !== 'volume'"
+        (click)="sortBy('volume')">
         <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
         <span class="hidden md:inline">Volume(24h)</span>
+        <span *ngIf="sortField === 'volume'" class="ml-1 text-xs">
+          {{ sortDirection === 'asc' ? '↑' : '↓' }}
+        </span>
       </app-button>
       
       <app-button variant="ghost" size="sm" class="text-muted-foreground">
@@ -71,16 +88,6 @@
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
         <span class="hidden md:inline">Filters</span>
-      </app-button>
-      
-      <app-button variant="ghost" size="sm" class="text-muted-foreground">
-        <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-        <span class="hidden md:inline">Columns</span>
       </app-button>
     </div>
   </div>

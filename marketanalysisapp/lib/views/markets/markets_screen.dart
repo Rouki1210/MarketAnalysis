@@ -8,6 +8,7 @@ import '../../widgets/profile_button.dart';
 import '../../widgets/user_menu_drawer.dart';
 import '../../widgets/fear_greed_gauge.dart';
 import '../../views/market/coin_detail_screen.dart';
+import '../../views/market/coin_search_delegate.dart';
 
 /// Markets screen with tabs
 class MarketsScreen extends StatefulWidget {
@@ -20,7 +21,6 @@ class MarketsScreen extends StatefulWidget {
 class _MarketsScreenState extends State<MarketsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final _searchController = TextEditingController();
 
   final List<String> _tabs = const [
     'Top',
@@ -47,7 +47,6 @@ class _MarketsScreenState extends State<MarketsScreen>
   void dispose() {
     _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -89,10 +88,35 @@ class _MarketsScreenState extends State<MarketsScreen>
                 bottom: BorderSide(color: AppColors.border, width: 1),
               ),
             ),
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
+            child: Column(
+              children: [
+                TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
+                ),
+                // Sort Buttons
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Consumer<MarketViewModel>(
+                    builder: (context, vm, _) => Row(
+                      children: [
+                        _buildSortButton(
+                          context,
+                          vm,
+                          'Market Cap',
+                          'marketCap',
+                        ),
+                        const SizedBox(width: 12),
+                        _buildSortButton(context, vm, 'Volume(24h)', 'volume'),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -366,38 +390,54 @@ class _MarketsScreenState extends State<MarketsScreen>
   }
 
   void _showSearchDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Search Coins'),
-          content: TextField(
-            controller: _searchController,
-            decoration: const InputDecoration(
-              hintText: 'Search by name or symbol',
-              prefixIcon: Icon(Icons.search),
-            ),
-            onChanged: (value) {
-              context.read<MarketViewModel>().setSearchQuery(value);
-            },
-            autofocus: true,
+    showSearch(context: context, delegate: CoinSearchDelegate());
+  }
+
+  Widget _buildSortButton(
+    BuildContext context,
+    MarketViewModel vm,
+    String label,
+    String field,
+  ) {
+    final isSelected = vm.sortField == field;
+    return InkWell(
+      onTap: () => vm.sortBy(field),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryAccent.withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryAccent : AppColors.border,
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _searchController.clear();
-                context.read<MarketViewModel>().setSearchQuery('');
-                Navigator.of(context).pop();
-              },
-              child: const Text('Clear'),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected
+                    ? AppColors.primaryAccent
+                    : AppColors.textSecondary,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
+            if (isSelected) ...[
+              const SizedBox(width: 4),
+              Icon(
+                vm.sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                size: 14,
+                color: AppColors.primaryAccent,
+              ),
+            ],
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 }

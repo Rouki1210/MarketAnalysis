@@ -10,6 +10,7 @@ namespace MarketAnalysisBackend.Services.Implementations
         Task<IEnumerable<Asset>> RefreshTopAssetAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<Asset>> GetByPagination(int pageNumber, int pageSize);
         Task<Asset?> GetAssetBySymbolAsync(string symbol);
+        Task<IEnumerable<Asset>> SearchAssetsAsync(string query);
         Task DeleteAllAsync();
     }
 }

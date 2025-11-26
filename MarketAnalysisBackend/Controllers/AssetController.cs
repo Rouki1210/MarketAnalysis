@@ -52,6 +52,13 @@ namespace MarketAnalysisBackend.Controllers
             return Ok(asset);
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchAssets([FromQuery] string query)
+        {
+            var assets = await _assetService.SearchAssetsAsync(query);
+            return Ok(assets);
+        }
+
         [HttpDelete]
         public async Task DeleteAsset()
         {

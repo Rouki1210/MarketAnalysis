@@ -50,6 +50,7 @@ interface TooltipData {
 })
 export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() symbol!: string;
+  @Input() assetId?: number;
   @ViewChild('chartContainer', { static: false }) chartContainer!: ElementRef;
 
   private chart?: IChartApi;
@@ -66,7 +67,6 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
   tooltipData: TooltipData | null = null;
   showTooltip = false;
   isAlertModalOpen = false;
-  assetId?: number;
   currentPrice?: number;
 
   constructor(
@@ -76,14 +76,7 @@ export class PriceChartComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    // Get asset ID for this symbol
-    this.apiService.coins$.subscribe((coins) => {
-      const coin = coins.find((c) => c.symbol === this.symbol);
-      if (coin) {
-        this.assetId = Number(coin.id);
-        this.currentPrice = coin.price ? Number(coin.price) : undefined;
-      }
-    });
+    // Asset ID is now passed as input
   }
 
   ngAfterViewInit(): void {

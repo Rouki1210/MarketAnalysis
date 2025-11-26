@@ -104,4 +104,39 @@ class AssetRepository {
       throw Exception('Failed to load coin $symbol: $e');
     }
   }
+
+  /// Search coins by query
+  Future<List<Coin>> searchCoins(String query) async {
+    try {
+      // 1. Search assets from API
+      final response = await _apiClient.get(
+        ApiEndpoints.searchAssets(query),
+        includeAuth: false,
+      );
+
+      final List<dynamic> assetsJson = response as List<dynamic>;
+      final assets = assetsJson.map((json) {
+        return Asset.fromJson(json as Map<String, dynamic>);
+      }).toList();
+
+      if (assets.isEmpty) return [];
+
+      // 2. Get all prices (assuming we want to show prices for search results)
+      // Optimization: In a real app, we might want to fetch prices only for the results,
+      // but since our price endpoint returns all prices, we'll use that or cache.
+      // For now, let's fetch all prices to ensure accuracy.
+      final prices = await getPrices();
+      final priceMap = <String, PricePoint>{};
+      for (var price in prices) {
+        priceMap[price.assetSymbol] = price;
+      }
+
+      // 3. Combine
+      return assets
+          .map((asset) => Coin.fromAssetAndPrice(asset, priceMap[asset.symbol]))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to search coins: $e');
+    }
+  }
 }
