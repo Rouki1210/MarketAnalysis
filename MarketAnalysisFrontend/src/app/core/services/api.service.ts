@@ -53,7 +53,7 @@ export class ApiService {
           isPositive24h: true,
           isPositive7d: true,
           icon: a.logoUrl,
-          network: 'Unknown',
+          network: a.network,
           sparklineData: [],
         }));
 

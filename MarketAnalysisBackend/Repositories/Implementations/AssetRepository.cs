@@ -34,5 +34,10 @@ namespace MarketAnalysisBackend.Repositories.Implementations
 
             return assets;
         }
+
+        public async Task<IEnumerable<Asset>> GetByRank()
+        {
+            return await _context.Assets.AsNoTracking().OrderBy(a => Convert.ToInt32(a.Rank)).ToListAsync();
+        }
     }
 }

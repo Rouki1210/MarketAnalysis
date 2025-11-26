@@ -21,7 +21,7 @@ namespace MarketAnalysisBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAssets()
         {
-            var assets = await _assetService.GetAllAssetsAsync();
+            var assets = await _assetService.GetAllAssetsByRankAsync();
             return Ok(assets);
         }
 

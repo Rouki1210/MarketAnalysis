@@ -54,5 +54,10 @@ namespace MarketAnalysisBackend.Services.Interfaces
             await _assetService.SaveChangesAsync();
             return await _assetImporter.ImportAssetByRank(1, 10, true, cancellationToken); // Use the instance
         }
+
+        public async Task<IEnumerable<Asset>> GetAllAssetsByRankAsync()
+        {
+            return await _assetRepo.GetByRank();
+        }
     }
 }

@@ -116,7 +116,6 @@ namespace MarketAnalysisBackend.Data
                 .WithMany()
                 .HasForeignKey(wi => wi.AssetId);
 
-            // Unique: Một Asset không thể trùng trong cùng một Watchlist
             modelBuilder.Entity<WatchlistItems>()
                 .HasIndex(wi => new { wi.WatchlistId, wi.AssetId })
                 .IsUnique();
