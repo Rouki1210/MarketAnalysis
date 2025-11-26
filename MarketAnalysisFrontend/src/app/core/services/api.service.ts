@@ -9,6 +9,7 @@ import {
   Observable,
   of,
   switchMap,
+  forkJoin,
 } from 'rxjs';
 import { Coin, CoinDetail } from '../models/coin.model';
 import { Market, MarketOverview } from '../models/market.model';
@@ -55,6 +56,8 @@ export class ApiService {
           icon: a.logoUrl,
           network: a.network,
           sparklineData: [],
+          viewCount: a.viewCount,
+          dateAdd: a.dateAdd,
         }));
 
         this.coinsSource.next(coins);
@@ -179,56 +182,108 @@ export class ApiService {
   }
 
   getCoinBySymbol(symbol: string): Observable<CoinDetail> {
-    // Wait for coins to be loaded (non-empty array), then find the coin
-    return this.coins$.pipe(
-      filter((coins) => coins.length > 0),
-      first(),
-      map((coins) => {
-        const foundCoin = coins.find((c) => c.symbol === symbol);
-        if (!foundCoin) {
-          console.error(`Coin ${symbol} not found`);
+    // Fetch asset details and latest price in parallel
+    return forkJoin({
+      asset: this.http.get<any>(`${this.apiUrl}/api/Asset/${symbol}`),
+      // Get price history for the last 24h to calculate changes if needed,
+      // or just use the asset's price points if the backend returns them.
+      // However, the backend Asset model has a PricePoints collection.
+      // Let's assume the Asset endpoint returns the Asset object which might include PricePoints.
+      // If not, we fetch prices separately.
+      // Based on the plan, we call /api/Prices/{symbol}
+      prices: this.http.get<any[]>(
+        `${this.apiUrl}/api/Prices/${symbol}?from=${new Date(
+          Date.now() - 24 * 60 * 60 * 1000
+        ).toISOString()}`
+      ),
+    }).pipe(
+      map(({ asset, prices }) => {
+        if (!asset) {
           throw new Error(`Coin with symbol ${symbol} not found`);
         }
 
+        // Get latest price point
+        // Sort prices by timestamp descending to get the latest
+        const sortedPrices = prices.sort(
+          (a, b) =>
+            new Date(b.timestampUtc).getTime() -
+            new Date(a.timestampUtc).getTime()
+        );
+        const latestPrice = sortedPrices.length > 0 ? sortedPrices[0] : null;
+
         // Helper function to parse numeric values from formatted strings
-        const parseValue = (str: string | undefined): number => {
-          if (!str) return 0;
-          return parseFloat(str.replace(/[$,]/g, ''));
+        const parseValue = (val: any): number => {
+          if (typeof val === 'number') return val;
+          if (!val) return 0;
+          return parseFloat(val.toString().replace(/[$,]/g, ''));
         };
 
-        // Parse values from the coin object
-        const price = parseValue(foundCoin.price);
-        const marketCap = parseValue(foundCoin.marketCap);
-        const volume = parseValue(foundCoin.volume);
-        const change1h = parseValue(foundCoin.change1h);
-        const change24h = parseValue(foundCoin.change24h);
-        const change7d = parseValue(foundCoin.change7d);
+        const price = latestPrice ? latestPrice.price : 0;
+        const marketCap = latestPrice ? latestPrice.marketCap : 0;
+        const volume = latestPrice ? latestPrice.volume : 0;
+        const change1h = latestPrice ? latestPrice.percentChange1h : 0;
+        const change24h = latestPrice ? latestPrice.percentChange24h : 0;
+        const change7d = latestPrice ? latestPrice.percentChange7d : 0;
+        const supply = latestPrice ? latestPrice.supply : 0;
 
         // Calculate volume/market cap ratio
         const volMktCapRatio =
           marketCap > 0 ? ((volume / marketCap) * 100).toFixed(2) : '0.00';
 
+        // Format helper
+        const formatNumber = (num: number, digits: number = 2) =>
+          num?.toLocaleString(undefined, {
+            minimumFractionDigits: digits,
+            maximumFractionDigits: digits,
+          }) ?? '0';
+
+        const formatPercent = (val: number) => {
+          const sign = val >= 0 ? '+' : '';
+          return `${sign}${val.toFixed(2)}%`;
+        };
+
+        const coin: Coin = {
+          id: asset.id.toString(),
+          name: asset.name,
+          symbol: asset.symbol,
+          description: asset.description,
+          rank: asset.rank,
+          price: `$${formatNumber(price)}`,
+          change1h: formatPercent(change1h),
+          change24h: formatPercent(change24h),
+          change7d: formatPercent(change7d),
+          marketCap: `$${formatNumber(marketCap, 0)}`,
+          volume: `$${formatNumber(volume, 0)}`,
+          supply: `${formatNumber(supply, 0)} ${asset.symbol}`,
+          isPositive1h: change1h >= 0,
+          isPositive24h: change24h >= 0,
+          isPositive7d: change7d >= 0,
+          icon: asset.logoUrl,
+          network: asset.network,
+          sparklineData: [], // Sparkline can be fetched separately if needed
+        };
+
         const detail: CoinDetail = {
-          coin: foundCoin,
+          coin: coin,
           stats: {
             marketCap: {
-              value: foundCoin.marketCap ?? '$0',
-              change: foundCoin.change24h ?? '+0%',
-              isPositive: foundCoin.isPositive24h,
+              value: coin.marketCap ?? '$0',
+              change: coin.change24h ?? '+0%',
+              isPositive: coin.isPositive24h,
             },
             volume24h: {
-              value: foundCoin.volume ?? '$0',
-              change: foundCoin.change24h ?? '+0%',
-              isPositive: foundCoin.isPositive24h,
+              value: coin.volume ?? '$0',
+              change: coin.change24h ?? '+0%',
+              isPositive: coin.isPositive24h,
             },
             volumeMarketCapRatio: `${volMktCapRatio}%`,
-            maxSupply: foundCoin.supply ?? '0',
-            circulatingSupply: foundCoin.supply ?? '0',
-            totalSupply: foundCoin.supply ?? '0',
+            maxSupply: coin.supply ?? '0',
+            circulatingSupply: coin.supply ?? '0',
+            totalSupply: coin.supply ?? '0',
           },
           links: {
-            website: 'https://bitcoin.org',
-            whitepaper: 'https://bitcoin.org/bitcoin.pdf',
+            website: 'https://bitcoin.org', // Placeholder
+            whitepaper: 'https://bitcoin.org/bitcoin.pdf', // Placeholder
           },
         };
 

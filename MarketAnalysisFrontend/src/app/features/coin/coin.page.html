@@ -36,7 +36,10 @@
 
     <!-- Right Column - Chart -->
     <div class="lg:col-span-2">
-      <app-price-chart [symbol]="coinDetail.coin.symbol"></app-price-chart>
+      <app-price-chart 
+        [symbol]="coinDetail.coin.symbol"
+        [assetId]="+coinDetail.coin.id">
+      </app-price-chart>
     </div>
   </div>
 

@@ -44,5 +44,27 @@ namespace MarketAnalysisBackend.Repositories.Implementations
         {
             return await _context.Assets.AsNoTracking().OrderBy(a => Convert.ToInt32(a.Rank)).ToListAsync();
         }
+
+        public async Task<IEnumerable<Asset>> SearchAssetsAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return new List<Asset>();
+            }
+
+            var lowerQuery = query.ToLower();
+
+            var assets = await _context.Assets
+                .AsNoTracking()
+                .Where(a => a.Name.ToLower().Contains(lowerQuery) || a.Symbol.ToLower().Contains(lowerQuery))
+                .ToListAsync();
+
+            return assets
+                .OrderByDescending(a => a.Symbol.ToLower() == lowerQuery) // Exact symbol match first
+                .ThenByDescending(a => a.Symbol.ToLower().StartsWith(lowerQuery)) // Symbol starts with query second
+                .ThenByDescending(a => a.Name.ToLower().StartsWith(lowerQuery)) // Name starts with query third
+                .ThenBy(a => a.Rank) // Then by rank
+                .ToList();
+        }
     }
 }

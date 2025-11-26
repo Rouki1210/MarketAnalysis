@@ -22,11 +22,11 @@
 @keyframes slideDownCentered {
   from {
     opacity: 0;
-    transform: translate(-50%, -10px);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translateY(0);
   }
 }
 
@@ -38,7 +38,8 @@
   animation: slideDown 0.2s ease-out;
 }
 
-.watchlist-dropdown-container > div {
+.watchlist-dropdown-container > div,
+.search-container > div {
   animation: slideDownCentered 0.2s ease-out;
 }
 
@@ -70,4 +71,3 @@
 .watchlist-dropdown-container .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: rgba(156, 163, 175, 0.5);
 }
-

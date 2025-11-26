@@ -12,6 +12,7 @@ namespace MarketAnalysisBackend.Services.Implementations
         Task<IEnumerable<Asset>> GetAllAssetByDateAsynnc();
         Task<IEnumerable<Asset>> GetAllAssetByViewAsynnc();
         Task<Asset?> GetAssetBySymbolAsync(string symbol);
+        Task<IEnumerable<Asset>> SearchAssetsAsync(string query);
         Task DeleteAllAsync();
     }
 }

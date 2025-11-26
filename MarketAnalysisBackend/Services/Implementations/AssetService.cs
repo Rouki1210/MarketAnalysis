@@ -79,5 +79,10 @@ namespace MarketAnalysisBackend.Services.Interfaces
         {
             return await _assetRepo.GetByRank();
         }
+
+        public async Task<IEnumerable<Asset>> SearchAssetsAsync(string query)
+        {
+            return await _assetRepo.SearchAssetsAsync(query);
+        }
     }
 }

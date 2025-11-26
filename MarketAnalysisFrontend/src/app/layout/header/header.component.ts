@@ -10,6 +10,8 @@ import { CurrencyService } from '../../core/services/currency.service';
 import { WatchlistService } from '../../core/services/watchlist.service';
 import { Currency, Theme } from '../../core/models/common.model';
 import { WatchlistCoin } from '../../core/models/watchlist.model';
+import { Coin } from '../../core/models/coin.model';
+import { AssetService } from '../../core/services/asset.service';
 import { Observable } from 'rxjs';
 import { CompactNumberPipe } from '../../shared/pipes/compact-number.pipe';
 import { AlertButtonComponent } from './components/alert-button/alert-button.component';
@@ -53,11 +55,17 @@ export class HeaderComponent implements OnDestroy {
 
   private systemThemeMediaQuery?: MediaQueryList;
 
+  // Search
+  searchResults = signal<Coin[]>([]);
+  showSearchResults = signal(false);
+  isSearching = signal(false);
+
   constructor(
     public authService: AuthService,
     public themeService: ThemeService,
     public currencyService: CurrencyService,
     private watchlistService: WatchlistService,
+    private assetService: AssetService,
     private router: Router
   ) {
     this.initializeSystemThemeListener();
@@ -68,9 +76,33 @@ export class HeaderComponent implements OnDestroy {
     this.cleanupSystemThemeListener();
   }
 
-  // Search
   onSearch(): void {
-    // Implement search functionality
+    if (!this.searchQuery || this.searchQuery.trim().length < 1) {
+      this.searchResults.set([]);
+      this.showSearchResults.set(false);
+      return;
+    }
+
+    this.isSearching.set(true);
+    this.showSearchResults.set(true);
+
+    this.assetService.searchAssets(this.searchQuery).subscribe({
+      next: (coins) => {
+        this.searchResults.set(coins);
+        this.isSearching.set(false);
+      },
+      error: (err) => {
+        console.error('Search error:', err);
+        this.searchResults.set([]);
+        this.isSearching.set(false);
+      },
+    });
+  }
+
+  navigateToCoin(coin: Coin): void {
+    this.router.navigate(['/coin', coin.symbol.toLowerCase()]);
+    this.searchQuery = '';
+    this.showSearchResults.set(false);
   }
 
   // Authentication
@@ -90,6 +122,8 @@ export class HeaderComponent implements OnDestroy {
     this.showCryptoMenu.set(false);
     this.showExchangeMenu.set(false);
     this.showCommunityMenu.set(false);
+    this.showWatchlistDropdown.set(false);
+    this.showSearchResults.set(false);
   }
 
   private closeSettingsMenu(): void {
@@ -102,6 +136,8 @@ export class HeaderComponent implements OnDestroy {
     this.showSettingsMenu.set(false);
     this.showExchangeMenu.set(false);
     this.showCommunityMenu.set(false);
+    this.showWatchlistDropdown.set(false);
+    this.showSearchResults.set(false);
   }
 
   openCryptoMenu(): void {
@@ -109,6 +145,8 @@ export class HeaderComponent implements OnDestroy {
     this.showSettingsMenu.set(false);
     this.showExchangeMenu.set(false);
     this.showCommunityMenu.set(false);
+    this.showWatchlistDropdown.set(false);
+    this.showSearchResults.set(false);
   }
 
   closeCryptoMenu(): void {
@@ -121,6 +159,8 @@ export class HeaderComponent implements OnDestroy {
     this.showSettingsMenu.set(false);
     this.showCryptoMenu.set(false);
     this.showCommunityMenu.set(false);
+    this.showWatchlistDropdown.set(false);
+    this.showSearchResults.set(false);
   }
 
   closeExchangeMenu(): void {
@@ -133,6 +173,8 @@ export class HeaderComponent implements OnDestroy {
     this.showSettingsMenu.set(false);
     this.showCryptoMenu.set(false);
     this.showExchangeMenu.set(false);
+    this.showWatchlistDropdown.set(false);
+    this.showSearchResults.set(false);
   }
 
   closeCommunityMenu(): void {
@@ -146,6 +188,7 @@ export class HeaderComponent implements OnDestroy {
     this.showCryptoMenu.set(false);
     this.showExchangeMenu.set(false);
     this.showCommunityMenu.set(false);
+    this.showSearchResults.set(false);
   }
 
   openWatchlistDropdown(): void {
@@ -154,6 +197,7 @@ export class HeaderComponent implements OnDestroy {
     this.showCryptoMenu.set(false);
     this.showExchangeMenu.set(false);
     this.showCommunityMenu.set(false);
+    this.showSearchResults.set(false);
   }
 
   closeWatchlistDropdown(): void {
@@ -236,6 +280,9 @@ export class HeaderComponent implements OnDestroy {
     }
     if (!target.closest('.alert-menu-container')) {
       this.showAlertDropdown.set(false);
+    }
+    if (!target.closest('.search-container')) {
+      this.showSearchResults.set(false);
     }
     // Watchlist dropdown is now hover-based, no click outside needed
   }

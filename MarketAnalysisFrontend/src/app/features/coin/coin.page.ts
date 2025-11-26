@@ -27,17 +27,8 @@ export class CoinPage implements OnInit {
     this.route.params.subscribe((params) => {
       const symbol = params['symbol']?.toUpperCase();
       if (symbol) {
-        // Ensure coins are loaded first
-        this.apiService.getCoins().subscribe({
-          next: () => {
-            this.loadCoinData(symbol);
-            this.subscribeToRealtimeUpdates(symbol);
-          },
-          error: (err) => {
-            console.error('Error loading coins:', err);
-            this.isLoading = false;
-          },
-        });
+        this.loadCoinData(symbol);
+        this.subscribeToRealtimeUpdates(symbol);
       }
     });
   }

@@ -88,6 +88,7 @@ class Coin {
   final double volume24h;
   final double? supply;
   final List<double>? sparklineData;
+  final DateTime? createdAt;
 
   // UI helpers
   bool get isPositive1h => change1h >= 0;
@@ -108,6 +109,7 @@ class Coin {
     required this.volume24h,
     this.supply,
     this.sparklineData,
+    this.createdAt,
   });
 
   factory Coin.fromAssetAndPrice(Asset asset, PricePoint? price) {
@@ -125,6 +127,7 @@ class Coin {
       volume24h: price?.volume24h ?? 0,
       supply: price?.circulatingSupply,
       sparklineData: null,
+      createdAt: asset.createdAt,
     );
   }
 
@@ -145,6 +148,9 @@ class Coin {
       sparklineData: (json['sparklineData'] as List<dynamic>?)
           ?.map((e) => (e as num).toDouble())
           .toList(),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
     );
   }
 
