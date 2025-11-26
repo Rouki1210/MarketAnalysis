@@ -223,5 +223,34 @@ namespace MarketAnalysisBackend.Controllers
                 return StatusCode(500, new { message = "Failed to retrieve history" });
             }
         }
+
+        [HttpDelete("history/{historyId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(401)]
+        public async Task<IActionResult> DeleteAlertHistory(int historyId)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                if (userId == 0)
+                {
+                    return Unauthorized(new { message = "Invalid user" });
+                }
+
+                var result = await _userAlertService.DeleteAlertHistoryAsync(userId, historyId);
+                if (!result)
+                {
+                    return NotFound(new { message = "Alert history not found" });
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting alert history {HistoryId}", historyId);
+                return StatusCode(500, new { message = "Failed to delete alert history" });
+            }
+        }
     }
 }

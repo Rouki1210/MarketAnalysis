@@ -1,51 +1,31 @@
 import 'package:flutter/foundation.dart';
-import '../models/notification_model.dart';
+import '../models/price_alert_notification_model.dart';
 import '../repositories/notification_repository.dart';
 
 class NotificationViewModel extends ChangeNotifier {
   final NotificationRepository _repository;
 
-  List<AppNotification> _notifications = [];
+  List<PriceAlertNotification> _notifications = [];
   int _unreadCount = 0;
   bool _isLoading = false;
   String? _errorMessage;
-  int _currentPage = 1;
-  bool _hasMore = true;
 
-  List<AppNotification> get notifications => _notifications;
+  List<PriceAlertNotification> get notifications => _notifications;
   int get unreadCount => _unreadCount;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  bool get hasMore => _hasMore;
 
   NotificationViewModel({NotificationRepository? repository})
     : _repository = repository ?? NotificationRepository();
 
   Future<void> loadNotifications({bool refresh = false}) async {
-    if (refresh) {
-      _currentPage = 1;
-      _hasMore = true;
-      _notifications = [];
-    }
-
-    if (!_hasMore && !refresh) return;
-
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final newNotifications = await _repository.getNotifications(
-        page: _currentPage,
-        pageSize: 20,
-      );
-
-      if (newNotifications.isEmpty) {
-        _hasMore = false;
-      } else {
-        _notifications.addAll(newNotifications);
-        _currentPage++;
-      }
+      final newNotifications = await _repository.getNotifications();
+      _notifications = newNotifications;
 
       // Also update unread count
       await loadUnreadCount();
@@ -70,19 +50,22 @@ class NotificationViewModel extends ChangeNotifier {
     try {
       final success = await _repository.markAsRead(id);
       if (success) {
+        // Locally update the notification's viewedAt
         final index = _notifications.indexWhere((n) => n.id == id);
         if (index != -1) {
-          // Create a new instance with isRead = true
           final old = _notifications[index];
-          _notifications[index] = AppNotification(
+          // Create a new instance with viewedAt set to now
+          _notifications[index] = PriceAlertNotification(
             id: old.id,
-            actorUser: old.actorUser,
-            notificationType: old.notificationType,
-            entityType: old.entityType,
-            entityId: old.entityId,
-            message: old.message,
-            isRead: true,
-            createdAt: old.createdAt,
+            userAlertId: old.userAlertId,
+            assetSymbol: old.assetSymbol,
+            assetName: old.assetName,
+            alertType: old.alertType,
+            targetPrice: old.targetPrice,
+            actualPrice: old.actualPrice,
+            triggeredAt: old.triggeredAt,
+            wasNotified: old.wasNotified,
+            viewedAt: DateTime.now(),
           );
 
           if (_unreadCount > 0) {
@@ -103,15 +86,17 @@ class NotificationViewModel extends ChangeNotifier {
       if (success) {
         _notifications = _notifications
             .map(
-              (n) => AppNotification(
+              (n) => PriceAlertNotification(
                 id: n.id,
-                actorUser: n.actorUser,
-                notificationType: n.notificationType,
-                entityType: n.entityType,
-                entityId: n.entityId,
-                message: n.message,
-                isRead: true,
-                createdAt: n.createdAt,
+                userAlertId: n.userAlertId,
+                assetSymbol: n.assetSymbol,
+                assetName: n.assetName,
+                alertType: n.alertType,
+                targetPrice: n.targetPrice,
+                actualPrice: n.actualPrice,
+                triggeredAt: n.triggeredAt,
+                wasNotified: n.wasNotified,
+                viewedAt: DateTime.now(),
               ),
             )
             .toList();
@@ -127,16 +112,32 @@ class NotificationViewModel extends ChangeNotifier {
 
   Future<void> deleteNotification(int id) async {
     try {
+      print('DEBUG ViewModel: Attempting to delete notification $id');
+
       final success = await _repository.deleteNotification(id);
+      print('DEBUG ViewModel: Delete API returned success = $success');
+
       if (success) {
-        final notification = _notifications.firstWhere((n) => n.id == id);
-        if (!notification.isRead && _unreadCount > 0) {
-          _unreadCount--;
+        // Find and remove the notification
+        final index = _notifications.indexWhere((n) => n.id == id);
+        if (index != -1) {
+          final notification = _notifications[index];
+          if (!notification.isViewed && _unreadCount > 0) {
+            _unreadCount--;
+          }
+          _notifications.removeAt(index);
+          print('DEBUG ViewModel: Removed notification at index $index');
+          notifyListeners();
+        } else {
+          print('DEBUG ViewModel: Notification $id not found in local list');
         }
-        _notifications.removeWhere((n) => n.id == id);
+      } else {
+        print('DEBUG ViewModel: Delete API returned false');
+        _errorMessage = 'Failed to delete notification';
         notifyListeners();
       }
     } catch (e) {
+      print('DEBUG ViewModel: Error deleting notification: $e');
       _errorMessage = e.toString();
       notifyListeners();
     }

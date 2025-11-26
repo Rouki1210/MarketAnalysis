@@ -261,6 +261,37 @@ namespace MarketAnalysisBackend.Services.Implementations
             }
         }
 
+        public async Task<bool> DeleteAlertHistoryAsync(int userId, int historyId)
+        {
+            try
+            {
+                var history = await _historyRepository.GetByIdAsync(historyId);
+                
+                if (history == null)
+                {
+                    return false;
+                }
+
+                // Verify the history belongs to this user
+                var userAlert = await _alertRepository.GetByIdAsync(history.UserAlertId);
+                if (userAlert == null || userAlert.UserId != userId)
+                {
+                    return false;
+                }
+
+                await _historyRepository.DeleteAsync(history);
+                await _historyRepository.SaveChangesAsync(); // CRITICAL: Save to database!
+                
+                _logger.LogInformation("Deleted alert history {HistoryId} for user {UserId}", historyId, userId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting alert history {HistoryId} for user {UserId}", historyId, userId);
+                throw;
+            }
+        }
+
         public async Task CheckAndTriggerAlertsAsync()
         {
             try

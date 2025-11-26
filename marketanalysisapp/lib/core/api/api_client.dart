@@ -168,9 +168,18 @@ class ApiClient {
       final uri = _buildUri(endpoint);
       final headers = await _buildHeaders(includeAuth: includeAuth);
 
+      print('DEBUG: ApiClient DELETE - Endpoint: $endpoint');
+      print('DEBUG: ApiClient DELETE - Full URI: $uri');
+      print('DEBUG: ApiClient DELETE - Headers: ${headers.keys.join(", ")}');
+
       final response = await _httpClient
           .delete(uri, headers: headers)
           .timeout(Duration(milliseconds: AppConfig.apiTimeout));
+
+      print(
+        'DEBUG: ApiClient DELETE - Response status: ${response.statusCode}',
+      );
+      print('DEBUG: ApiClient DELETE - Response body: ${response.body}');
 
       return _handleResponse(response);
     } on SocketException {
