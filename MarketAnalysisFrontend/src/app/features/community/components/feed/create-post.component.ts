@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '../common/button.component';
 import { Post } from '../../models/post.model';
+import { PostService } from '../../services/post.service';
+import { CreatePostDto } from '../../services/community.service';
 
 @Component({
   selector: 'app-create-post',
@@ -71,15 +73,30 @@ export class CreatePostComponent {
   };
   tagsInput = '';
 
+  constructor(private postService: PostService) {}
+
   onSubmit(): void {
     if (!this.postData.title || !this.postData.content) {
       return;
     }
     this.postData.tags = this.tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag);
     this.submit.emit(this.postData);
-    this.resetForm();
+    const payload : CreatePostDto ={
+      title: this.postData.title || '',
+      content: this.postData.content || '',
+      topicIds: []
+    };
+    this.postService.createPost(payload).subscribe({
+      next: (post) => {
+        console.log('✅ Post created:', post);
+        this.resetForm();
+        this.close.emit();
+      },
+      error: (error) => {
+        console.error('❌ Error creating post:', error);
+      }
+    });
     // Close modal after submitting
-    this.close.emit();
   }
 
   private resetForm(): void {
