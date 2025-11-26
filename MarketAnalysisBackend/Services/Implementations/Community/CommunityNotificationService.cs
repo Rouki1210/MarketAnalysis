@@ -1,16 +1,20 @@
-﻿using MarketAnalysisBackend.Models.Community;
+﻿using MarketAnalysisBackend.Hubs;
+using MarketAnalysisBackend.Models.Community;
 using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Repositories.Interfaces.Community;
 using MarketAnalysisBackend.Services.Interfaces.Community;
+using Microsoft.AspNetCore.SignalR;
 
 namespace MarketAnalysisBackend.Services.Implementations.Community
 {
     public class CommunityNotificationService : ICommunityNotificationService
     {
         private readonly ICommunityNotificationRepository _notificationRepository;
-        public CommunityNotificationService(ICommunityNotificationRepository notificationRepository)
+        private readonly IHubContext<NotificationHub> _hubContext;
+        public CommunityNotificationService(ICommunityNotificationRepository notificationRepository, IHubContext<NotificationHub> hubContext)
         {
             _notificationRepository = notificationRepository;
+            _hubContext = hubContext;
         }
         public async Task<bool> DeleteNotificationAsync(int notificationId, int userId)
         {
@@ -75,7 +79,34 @@ namespace MarketAnalysisBackend.Services.Implementations.Community
                 Message = message
             };
 
-            await _notificationRepository.CreateAsync(notification);
+            var createdNotification = await _notificationRepository.CreateAsync(notification);
+            var fullNotification = await _notificationRepository.GetByIdAsync(createdNotification.Id);
+
+            if (fullNotification != null)
+            {
+                var notificationDto = new NotificationDto
+                {
+                    Id = fullNotification.Id,
+                    ActorUser = fullNotification.ActorUser != null ? new UserBasicDto
+                    {
+                        Id = fullNotification.ActorUser.Id,
+                        Username = fullNotification.ActorUser.Username,
+                        DisplayName = fullNotification.ActorUser.DisplayName,
+                        AvatarEmoji = fullNotification.ActorUser.AvartarUrl,
+                        IsVerified = fullNotification.ActorUser.IsVerified
+                    } : null,
+                    NotificationType = fullNotification.NotificationType,
+                    EntityType = fullNotification.EntityType,
+                    EntityId = fullNotification.EntityId,
+                    Message = fullNotification.Message,
+                    IsRead = fullNotification.IsRead,
+                    CreatedAt = fullNotification.CreatedAt
+                };
+
+                // Send real-time notification via SignalR
+                await _hubContext.Clients.Group($"user_{userId}")
+                    .SendAsync("ReceiveNotification", notificationDto);
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using MarketAnalysisBackend.Models.DTO;
 using MarketAnalysisBackend.Services.Interfaces.Community;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Nethereum.Contracts;
 using System.Security.Claims;
 
@@ -13,9 +14,11 @@ namespace MarketAnalysisBackend.Controllers
     public class CommunityPostController : Controller
     {
         private readonly ICommunityPostService _post;
-        public CommunityPostController(ICommunityPostService post)
+        private readonly ICommunityNotificationService _notificationService;
+        public CommunityPostController(ICommunityPostService post, ICommunityNotificationService notificationService)
         {
             _post = post;
+            _notificationService = notificationService;
         }
 
         private int? GetCurrentUserId()
@@ -245,10 +248,28 @@ namespace MarketAnalysisBackend.Controllers
             try
             {
                 var currentUserId = GetCurrentUserId();
+                var post = await _post.GetPostByIdAsync(id);
                 if (!currentUserId.HasValue)
                     return Unauthorized(ApiResponse<bool>.ErrorResponse("User not authenticated"));
 
                 var isLiked = await _post.ToggleLikeAsync(id, currentUserId.Value);
+
+                if(post.UserId != currentUserId.Value)
+                {
+                    try
+                    {
+                        await _notificationService.NotifyUserAsync(
+                            userId: post.UserId,
+                            actorUserId: currentUserId.Value,
+                            notificationType: "Like",
+                            entityType: "Post",
+                            entityId: id,
+                            message: "Liked your post");
+                    }catch(Exception ex)
+                    {
+                        
+                    }
+                }
                 var message = isLiked ? "Post liked" : "Post unliked";
 
                 return Ok(ApiResponse<bool>.SuccessResponse(isLiked, message));

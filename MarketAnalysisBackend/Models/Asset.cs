@@ -8,6 +8,8 @@
         public string Rank { get; set; } = string.Empty;
         public string Network { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public DateTime DateAdd { get; set; }
+        public int ViewCount { get; set; }
         public string LogoUrl { get; set; } = string.Empty;
 
         public ICollection<PricePoint> PricePoints { get; set; } = new List<PricePoint>();

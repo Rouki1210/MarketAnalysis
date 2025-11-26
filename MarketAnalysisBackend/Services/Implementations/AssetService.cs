@@ -44,8 +44,28 @@ namespace MarketAnalysisBackend.Services.Interfaces
 
         public async Task<Asset?> GetAssetBySymbolAsync(string symbol)
         {
+            var asset = await _assetRepo.GetAssetBySymbolAsync(symbol);
+            if (asset == null)
+            {
+                return null;
+            }
+
+            asset.ViewCount += 1;
+            await _assetRepo.UpdateAsync(asset);
+            await _assetRepo.SaveChangesAsync();
+            return asset;
+        }
+
+        public async Task<IEnumerable<Asset>> GetAllAssetByDateAsynnc()
+        {
             var assets = await _assetService.GetAllAsync();
-            return assets.FirstOrDefault(a => a.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+            return assets.OrderByDescending(a => a.DateAdd);
+        }
+
+        public async Task<IEnumerable<Asset>> GetAllAssetByViewAsynnc()
+        {
+            var assets = await _assetService.GetAllAsync();
+            return assets.OrderByDescending(a => a.ViewCount);
         }
 
         public async Task<IEnumerable<Asset>> RefreshTopAssetAsync(CancellationToken cancellationToken = default)

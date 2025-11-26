@@ -7,6 +7,7 @@ namespace MarketAnalysisBackend.Repositories.Interfaces
     {
         Task DeleteAllAsync();
         Task<IEnumerable<Asset>> GetByRank();
+        Task<Asset?> GetAssetBySymbolAsync(string symbol);
         Task<IEnumerable<Asset>> GetByPagination(int from, int to);
         Task<IEnumerable<Asset>> SearchAssetsAsync(string query);
     }

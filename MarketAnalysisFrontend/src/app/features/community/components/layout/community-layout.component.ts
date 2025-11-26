@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CommunitySidebarComponent } from './community-sidebar.component';
 import { LeaderboardEntry, LeaderboardService } from '../../services/leaderboard.service';
+import { CommunityService } from '../../services/community.service';
 
 @Component({
   selector: 'app-community-layout',
@@ -24,15 +25,20 @@ import { LeaderboardEntry, LeaderboardService } from '../../services/leaderboard
   `,
   styles: []
 })
-export class CommunityLayoutComponent implements OnInit {
+export class CommunityLayoutComponent implements OnInit, OnDestroy {
   leaderboard: LeaderboardEntry[] = [];
 
-  constructor(private leaderboardService: LeaderboardService) {}
+  constructor(private leaderboardService: LeaderboardService, private communityService: CommunityService) {}
 
   ngOnInit(): void {
     this.leaderboardService.getTopContributors(5).subscribe(
       data => this.leaderboard = data
     );
+    this.communityService.startNotificationsRealtime();
+  }
+
+  ngOnDestroy(): void {
+    this.communityService.stopNotificationsRealtime();
   }
 }
 
