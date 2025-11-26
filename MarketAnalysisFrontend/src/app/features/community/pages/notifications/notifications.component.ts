@@ -1,11 +1,12 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CommunityService, NotificationDto } from '../../services/community.service';
+import { Subscription } from 'rxjs';
 
 interface Notification {
   id: string;
-  type: 'like' | 'comment' | 'follow' | 'mention';
+  type: 'Comment' | 'Like' | 'Follow';
   user: string;
-  avatar: string;
   message: string;
   time: string;
   read: boolean;
@@ -28,9 +29,9 @@ interface Notification {
           [class]="getNotificationClasses(notification)"
           (click)="markAsRead(notification.id)">
           <div class="flex items-start gap-4">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl flex-shrink-0">
+            <!-- <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl flex-shrink-0">
               {{ notification.avatar }}
-            </div>
+            </div> -->
             
             <div class="flex-1 min-w-0">
               <p class="text-white">
@@ -56,45 +57,41 @@ interface Notification {
   `,
   styles: []
 })
-export class NotificationsComponent {
-  notifications = signal<Notification[]>([
-    {
-      id: '1',
-      type: 'like',
-      user: 'CryptoGuru',
-      avatar: '🏆',
-      message: 'liked your post about Bitcoin',
-      time: '5 minutes ago',
-      read: false
-    },
-    {
-      id: '2',
-      type: 'comment',
-      user: 'BlockchainPro',
-      avatar: '🥈',
-      message: 'commented on your post',
-      time: '1 hour ago',
-      read: false
-    },
-    {
-      id: '3',
-      type: 'follow',
-      user: 'TokenMaster',
-      avatar: '🥉',
-      message: 'started following you',
-      time: '3 hours ago',
-      read: true
-    },
-    {
-      id: '4',
-      type: 'mention',
-      user: 'DeFiExpert',
-      avatar: '🟦',
-      message: 'mentioned you in a comment',
-      time: '1 day ago',
-      read: true
-    }
-  ]);
+export class NotificationsComponent implements OnInit, OnDestroy {
+  notifications = signal<Notification[]>([]);
+  private notificationSub?: Subscription;
+  constructor(private communityService: CommunityService) {
+    this.loadNotifications();
+  }
+
+  ngOnInit() {
+    this.communityService.startNotificationsRealtime();
+    this.loadNotifications();
+
+    // Subscribe to real-time notifications
+    this.notificationSub = this.communityService.notificationStream().subscribe((dto: NotificationDto) => {
+      // Insert new notification at the top
+      const newNotification = this.mapDtoToNotification(dto);
+      this.notifications.set([newNotification, ...this.notifications()]);
+    });
+  }
+
+  ngOnDestroy() {
+    this.notificationSub?.unsubscribe();
+    this.communityService.stopNotificationsRealtime();
+  }
+
+  loadNotifications(): void {
+    this.communityService.getNotifications().subscribe({
+      next: (data: NotificationDto[]) => {
+        this.notifications.set(data.map(dto => this.mapDtoToNotification(dto)));
+      },
+      error: (err) => {
+        console.error('Failed to load notifications:', err);
+      }
+    });
+  }
+
 
   getNotificationClasses(notification: Notification): string {
     const baseClasses = 'bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 cursor-pointer transition-colors';
@@ -110,6 +107,29 @@ export class NotificationsComponent {
       n.id === id ? { ...n, read: true } : n
     );
     this.notifications.set(updatedNotifications);
+  }
+
+  private mapDtoToNotification(dto: NotificationDto): Notification {
+    if (!dto || typeof dto.id === 'undefined') {
+      // Defensive fallback: ignore or return a placeholder/dummy object,
+      // or handle it upstream in the subscription.
+      return {
+        id: '',
+        type: 'Comment', // Default/fallback
+        user: 'Unknown',
+        message: '',
+        time: '',
+        read: true
+      };
+    }
+    return {
+      id: dto.id.toString(),
+      type: dto.type,
+      user: dto.actorUser.displayName,
+      message: dto.message,
+      time: dto.createdAt,
+      read: dto.isRead
+    };
   }
 }
 

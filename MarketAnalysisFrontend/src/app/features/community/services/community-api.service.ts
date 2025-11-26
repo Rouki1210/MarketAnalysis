@@ -1,14 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import * as SignalR from '@microsoft/signalr';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CommunityApiService {
   private baseURL = 'https://localhost:7175/api'; // Change this to your API URL
+  private hubURL = 'https://localhost:7175/notificationhub'; // Change this to your SignalR Hub URL
   private timeout = 10000;
+
+  private hubConnection?: SignalR.HubConnection;
+  private notificationSubject = new BehaviorSubject<Notification[]>([]);
+  private connectionState = new BehaviorSubject<SignalR.HubConnectionState>(
+    SignalR.HubConnectionState.Disconnected
+  );
 
   constructor(private http: HttpClient) {}
 
@@ -23,6 +31,39 @@ export class CommunityApiService {
     }
 
     return headers;
+  }
+
+  startNotificationHub(): void {
+    if (this.hubConnection) return;
+    this.hubConnection = new SignalR.HubConnectionBuilder()
+      .withUrl(this.hubURL, {
+        accessTokenFactory: () => this.getToken() || ""
+      })
+      .withAutomaticReconnect()
+      .build();
+    this.hubConnection
+      .start()
+      .then(() => {
+        this.connectionState.next(SignalR.HubConnectionState.Connected);
+        console.log('SignalR Connected');
+        this.hubConnection?.on('ReceiveNotification', (notification) => {
+          this.notificationSubject.next(notification);
+        });
+      })
+      .catch(err => {
+        this.connectionState.next(SignalR.HubConnectionState.Disconnected);
+        console.error('SignalR Connection Error:', err);
+      });
+  }
+
+  stopNotificationHub(): void {
+    this.hubConnection?.stop();
+    this.hubConnection = undefined;
+  }
+
+  // Expose notifications as Observable
+  getNotificationStream(): Observable<any> {
+    return this.notificationSubject.asObservable();
   }
 
   private handleError(error: HttpErrorResponse) {

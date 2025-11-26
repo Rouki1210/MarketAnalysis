@@ -7,6 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MarketAnalysisBackend.Controllers
 {
+    public class CreateTestNotificationRequest
+    {
+        public int TargetUserId { get; set; }
+        public string NotificationType { get; set; } = "Like";
+        public string EntityType { get; set; } = "Post";
+        public int EntityId { get; set; } = 999;
+        public string Message { get; set; } = string.Empty;
+    }
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
@@ -54,6 +62,59 @@ namespace MarketAnalysisBackend.Controllers
                 return StatusCode(500, ApiResponse<List<NotificationDto>>.ErrorResponse("An error occurred while fetching notifications."));
             }
         }
+
+        [RequireRole("User")]
+        [HttpPost("test/create")]
+        public async Task<ActionResult<ApiResponse<NotificationDto>>> TestCreateNotification(
+            [FromBody] CreateTestNotificationRequest request)
+        {
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                if (!currentUserId.HasValue)
+                    return Unauthorized(ApiResponse<NotificationDto>.ErrorResponse("User not authenticated"));
+
+                // Validate request
+                if (request.TargetUserId <= 0)
+                    return BadRequest(ApiResponse<NotificationDto>.ErrorResponse("TargetUserId is required"));
+
+                if (string.IsNullOrWhiteSpace(request.NotificationType))
+                    request.NotificationType = "Like";
+
+                if (string.IsNullOrWhiteSpace(request.EntityType))
+                    request.EntityType = "Post";
+
+                if (request.EntityId <= 0)
+                    request.EntityId = 999;
+
+                if (string.IsNullOrWhiteSpace(request.Message))
+                    request.Message = $"{request.NotificationType.ToLower()}d your {request.EntityType.ToLower()} (TEST)";
+
+                // Create test notification
+                await _notificationService.NotifyUserAsync(
+                    userId: request.TargetUserId,
+                    actorUserId: currentUserId.Value,
+                    notificationType: request.NotificationType,
+                    entityType: request.EntityType,
+                    entityId: request.EntityId,
+                    message: request.Message
+                );
+
+                _logger.LogInformation(
+                    "Test notification created: User {ActorId} -> User {TargetId}, Type: {Type}",
+                    currentUserId.Value, request.TargetUserId, request.NotificationType);
+
+                return Ok(ApiResponse<NotificationDto>.SuccessResponse(
+                    null,
+                    $"Test notification sent to user {request.TargetUserId}"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating test notification");
+                return StatusCode(500, ApiResponse<NotificationDto>.ErrorResponse("Failed to create test notification"));
+            }
+        }
+    
 
         [RequireRole("User")]
         [HttpGet("unread-count")]
@@ -166,5 +227,5 @@ namespace MarketAnalysisBackend.Controllers
                 return StatusCode(500, ApiResponse<List<string>>.ErrorResponse("An error occurred while fetching notification types."));
             }
         }
-    }
+}
 }

@@ -211,7 +211,9 @@ builder.Services.AddAuthentication(options =>
                 (path.StartsWithSegments("/pricehub") ||
                  path.StartsWithSegments("/globalmetrichub") ||
                  path.StartsWithSegments("/alerthub") ||
-                 path.StartsWithSegments("/useralerthub"))) 
+                 path.StartsWithSegments("/useralerthub") ||
+                 path.StartsWithSegments("/notificationhub")
+                 )) 
    
             {
                 context.Token = accessToken;
@@ -277,6 +279,7 @@ app.MapHub<PriceHub>("/pricehub");
 app.MapHub<GlobalMetric>("/globalmetrichub");
 app.MapHub <AlertHub>("/alerthub");
 app.MapHub<UserAlertHub>("/useralerthub");
+app.MapHub<NotificationHub>("/notificationhub");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

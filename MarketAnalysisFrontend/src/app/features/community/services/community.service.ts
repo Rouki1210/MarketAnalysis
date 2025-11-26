@@ -103,7 +103,13 @@ export interface CommentDto {
 
 export interface NotificationDto {
     id: number;
-    userId: number;
+    actorUser: {
+    id: number;
+    username: string;
+    displayName: string;
+    avatarEmoji: string | null;
+    isVerified: boolean;
+};
     type: 'Comment' | 'Like' | 'Follow';
     message: string;
     relatedEntityId?: number;
@@ -138,6 +144,19 @@ export interface PaginationRequest {
 export class CommunityService {
     constructor(private api: CommunityApiService) { }
 
+    
+    startNotificationsRealtime() {
+        this.api.startNotificationHub();
+    }
+
+    stopNotificationsRealtime() {
+        this.api.stopNotificationHub();
+    }
+
+    notificationStream() {
+        return this.api.getNotificationStream();
+    }
+
     // ==================== COMMUNITY POSTS ====================
 
     /**
@@ -151,6 +170,7 @@ export class CommunityService {
         };
         return this.api.get<PaginatedResponse<CommunityPostDto>>('/CommunityPost', params);
     }
+
 
     /**
      * Get a single post by ID

@@ -13,11 +13,13 @@ namespace MarketAnalysisBackend.Controllers
     {
         private readonly ILogger<CommentController> _logger;
         private readonly ICommentService _commentService;
+        private readonly ICommunityNotificationService _notificationService;
 
-        public CommentController(ILogger<CommentController> logger, ICommentService commentService)
+        public CommentController(ILogger<CommentController> logger, ICommentService commentService, ICommunityNotificationService notificationService)
         {
             _logger = logger;
             _commentService = commentService;
+            _notificationService = notificationService;
         }
 
         private int? GetCurrentUserId()
@@ -86,6 +88,7 @@ namespace MarketAnalysisBackend.Controllers
             var currentUserId = GetCurrentUserId();
             if (!currentUserId.HasValue)
                 return Unauthorized(ApiResponse<CommentDto>.ErrorResponse("User not authenticated"));
+            
 
             if (string.IsNullOrWhiteSpace(createCommentDto.Content))
                 return BadRequest(ApiResponse<CommentDto>.ErrorResponse("Comment content is required"));
