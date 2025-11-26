@@ -74,14 +74,7 @@ export class CryptoTableComponent implements OnInit {
     'Solana',
     'Base',
   ];
-  readonly tabs = [
-    'Top',
-    'Trending',
-    'Most Visited',
-    'New',
-    'Gainers',
-    'Real-World Assets',
-  ];
+  readonly tabs = ['Top', 'Trending', 'Most Visited', 'New', 'Gainers'];
   readonly additionalNetworks: Network[] = [
     { name: 'Arbitrum', icon: '🔷', color: 'bg-blue-500' },
     { name: 'Avalanche', icon: '🔺', color: 'bg-red-500' },
@@ -152,7 +145,7 @@ export class CryptoTableComponent implements OnInit {
   selectTab(tab: string): void {
     this.selectedTab = tab;
     this.currentPage = 1; // Reset to first page when changing tab
-    // TODO: Load different data based on selected tab
+    this.applyFilter();
   }
 
   sortBy(field: 'rank' | 'marketCap' | 'volume'): void {
@@ -175,29 +168,109 @@ export class CryptoTableComponent implements OnInit {
         ? [...this.coins]
         : this.coins.filter((coin) => coin.network === this.selectedNetwork);
 
-    // Apply sorting
-    result.sort((a, b) => {
-      let valA: number;
-      let valB: number;
+    // Apply Tab Filtering/Sorting Logic
+    switch (this.selectedTab) {
+      case 'Trending':
+        // Sort by 24h Volume (highest to lowest)
+        result.sort((a, b) => {
+          const volA = this.parseCurrency(a.volume || '0');
+          const volB = this.parseCurrency(b.volume || '0');
+          return volB - volA;
+        });
+        break;
+      case 'Most Visited':
+        // Sort by viewCount (highest to lowest)
+        result.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+        break;
+      case 'New':
+        // Sort by creation date (newest first)
+        result.sort((a, b) => {
+          const dateA = new Date(a.dateAdd || 0).getTime();
+          const dateB = new Date(b.dateAdd || 0).getTime();
+          return dateB - dateA;
+        });
+        break;
+      case 'Gainers':
+        // Filter positive 24h change, sort by highest gain
+        result = result.filter((coin) => {
+          const change = parseFloat((coin.change24h || '0').replace('%', ''));
+          return change > 0;
+        });
+        result.sort((a, b) => {
+          const changeA = parseFloat((a.change24h || '0').replace('%', ''));
+          const changeB = parseFloat((b.change24h || '0').replace('%', ''));
+          return changeB - changeA;
+        });
+        break;
+      case 'Top':
+      default:
+        // Default sort by Rank (handled below if no explicit sort)
+        // If user hasn't clicked a column header, default to rank
+        if (this.sortField === 'rank' && this.sortDirection === 'asc') {
+          result.sort((a, b) => Number(a.rank) - Number(b.rank));
+        }
+        break;
+    }
 
-      switch (this.sortField) {
-        case 'marketCap':
-          valA = this.parseCurrency(a.marketCap || '0');
-          valB = this.parseCurrency(b.marketCap || '0');
-          break;
-        case 'volume':
-          valA = this.parseCurrency(a.volume || '0');
-          valB = this.parseCurrency(b.volume || '0');
-          break;
-        case 'rank':
-        default:
-          valA = Number(a.rank);
-          valB = Number(b.rank);
-          break;
-      }
+    // Apply explicit column sorting if user interacted with headers
+    // Note: Tab logic sets a default sort, but column headers should override or refine it
+    // For simplicity, if user clicks a header, we respect that over tab default sort
+    // But here we might want to only apply explicit sort if it differs from tab default
+    // or just let the user override.
+    // Let's allow column sort to override tab sort if it's not the default rank sort
+    // OR if the user explicitly clicked rank.
 
-      return this.sortDirection === 'asc' ? valA - valB : valB - valA;
-    });
+    // Actually, the requirement says "Top: Sorts by Rank (default)".
+    // So if we are in 'Top' tab, we default to Rank.
+    // If we are in 'Trending', we default to Volume.
+    // If user clicks 'Market Cap', we sort by Market Cap.
+
+    // To handle this cleanly:
+    // 1. If user clicked a header (sortField/Direction set manually), use that.
+    // 2. Else use tab default.
+
+    // However, `sortBy` sets `sortField`.
+    // Let's assume if `sortField` is 'rank' and `sortDirection` is 'asc', it's the "default" state.
+    // But 'Trending' implies a different default.
+
+    // Refined logic:
+    // We apply tab specific sort FIRST (as above).
+    // THEN, if the user has explicitly requested a sort (e.g. clicked Market Cap), we re-sort.
+    // But we need to know if the user *explicitly* requested it.
+    // Current `sortBy` implementation sets `sortField`.
+
+    // Let's just stick to the tab logic being the primary sort when a tab is selected.
+    // If the user clicks a header, it might break the "Trending" view, which is expected.
+    // But for now, the code above applies tab sort.
+    // The code below applies column sort.
+    // We should only apply column sort if it's NOT the default rank sort,
+    // OR if we want to support sorting within the filtered list (e.g. sort Gainers by Market Cap).
+
+    // Let's apply column sort ONLY if it's not 'rank' (default) OR if direction is 'desc' (user clicked rank).
+    if (this.sortField !== 'rank' || this.sortDirection !== 'asc') {
+      result.sort((a, b) => {
+        let valA: number;
+        let valB: number;
+
+        switch (this.sortField) {
+          case 'marketCap':
+            valA = this.parseCurrency(a.marketCap || '0');
+            valB = this.parseCurrency(b.marketCap || '0');
+            break;
+          case 'volume':
+            valA = this.parseCurrency(a.volume || '0');
+            valB = this.parseCurrency(b.volume || '0');
+            break;
+          case 'rank':
+          default:
+            valA = Number(a.rank);
+            valB = Number(b.rank);
+            break;
+        }
+
+        return this.sortDirection === 'asc' ? valA - valB : valB - valA;
+      });
+    }
 
     this.filteredCoins = result;
     this.updatePagination();

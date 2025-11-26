@@ -56,6 +56,8 @@ export class ApiService {
           icon: a.logoUrl,
           network: a.network,
           sparklineData: [],
+          viewCount: a.viewCount,
+          dateAdd: a.dateAdd,
         }));
 
         this.coinsSource.next(coins);

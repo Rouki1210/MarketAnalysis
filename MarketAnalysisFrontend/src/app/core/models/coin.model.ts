@@ -27,8 +27,11 @@ export interface Coin {
 
   // For real-time updates
   highlightClass?: string;
-}
 
+  // New fields for sorting
+  viewCount?: number;
+  dateAdd?: string | Date;
+}
 
 export interface CoinDetail {
   coin: Coin;
@@ -67,4 +70,3 @@ export interface CoinLinks {
   reddit?: string;
   github?: string;
 }
-
