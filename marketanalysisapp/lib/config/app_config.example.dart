@@ -12,7 +12,9 @@ class AppConfig {
   // SignalR Hub Endpoints
   static const String priceHubUrl = '$backendApiUrl/pricehub';
   static const String globalMetricHubUrl = '$backendApiUrl/globalmetrichub';
-  static const String alertHubUrl = '$backendApiUrl/alerthub';
+  static const String alertHubUrl = '$backendApiUrl/alerthub'; // Global alerts
+  static const String userAlertHubUrl =
+      '$backendApiUrl/useralerthub'; // User price alerts
 
   // App Configuration
   static const String appName = 'Market Analysis';

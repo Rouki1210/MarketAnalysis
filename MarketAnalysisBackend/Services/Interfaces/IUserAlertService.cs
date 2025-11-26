@@ -11,6 +11,7 @@ namespace MarketAnalysisBackend.Services
         Task<bool> DeleteAlertAsync(int userId, int alertId);
         Task<List<UserAlertHistoryDto>> GetAlertHistoryAsync(int userId, int alertId);
         Task<List<UserAlertHistoryDto>> GetUserHistoryAsync(int userId, int limit = 50);
+        Task<bool> DeleteAlertHistoryAsync(int userId, int historyId);
         Task CheckAndTriggerAlertsAsync();
     }
 }

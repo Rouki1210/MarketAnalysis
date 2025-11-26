@@ -3,7 +3,8 @@ import '../../config/app_config.dart';
 
 /// Alert Hub Service for price alert notifications
 class AlertHubService extends SignalRService {
-  AlertHubService() : super(hubUrl: AppConfig.alertHubUrl, hubName: 'AlertHub');
+  AlertHubService()
+    : super(hubUrl: AppConfig.userAlertHubUrl, hubName: 'UserAlertHub');
 
   /// Subscribe to alert notifications
   void subscribeToAlerts(Function(Map<String, dynamic>) onAlertTriggered) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
-import '../../models/notification_model.dart';
+import '../../models/price_alert_notification_model.dart';
 import '../../viewmodels/notification_viewmodel.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -12,42 +12,23 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  final ScrollController _scrollController = ScrollController();
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<NotificationViewModel>().loadNotifications(refresh: true);
     });
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      final viewModel = context.read<NotificationViewModel>();
-      if (!viewModel.isLoading && viewModel.hasMore) {
-        viewModel.loadNotifications();
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: const Text('Price Alert Notifications'),
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all),
-            tooltip: 'Mark all as read',
+            tooltip: 'Mark all as viewed',
             onPressed: () {
               context.read<NotificationViewModel>().markAllAsRead();
             },
@@ -71,6 +52,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
+                  Text(
+                    viewModel.errorMessage ?? '',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => viewModel.loadNotifications(refresh: true),
                     child: const Text('Retry'),
@@ -92,7 +78,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No notifications',
+                    'No price alert notifications',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -105,21 +91,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           return RefreshIndicator(
             onRefresh: () => viewModel.loadNotifications(refresh: true),
             child: ListView.separated(
-              controller: _scrollController,
               padding: const EdgeInsets.all(16),
-              itemCount:
-                  viewModel.notifications.length + (viewModel.hasMore ? 1 : 0),
+              itemCount: viewModel.notifications.length,
               separatorBuilder: (context, index) => const Divider(),
               itemBuilder: (context, index) {
-                if (index == viewModel.notifications.length) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                }
-
                 final notification = viewModel.notifications[index];
                 return _buildNotificationItem(context, notification, viewModel);
               },
@@ -132,9 +107,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildNotificationItem(
     BuildContext context,
-    AppNotification notification,
+    PriceAlertNotification notification,
     NotificationViewModel viewModel,
   ) {
+    final priceDiff = notification.priceDifference;
+    final isPositive = priceDiff >= 0;
+
     return Dismissible(
       key: Key('notification_${notification.id}'),
       direction: DismissDirection.endToStart,
@@ -149,64 +127,87 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       },
       child: InkWell(
         onTap: () {
-          if (!notification.isRead) {
+          if (!notification.isViewed) {
             viewModel.markAsRead(notification.id);
           }
-          // TODO: Navigate to related entity (Post, User, etc.)
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           decoration: BoxDecoration(
-            color: notification.isRead
+            color: notification.isViewed
                 ? Colors.transparent
                 : AppColors.primaryAccent.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: AppColors.cardBackground,
-                child: Text(
-                  notification.actorUser?.avatarEmoji ?? '👤',
-                  style: const TextStyle(fontSize: 20),
+              // Asset icon
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: const Icon(
+                  Icons.notifications_active,
+                  color: AppColors.primaryAccent,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
 
               // Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        children: [
-                          TextSpan(
-                            text:
-                                notification.actorUser?.displayName ??
-                                'Someone',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(text: ' ${notification.message}'),
-                        ],
+                    Text(
+                      '${notification.assetSymbol} Price Alert',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _formatTimeAgo(notification.createdAt),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                      'Target: \$${notification.targetPrice.toStringAsFixed(2)} | Actual: \$${notification.actualPrice.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          isPositive
+                              ? Icons.arrow_upward
+                              : Icons.arrow_downward,
+                          size: 16,
+                          color: isPositive
+                              ? AppColors.success
+                              : AppColors.error,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${isPositive ? '+' : ''}${priceDiff.toStringAsFixed(2)}%',
+                          style: TextStyle(
+                            color: isPositive
+                                ? AppColors.success
+                                : AppColors.error,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          _formatTimeAgo(notification.triggeredAt),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
 
-              if (!notification.isRead)
+              if (!notification.isViewed)
                 const Center(
                   child: Icon(
                     Icons.circle,
