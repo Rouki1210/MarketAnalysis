@@ -7,6 +7,7 @@ class Asset {
   final String? logoUrl;
   final int? rank;
   final DateTime? createdAt;
+  final int viewCount;
 
   Asset({
     required this.id,
@@ -16,6 +17,7 @@ class Asset {
     this.logoUrl,
     this.rank,
     this.createdAt,
+    this.viewCount = 0,
   });
 
   factory Asset.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class Asset {
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
+      viewCount: _parseInt(json['viewCount']) ?? 0,
     );
   }
 
@@ -49,6 +52,7 @@ class Asset {
       'logoUrl': logoUrl,
       'rank': rank,
       'createdAt': createdAt?.toIso8601String(),
+      'viewCount': viewCount,
     };
   }
 
@@ -60,6 +64,7 @@ class Asset {
     String? logoUrl,
     int? rank,
     DateTime? createdAt,
+    int? viewCount,
   }) {
     return Asset(
       id: id ?? this.id,
@@ -69,6 +74,7 @@ class Asset {
       logoUrl: logoUrl ?? this.logoUrl,
       rank: rank ?? this.rank,
       createdAt: createdAt ?? this.createdAt,
+      viewCount: viewCount ?? this.viewCount,
     );
   }
 }
@@ -89,6 +95,7 @@ class Coin {
   final double? supply;
   final List<double>? sparklineData;
   final DateTime? createdAt;
+  final int viewCount;
 
   // UI helpers
   bool get isPositive1h => change1h >= 0;
@@ -110,6 +117,7 @@ class Coin {
     this.supply,
     this.sparklineData,
     this.createdAt,
+    this.viewCount = 0,
   });
 
   factory Coin.fromAssetAndPrice(Asset asset, PricePoint? price) {
@@ -128,6 +136,7 @@ class Coin {
       supply: price?.circulatingSupply,
       sparklineData: null,
       createdAt: asset.createdAt,
+      viewCount: asset.viewCount,
     );
   }
 
@@ -151,6 +160,7 @@ class Coin {
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
+      viewCount: _parseInt(json['viewCount']) ?? 0,
     );
   }
 
@@ -176,6 +186,7 @@ class Coin {
       'volume24h': volume24h,
       'supply': supply,
       'sparklineData': sparklineData,
+      'viewCount': viewCount,
     };
   }
 }

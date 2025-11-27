@@ -8,6 +8,7 @@ class CommunityPost {
   final String content;
   final int likesCount;
   final int commentsCount;
+  final int viewCount;
   final bool isLiked;
   final bool isBookmarked;
   final DateTime createdAt;
@@ -22,6 +23,7 @@ class CommunityPost {
     required this.content,
     required this.likesCount,
     required this.commentsCount,
+    this.viewCount = 0,
     this.isLiked = false,
     this.isBookmarked = false,
     required this.createdAt,
@@ -43,6 +45,7 @@ class CommunityPost {
       content: json['content'] as String,
       likesCount: (json['likes'] ?? json['likesCount']) as int? ?? 0,
       commentsCount: (json['comments'] ?? json['commentsCount']) as int? ?? 0,
+      viewCount: (json['viewCount'] ?? json['views']) as int? ?? 0,
       isLiked: json['isLiked'] as bool? ?? false,
       isBookmarked: json['isBookmarked'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -62,6 +65,7 @@ class CommunityPost {
       'content': content,
       'likesCount': likesCount,
       'commentsCount': commentsCount,
+      'viewCount': viewCount,
       'isLiked': isLiked,
       'isBookmarked': isBookmarked,
       'createdAt': createdAt.toIso8601String(),
@@ -71,9 +75,10 @@ class CommunityPost {
 
   CommunityPost copyWith({
     int? likesCount,
+    int? commentsCount,
+    int? viewCount,
     bool? isLiked,
     bool? isBookmarked,
-    int? commentsCount,
   }) {
     return CommunityPost(
       id: id,
@@ -84,6 +89,7 @@ class CommunityPost {
       content: content,
       likesCount: likesCount ?? this.likesCount,
       commentsCount: commentsCount ?? this.commentsCount,
+      viewCount: viewCount ?? this.viewCount,
       isLiked: isLiked ?? this.isLiked,
       isBookmarked: isBookmarked ?? this.isBookmarked,
       createdAt: createdAt,
@@ -170,6 +176,18 @@ class Article {
   });
 
   factory Article.fromJson(Map<String, dynamic> json) {
+    // Handle author being a Map or String
+    String? authorName;
+    if (json['author'] is Map) {
+      final authorMap = json['author'] as Map<String, dynamic>;
+      authorName =
+          authorMap['displayName'] ??
+          authorMap['username'] ??
+          authorMap['name'];
+    } else if (json['author'] is String) {
+      authorName = json['author'] as String;
+    }
+
     return Article(
       id: json['id'] as int,
       title: json['title'] as String,
@@ -177,7 +195,7 @@ class Article {
       content: json['content'] as String?,
       imageUrl: json['imageUrl'] as String?,
       sourceUrl: json['sourceUrl'] as String?,
-      author: json['author'] as String?,
+      author: authorName,
       publishedAt: DateTime.parse(json['publishedAt'] as String),
       createdAt: DateTime.parse(json['createdAt'] as String),
     );

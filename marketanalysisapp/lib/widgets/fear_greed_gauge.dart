@@ -19,7 +19,7 @@ class FearGreedGauge extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: size,
-      height: size * 0.6,
+      height: size * 0.65, // Further reduced height
       child: CustomPaint(
         painter: _GaugePainter(
           value: value.clamp(0, 100),
@@ -48,7 +48,7 @@ class _GaugePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size canvasSize) {
     final centerX = size / 2;
-    final centerY = size * 0.5;
+    final centerY = size * 0.4; // Moved up slightly
     final radius = (size - 16) / 2.5;
     const strokeWidth = 12.0;
 
@@ -136,13 +136,13 @@ class _GaugePainter extends CustomPainter {
       pointerBorderPaint,
     );
 
-    // Draw value text - matching frontend at y = size * 0.45
+    // Draw value text - centered
     final valueTextPainter = TextPainter(
       text: TextSpan(
         text: value.toString(),
         style: TextStyle(
           color: textColor,
-          fontSize: size * 0.25,
+          fontSize: size * 0.28, // Slightly larger
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -153,17 +153,19 @@ class _GaugePainter extends CustomPainter {
       canvas,
       Offset(
         centerX - valueTextPainter.width / 2,
-        size * 0.45 - valueTextPainter.height / 2,
+        centerY -
+            valueTextPainter.height / 2 -
+            size * 0.05, // Moved up closer to gauge
       ),
     );
 
-    // Draw label text - matching frontend at y = size * 0.55
+    // Draw label text - moved up further
     final labelTextPainter = TextPainter(
       text: TextSpan(
         text: label,
         style: TextStyle(
           color: textColor.withOpacity(0.6),
-          fontSize: size * 0.08,
+          fontSize: size * 0.1, // Slightly larger
         ),
       ),
       textDirection: TextDirection.ltr,
@@ -173,7 +175,7 @@ class _GaugePainter extends CustomPainter {
       canvas,
       Offset(
         centerX - labelTextPainter.width / 2,
-        size * 0.55 - labelTextPainter.height / 2,
+        size * 0.6 - labelTextPainter.height / 2, // Moved up from 0.65
       ),
     );
   }
