@@ -28,7 +28,6 @@ class _MarketsScreenState extends State<MarketsScreen>
     'Most Visited',
     'New',
     'Gainers',
-    'Real-World Assets',
   ];
 
   @override
@@ -64,6 +63,75 @@ class _MarketsScreenState extends State<MarketsScreen>
       appBar: AppBar(
         title: const Text('Markets'),
         actions: [
+          // Filter Button
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.filter_list),
+            tooltip: 'Filter',
+            onSelected: (value) {
+              context.read<MarketViewModel>().sortBy(value);
+            },
+            itemBuilder: (BuildContext context) {
+              final vm = context.read<MarketViewModel>();
+              return [
+                PopupMenuItem(
+                  value: 'marketCap',
+                  child: Row(
+                    children: [
+                      Text(
+                        'Market Cap',
+                        style: TextStyle(
+                          color: vm.sortField == 'marketCap'
+                              ? AppColors.primaryAccent
+                              : null,
+                          fontWeight: vm.sortField == 'marketCap'
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                      if (vm.sortField == 'marketCap') ...[
+                        const SizedBox(width: 8),
+                        Icon(
+                          vm.sortAscending
+                              ? Icons.arrow_upward
+                              : Icons.arrow_downward,
+                          size: 16,
+                          color: AppColors.primaryAccent,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'volume',
+                  child: Row(
+                    children: [
+                      Text(
+                        'Volume (24h)',
+                        style: TextStyle(
+                          color: vm.sortField == 'volume'
+                              ? AppColors.primaryAccent
+                              : null,
+                          fontWeight: vm.sortField == 'volume'
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                      if (vm.sortField == 'volume') ...[
+                        const SizedBox(width: 8),
+                        Icon(
+                          vm.sortAscending
+                              ? Icons.arrow_upward
+                              : Icons.arrow_downward,
+                          size: 16,
+                          color: AppColors.primaryAccent,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ];
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -88,35 +156,26 @@ class _MarketsScreenState extends State<MarketsScreen>
                 bottom: BorderSide(color: AppColors.border, width: 1),
               ),
             ),
-            child: Column(
-              children: [
-                TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
-                ),
-                // Sort Buttons
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Consumer<MarketViewModel>(
-                    builder: (context, vm, _) => Row(
-                      children: [
-                        _buildSortButton(
-                          context,
-                          vm,
-                          'Market Cap',
-                          'marketCap',
-                        ),
-                        const SizedBox(width: 12),
-                        _buildSortButton(context, vm, 'Volume(24h)', 'volume'),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true, // Use scrollable to respect content width
+              tabAlignment: TabAlignment.center, // Center the tabs
+              labelColor: AppColors.primaryAccent,
+              unselectedLabelColor: AppColors.textSecondary,
+              indicatorColor: AppColors.primaryAccent,
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+              ), // Balanced spacing
+              labelStyle: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.normal,
+              ),
+              tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
             ),
           ),
 
@@ -214,134 +273,142 @@ class _MarketsScreenState extends State<MarketsScreen>
         }
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ), // Reduced vertical padding
           decoration: const BoxDecoration(
             color: AppColors.secondaryBackground,
             border: Border(
               bottom: BorderSide(color: AppColors.border, width: 1),
             ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Fear & Greed Gauge - Left side
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBackground,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Fear & Greed',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    FearGreedGauge(
-                      value: overview?.fearGreedIndex ?? 50,
-                      label: overview?.fearGreedText ?? 'Neutral',
-                      size: 140,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // Market metrics - Right side in 2x2 grid
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Fear & Greed Gauge - Left side
+                Container(
+                  padding: const EdgeInsets.all(
+                    8,
+                  ), // Reduced padding inside card
                   decoration: BoxDecoration(
                     color: AppColors.cardBackground,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.border),
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // First row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildCompactMetricItem(
-                              'Market Cap',
-                              overview != null
-                                  ? formatMarketCap(overview.totalMarketCap)
-                                  : '--',
-                              overview != null
-                                  ? formatPercent(
-                                      overview.totalMarketCapChange24h,
-                                    )
-                                  : '--',
-                              overview != null
-                                  ? overview.totalMarketCapChange24h >= 0
-                                  : false,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildCompactMetricItem(
-                              '24h Vol',
-                              overview != null
-                                  ? formatMarketCap(overview.totalVolume24h)
-                                  : '--',
-                              overview != null
-                                  ? formatPercent(
-                                      overview.totalVolume24hChange24h,
-                                    )
-                                  : '--',
-                              overview != null
-                                  ? overview.totalVolume24hChange24h >= 0
-                                  : false,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Fear & Greed',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                      const SizedBox(height: 12),
-
-                      // Second row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildCompactMetricItem(
-                              'BTC Dom',
-                              overview != null
-                                  ? '${overview.btcDominance.toStringAsFixed(1)}%'
-                                  : '--',
-                              overview != null
-                                  ? formatPercent(overview.btcDominanceChange)
-                                  : '--',
-                              overview != null
-                                  ? overview.btcDominanceChange >= 0
-                                  : true,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildCompactMetricItem(
-                              'ETH Dom',
-                              overview != null
-                                  ? '${overview.ethDominance.toStringAsFixed(1)}%'
-                                  : '--',
-                              overview != null
-                                  ? formatPercent(overview.ethDominanceChange)
-                                  : '--',
-                              overview != null
-                                  ? overview.ethDominanceChange >= 0
-                                  : false,
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: 4), // Reduced spacing
+                      FearGreedGauge(
+                        value: overview?.fearGreedIndex ?? 50,
+                        label: overview?.fearGreedText ?? 'Neutral',
+                        size: 140,
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12), // Reduced spacing between cards
+                // Market metrics - Right side in 2x2 grid
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(
+                      8,
+                    ), // Reduced padding inside card
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBackground,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      children: [
+                        // First row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildCompactMetricItem(
+                                'Market Cap',
+                                overview != null
+                                    ? formatMarketCap(overview.totalMarketCap)
+                                    : '--',
+                                overview != null
+                                    ? formatPercent(
+                                        overview.totalMarketCapChange24h,
+                                      )
+                                    : '--',
+                                overview != null
+                                    ? overview.totalMarketCapChange24h >= 0
+                                    : false,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildCompactMetricItem(
+                                '24h Vol',
+                                overview != null
+                                    ? formatMarketCap(overview.totalVolume24h)
+                                    : '--',
+                                overview != null
+                                    ? formatPercent(
+                                        overview.totalVolume24hChange24h,
+                                      )
+                                    : '--',
+                                overview != null
+                                    ? overview.totalVolume24hChange24h >= 0
+                                    : false,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Second row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildCompactMetricItem(
+                                'BTC Dom',
+                                overview != null
+                                    ? '${overview.btcDominance.toStringAsFixed(1)}%'
+                                    : '--',
+                                overview != null
+                                    ? formatPercent(overview.btcDominanceChange)
+                                    : '--',
+                                overview != null
+                                    ? overview.btcDominanceChange >= 0
+                                    : true,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildCompactMetricItem(
+                                'ETH Dom',
+                                overview != null
+                                    ? '${overview.ethDominance.toStringAsFixed(1)}%'
+                                    : '--',
+                                overview != null
+                                    ? formatPercent(overview.ethDominanceChange)
+                                    : '--',
+                                overview != null
+                                    ? overview.ethDominanceChange >= 0
+                                    : false,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -366,16 +433,16 @@ class _MarketsScreenState extends State<MarketsScreen>
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 6),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
-          overflow: TextOverflow.ellipsis,
         ),
-        if (change != '--') const SizedBox(height: 2),
+        const SizedBox(height: 2),
         if (change != '--')
           Text(
             change,
@@ -391,53 +458,5 @@ class _MarketsScreenState extends State<MarketsScreen>
 
   void _showSearchDialog() {
     showSearch(context: context, delegate: CoinSearchDelegate());
-  }
-
-  Widget _buildSortButton(
-    BuildContext context,
-    MarketViewModel vm,
-    String label,
-    String field,
-  ) {
-    final isSelected = vm.sortField == field;
-    return InkWell(
-      onTap: () => vm.sortBy(field),
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryAccent.withOpacity(0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryAccent : AppColors.border,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected
-                    ? AppColors.primaryAccent
-                    : AppColors.textSecondary,
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 4),
-              Icon(
-                vm.sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                size: 14,
-                color: AppColors.primaryAccent,
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
   }
 }

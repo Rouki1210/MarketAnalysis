@@ -198,6 +198,13 @@ class _PostContent extends StatelessWidget {
               color: AppColors.textSecondary,
               onTap: () {}, // Already on detail screen
             ),
+            const SizedBox(width: 24),
+            _InteractionButton(
+              icon: Icons.remove_red_eye_outlined,
+              label: '${post.viewCount}',
+              color: AppColors.textSecondary,
+              onTap: () {}, // View only
+            ),
           ],
         ),
       ],

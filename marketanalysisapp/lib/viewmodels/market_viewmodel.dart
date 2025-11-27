@@ -296,6 +296,9 @@ class MarketViewModel extends ChangeNotifier {
   /// Set selected tab
   void setSelectedTab(String tab) {
     _selectedTab = tab;
+    // Reset sort to default when changing tabs to ensure tab's specific view is shown
+    _sortField = 'rank';
+    _sortAscending = true;
     _applyFilters();
     notifyListeners();
   }
@@ -324,63 +327,35 @@ class MarketViewModel extends ChangeNotifier {
       }).toList();
     }
 
-    // Apply tab filter (only if not explicitly sorting by other fields)
-    if (_sortField == 'rank') {
-      switch (_selectedTab) {
-        case 'Trending':
-          filtered.sort((a, b) => b.volume24h.compareTo(a.volume24h));
-          break;
-        case 'Most Visited':
-          // Mock: Sort by volume as a proxy for popularity
-          filtered.sort((a, b) => b.volume24h.compareTo(a.volume24h));
-          break;
-        case 'New':
-          // Sort by creation date descending
-          filtered.sort((a, b) {
-            final dateA = a.createdAt ?? DateTime(2000);
-            final dateB = b.createdAt ?? DateTime(2000);
-            return dateB.compareTo(dateA);
-          });
-          break;
-        case 'Gainers':
-          // Sort by 24h change (positive)
-          filtered = filtered.where((coin) => coin.change24h > 0).toList();
-          filtered.sort((a, b) => b.change24h.compareTo(a.change24h));
-          break;
-        case 'Real-World Assets':
-          // RWA Tokens
-          final rwaSymbols = [
-            'ONDO',
-            'CFG',
-            'MPL',
-            'GFI',
-            'TRU',
-            'PRO',
-            'RIO',
-            'NXRA',
-            'CPOOL',
-            'BOSON',
-            'IXS',
-            'DEXTF',
-            'LAND',
-            'PROPC',
-            'ELAND',
-            'RWA',
-            'USDT',
-            'USDC',
-            'DAI',
-            'PAXG',
-          ];
-          filtered = filtered
-              .where((coin) => rwaSymbols.contains(coin.symbol))
-              .toList();
-          break;
-        case 'Top':
-        default:
-          // Sort by rank (top coins)
-          filtered.sort((a, b) => (a.rank ?? 999).compareTo(b.rank ?? 999));
-          break;
-      }
+    // Apply tab filter/sort
+    // We always apply this first to get the base set/order for the tab
+    switch (_selectedTab) {
+      case 'Trending':
+        // Sort by 24h Volume (highest to lowest)
+        filtered.sort((a, b) => b.volume24h.compareTo(a.volume24h));
+        break;
+      case 'Most Visited':
+        // Sort by viewCount (highest to lowest)
+        filtered.sort((a, b) => b.viewCount.compareTo(a.viewCount));
+        break;
+      case 'New':
+        // Sort by creation date (newest first)
+        filtered.sort((a, b) {
+          final dateA = a.createdAt ?? DateTime(2000);
+          final dateB = b.createdAt ?? DateTime(2000);
+          return dateB.compareTo(dateA);
+        });
+        break;
+      case 'Gainers':
+        // Shows only coins with positive 24h change, sorted by highest gain
+        filtered = filtered.where((coin) => coin.change24h > 0).toList();
+        filtered.sort((a, b) => b.change24h.compareTo(a.change24h));
+        break;
+      case 'Top':
+      default:
+        // Sort by rank (top coins)
+        filtered.sort((a, b) => (a.rank ?? 999).compareTo(b.rank ?? 999));
+        break;
     }
 
     // Apply explicit sorting
