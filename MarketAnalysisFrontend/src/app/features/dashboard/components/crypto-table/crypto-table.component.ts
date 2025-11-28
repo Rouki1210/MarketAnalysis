@@ -158,6 +158,13 @@ export class CryptoTableComponent implements OnInit {
     this.applyFilter();
   }
 
+  clearFilters(): void {
+    this.sortField = 'rank';
+    this.sortDirection = 'asc';
+    this.currentPage = 1; // Reset to first page
+    this.applyFilter();
+  }
+
   private parseCurrency(value: string): number {
     return Number(value.replace(/[^0-9.-]+/g, ''));
   }
@@ -191,11 +198,7 @@ export class CryptoTableComponent implements OnInit {
         });
         break;
       case 'Gainers':
-        // Filter positive 24h change, sort by highest gain
-        result = result.filter((coin) => {
-          const change = parseFloat((coin.change24h || '0').replace('%', ''));
-          return change > 0;
-        });
+        // Sort by 24h change (highest to lowest) - show all coins
         result.sort((a, b) => {
           const changeA = parseFloat((a.change24h || '0').replace('%', ''));
           const changeB = parseFloat((b.change24h || '0').replace('%', ''));

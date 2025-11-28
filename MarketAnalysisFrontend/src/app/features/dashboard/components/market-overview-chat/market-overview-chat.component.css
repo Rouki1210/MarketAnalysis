@@ -1,0 +1,105 @@
+/* Reuse floating chat styles from ai-analysis.component.css */
+@import '../../../../features/coin/components/ai-analysis/ai-analysis.component.css';
+
+/* Trend Badge */
+.trend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.trend-bullish {
+  background: linear-gradient(135deg, hsl(var(--secondary) / 0.2) 0%, hsl(var(--secondary) / 0.1) 100%);
+  color: hsl(var(--secondary));
+  border: 1px solid hsl(var(--secondary) / 0.3);
+}
+
+.trend-bearish {
+  background: linear-gradient(135deg, hsl(var(--accent) / 0.2) 0%, hsl(var(--accent) / 0.1) 100%);
+  color: hsl(var(--accent));
+  border: 1px solid hsl(var(--accent) / 0.3);
+}
+
+.trend-neutral {
+  background: hsl(var(--muted) / 0.2);
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  padding: 10px 12px;
+  background: linear-gradient(135deg, hsl(var(--muted) / 0.15) 0%, hsl(var(--muted) / 0.05) 100%);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+
+.stat-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+/* Movers Section */
+.movers-section {
+  margin-top: 16px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 12px 0 8px 0;
+  color: hsl(var(--foreground));
+}
+
+.movers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mover-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: hsl(var(--muted) / 0.1);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.mover-symbol {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.mover-change {
+  font-weight: 500;
+}
+
+.mover-change.positive {
+  color: hsl(var(--secondary));
+}
+
+.mover-change.negative {
+  color: hsl(var(--accent));
+}

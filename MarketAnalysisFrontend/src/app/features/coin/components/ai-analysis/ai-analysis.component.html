@@ -1,0 +1,88 @@
+<div class="modal-overlay" *ngIf="isOpen">
+  <div class="modal-container">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2>
+        <span class="ai-icon">🤖</span>
+        AI Analysis
+      </h2>
+      <button class="close-btn" (click)="closeModal()" title="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p class="loading-text">AI is analyzing data...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !loading" class="error-container">
+        <span class="error-icon">❌</span>
+        <p class="error-message">{{ error }}</p>
+        <button class="retry-btn" (click)="refreshAnalysis()">Retry</button>
+      </div>
+
+      <!-- Analysis Results -->
+      <div *ngIf="analysis && !loading" class="analysis-content">
+        <!-- Meta Info -->
+        <div class="meta-info">
+          <span class="source">
+            <span class="meta-icon">📡</span>
+            {{ analysis.source }}
+          </span>
+          <span class="timestamp">
+            <span class="meta-icon">🕐</span>
+            {{ formatDate(analysis.analyzedAt) }}
+          </span>
+        </div>
+
+        <!-- Price Info -->
+        <div class="price-info">
+          <div class="price-item">
+            <span class="label">Current Price:</span>
+            <span class="value">${{ analysis.currentPrice.toLocaleString() }}</span>
+          </div>
+          <div class="price-item">
+            <span class="label">7-Day Change:</span>
+            <span 
+              class="value" 
+              [class.positive]="analysis.percentChange7d >= 0"
+              [class.negative]="analysis.percentChange7d < 0">
+              {{ analysis.percentChange7d >= 0 ? '+' : '' }}{{ analysis.percentChange7d.toFixed(2) }}%
+            </span>
+          </div>
+        </div>
+
+        <!-- Insights List -->
+        <div class="insights-list">
+          <div 
+            *ngFor="let insight of analysis.insights; let i = index" 
+            class="insight-card"
+            [ngClass]="getInsightClass(insight.type)">
+            
+            <div class="insight-header">
+              <span class="icon">{{ getInsightIcon(insight.type) }}</span>
+              <h3 class="insight-title">{{ insight.title }}</h3>
+            </div>
+            
+            <p class="insight-description">{{ insight.description }}</p>
+          </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+          <span class="disclaimer-icon">⚠️</span>
+          This is AI-generated analysis for reference only, not investment advice. 
+          Please do your own research before making any decisions.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

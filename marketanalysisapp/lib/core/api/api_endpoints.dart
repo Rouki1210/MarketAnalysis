@@ -54,6 +54,10 @@ class ApiEndpoints {
   static const String topics = '/Topic';
   static String topicById(int id) => '/Topic/$id';
 
+  // AI Analysis endpoints
+  static const String marketOverview = '/AIAnalysis/market';
+  static String coinAnalysis(String symbol) => '/AIAnalysis/$symbol';
+
   // Global metrics
   static const String globalMetrics = '/GlobalMetric';
 }

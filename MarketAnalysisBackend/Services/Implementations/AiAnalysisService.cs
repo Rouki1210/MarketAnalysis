@@ -71,6 +71,11 @@ namespace MarketAnalysisBackend.Services.Implementations
             throw new NotImplementedException();
         }
 
+        public Task<MarketOverviewResponse> AnalyzeMarketAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException("Market analysis is only available with Gemini service");
+        }
+
         private async Task<List<PricePoint>> GetPriceDataFromDB(string symbol, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"📊 Fetching price data for {symbol} from database");
