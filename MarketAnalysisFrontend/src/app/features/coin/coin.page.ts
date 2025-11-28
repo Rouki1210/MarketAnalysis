@@ -6,11 +6,17 @@ import { CoinDetail } from '../../core/models/coin.model';
 import { Market } from '../../core/models/market.model';
 import { CoinStatsComponent } from './components/coin-stats/coin-stats.component';
 import { PriceChartComponent } from './components/price-chart/price-chart.component';
+import { AiAnalysisComponent } from './components/ai-analysis/ai-analysis.component';
 
 @Component({
   selector: 'app-coin',
   standalone: true,
-  imports: [CommonModule, CoinStatsComponent, PriceChartComponent],
+  imports: [
+    CommonModule,
+    CoinStatsComponent,
+    PriceChartComponent,
+    AiAnalysisComponent,
+  ],
   templateUrl: './coin.page.html',
   styleUrls: ['./coin.page.css'],
 })
@@ -20,6 +26,7 @@ export class CoinPage implements OnInit {
   selectedTab = 'Chart';
   tabs = ['Chart', 'Markets', 'News', 'Yield', 'Market Cycles', 'About'];
   isLoading = true;
+  showAiModal = false;
 
   constructor(private route: ActivatedRoute, private apiService: ApiService) {}
 

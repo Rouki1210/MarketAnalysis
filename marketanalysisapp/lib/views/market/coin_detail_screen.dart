@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:ui';
 import '../../models/asset_model.dart';
 import '../../viewmodels/market_viewmodel.dart';
 import '../../viewmodels/watchlist_viewmodel.dart';
@@ -7,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../widgets/price_chart_widget.dart';
 import '../../widgets/stat_card.dart';
+import '../../widgets/coin_analysis_sheet.dart';
 import '../../viewmodels/alert_viewmodel.dart';
 import '../../viewmodels/auth_viewmodel.dart';
 import '../alerts/create_alert_dialog.dart';
@@ -130,6 +132,32 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
 
               const SizedBox(height: 80), // Bottom padding
             ],
+          ),
+        ),
+      ),
+      floatingActionButton: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: FloatingActionButton.extended(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => DraggableScrollableSheet(
+                  initialChildSize: 0.9,
+                  minChildSize: 0.5,
+                  maxChildSize: 0.95,
+                  builder: (context, scrollController) =>
+                      CoinAnalysisSheet(symbol: widget.coin.symbol),
+                ),
+              );
+            },
+            icon: const Text('🤖', style: TextStyle(fontSize: 20)),
+            label: const Text('AI Analysis'),
+            backgroundColor: AppColors.primaryAccent.withOpacity(0.3),
+            elevation: 0,
           ),
         ),
       ),

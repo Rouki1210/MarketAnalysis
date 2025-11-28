@@ -315,6 +315,14 @@ class MarketViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Clear all filters
+  void clearFilters() {
+    _sortField = 'rank';
+    _sortAscending = true;
+    _applyFilters();
+    notifyListeners();
+  }
+
   /// Apply filters based on search and tab selection
   void _applyFilters() {
     List<Coin> filtered = List.from(_coins);
@@ -347,8 +355,7 @@ class MarketViewModel extends ChangeNotifier {
         });
         break;
       case 'Gainers':
-        // Shows only coins with positive 24h change, sorted by highest gain
-        filtered = filtered.where((coin) => coin.change24h > 0).toList();
+        // Sort by 24h change (highest to lowest) - show all coins
         filtered.sort((a, b) => b.change24h.compareTo(a.change24h));
         break;
       case 'Top':

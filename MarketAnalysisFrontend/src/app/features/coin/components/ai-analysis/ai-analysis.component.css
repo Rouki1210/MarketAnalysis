@@ -1,0 +1,388 @@
+/* Floating Chat Widget Container */
+.modal-overlay {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+/* Chat Widget - Floating Bottom Right */
+.modal-container {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 16px;
+  width: 400px;
+  max-width: calc(100vw - 40px);
+  height: 600px;
+  max-height: calc(100vh - 100px);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: slideUpChat 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@keyframes slideUpChat {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Chat Header with Gradient */
+.modal-header {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%);
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  border-bottom: 1px solid hsl(var(--border) / 0.3);
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: hsl(var(--primary-foreground));
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-icon {
+  font-size: 22px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.close-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.close-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: hsl(var(--primary-foreground));
+  stroke-width: 2.5;
+}
+
+/* Chat Body - Messages Area */
+.modal-body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+  background: hsl(var(--card));
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted)) transparent;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted) / 0.8);
+}
+
+/* Loading State */
+.loading-container {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid hsl(var(--muted));
+  border-top: 3px solid hsl(var(--primary));
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Error State */
+.error-container {
+  background: hsl(var(--destructive) / 0.1);
+  border: 1px solid hsl(var(--destructive) / 0.3);
+  border-radius: 12px;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  color: hsl(var(--destructive));
+  font-size: 14px;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.retry-btn {
+  padding: 10px 20px;
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Analysis Content */
+.analysis-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Meta Info - Chat Style */
+.meta-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+
+.meta-icon {
+  margin-right: 4px;
+}
+
+/* Price Info - Chat Bubble Style */
+.price-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, hsl(var(--primary) / 0.04) 100%);
+  border-radius: 10px;
+  border-left: 3px solid hsl(var(--primary));
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-item .label {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+.price-item .value {
+  font-size: 16px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.price-item .value.positive {
+  color: hsl(var(--secondary));
+}
+
+.price-item .value.negative {
+  color: hsl(var(--accent));
+}
+
+/* Insights - Chat Message Bubbles */
+.insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.insight-card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.insight-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.insight-card.insight-positive {
+  background: linear-gradient(135deg, 
+    hsl(var(--secondary) / 0.1) 0%, 
+    hsl(var(--secondary) / 0.05) 100%);
+  border-left: 3px solid hsl(var(--secondary));
+}
+
+.insight-card.insight-negative {
+  background: linear-gradient(135deg, 
+    hsl(var(--accent) / 0.1) 0%, 
+    hsl(var(--accent) / 0.05) 100%);
+  border-left: 3px solid hsl(var(--accent));
+}
+
+.insight-card.insight-neutral {
+  background: linear-gradient(135deg, 
+    hsl(var(--muted) / 0.3) 0%, 
+    hsl(var(--muted) / 0.15) 100%);
+  border-left: 3px solid hsl(var(--muted));
+}
+
+.insight-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.insight-header .icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.insight-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  flex: 1;
+  line-height: 1.4;
+}
+
+.insight-description {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.5;
+  font-size: 13px;
+  padding-left: 28px;
+}
+
+/* Disclaimer - Footer */
+.disclaimer {
+  padding: 10px 12px;
+  background: hsl(var(--muted) / 0.2);
+  border-left: 3px solid hsl(var(--muted));
+  border-radius: 6px;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.disclaimer-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .modal-overlay {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .modal-container {
+    width: 100%;
+    max-width: 100%;
+    height: calc(100vh - 100px);
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+  }
+
+  .ai-icon {
+    font-size: 20px;
+  }
+
+  .price-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .insight-description {
+    padding-left: 0;
+    margin-top: 4px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .modal-container {
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.3),
+      0 2px 4px -1px rgba(0, 0, 0, 0.2),
+      0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+}

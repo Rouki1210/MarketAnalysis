@@ -31,7 +31,10 @@
   <div *ngIf="!isLoading && coinDetail" class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
     <!-- Left Column - Stats -->
     <div class="lg:col-span-1">
-      <app-coin-stats [coinDetail]="coinDetail"></app-coin-stats>
+      <app-coin-stats 
+        [coinDetail]="coinDetail"
+        (aiAnalysisClick)="showAiModal = true">
+      </app-coin-stats>
     </div>
 
     <!-- Right Column - Chart -->
@@ -42,6 +45,14 @@
       </app-price-chart>
     </div>
   </div>
+
+  <!-- AI Analysis Modal -->
+  <app-ai-analysis 
+    *ngIf="coinDetail"
+    [symbol]="coinDetail.coin.symbol"
+    [isOpen]="showAiModal"
+    (close)="showAiModal = false">
+  </app-ai-analysis>
 
   <!-- Error State -->
   <div *ngIf="!isLoading && !coinDetail" class="text-center py-12">

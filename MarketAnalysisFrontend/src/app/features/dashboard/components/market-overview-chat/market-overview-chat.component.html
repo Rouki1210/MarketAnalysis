@@ -1,0 +1,100 @@
+<div class="modal-overlay" *ngIf="isOpen">
+  <div class="modal-container">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2>
+        <span class="ai-icon">🌍</span>
+        Market Overview
+      </h2>
+      <button class="close-btn" (click)="closeModal()" title="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+      <!-- Loading -->
+      <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p class="loading-text">Analyzing market data...</p>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="error && !loading" class="error-container">
+        <span class="error-icon">❌</span>
+        <p class="error-message">{{ error }}</p>
+        <button class="retry-btn" (click)="refreshAnalysis()">Retry</button>
+      </div>
+
+      <!-- Analysis -->
+      <div *ngIf="analysis && !loading" class="analysis-content">
+        <!-- Trend Badge -->
+        <div class="trend-badge" [ngClass]="getTrendBadgeClass(analysis.overallTrend)">
+          <span>{{ getTrendIcon(analysis.overallTrend) }}</span>
+          <span>{{ analysis.overallTrend | titlecase }}</span>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Market Cap</span>
+            <span class="stat-value">{{ formatNumber(analysis.statistics.totalMarketCap) }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">24h Volume</span>
+            <span class="stat-value">{{ formatNumber(analysis.statistics.totalVolume24h) }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">BTC Dominance</span>
+            <span class="stat-value">{{ analysis.statistics.btcDominance.toFixed(1) }}%</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Market Breadth</span>
+            <span class="stat-value">{{ (analysis.statistics.marketBreadth * 100).toFixed(1) }}%</span>
+          </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="insights-list">
+          <div *ngFor="let insight of analysis.insights" 
+               class="insight-card"
+               [ngClass]="getInsightClass(insight.type)">
+            <div class="insight-header">
+              <span class="icon">{{ getInsightIcon(insight.type) }}</span>
+              <h3 class="insight-title">{{ insight.title }}</h3>
+            </div>
+            <p class="insight-description">{{ insight.description }}</p>
+          </div>
+        </div>
+
+        <!-- Top Movers -->
+        <div class="movers-section">
+          <h4 class="section-title">🚀 Top Gainers</h4>
+          <div class="movers-list">
+            <div *ngFor="let mover of analysis.topGainers" class="mover-item">
+              <span class="mover-symbol">{{ mover.symbol }}</span>
+              <span class="mover-change positive">{{ formatPercent(mover.percentChange24h) }}</span>
+            </div>
+          </div>
+
+          <h4 class="section-title">📉 Top Losers</h4>
+          <div class="movers-list">
+            <div *ngFor="let mover of analysis.topLosers" class="mover-item">
+              <span class="mover-symbol">{{ mover.symbol }}</span>
+              <span class="mover-change negative">{{ formatPercent(mover.percentChange24h) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meta -->
+        <div class="meta-info">
+          <span>{{ analysis.source }}</span>
+          <span>{{ formatDate(analysis.analyzedAt) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

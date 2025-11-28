@@ -38,5 +38,22 @@ namespace MarketAnalysisBackend.Controllers
                 return StatusCode(500, new { error = "Internal server error" });
             }
         }
+
+        [HttpGet("market")]
+        [ProducesResponseType(typeof(MarketOverviewResponse), 200)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetMarketAnalysis(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var analysis = await _aiService.AnalyzeMarketAsync(cancellationToken);
+                return Ok(analysis);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error analyzing market");
+                return StatusCode(500, new { error = "Internal server error" });
+            }
+        }
     }
 }

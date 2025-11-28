@@ -6,6 +6,7 @@ import '../viewmodels/notification_viewmodel.dart';
 import '../views/auth/auth_screens.dart';
 import '../views/notifications/notifications_screen.dart';
 import '../views/alerts/alerts_screen.dart';
+import '../views/profile/profile_settings_screen.dart';
 
 class UserMenuDrawer extends StatelessWidget {
   const UserMenuDrawer({super.key});
@@ -81,7 +82,15 @@ class UserMenuDrawer extends StatelessWidget {
                       _buildMenuItem(
                         icon: Icons.settings_outlined,
                         title: 'Settings',
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ProfileSettingsScreen(),
+                            ),
+                          );
+                        },
                       ),
                       _buildMenuItem(
                         icon: Icons.help_outline,

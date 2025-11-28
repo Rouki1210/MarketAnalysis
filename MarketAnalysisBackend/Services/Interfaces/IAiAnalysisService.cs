@@ -6,5 +6,6 @@ namespace MarketAnalysisBackend.Services.Interfaces
     {
         Task<CoinAnalysisReponse> AnalyzeCoinAsync(string symbol, CancellationToken cancellationToken = default);
         Task<List<CoinAnalysisReponse>> AnalyzeMultipleCoinsAsync(List<string> symbols, CancellationToken cancellationToken = default);
+        Task<MarketOverviewResponse> AnalyzeMarketAsync(CancellationToken cancellationToken = default);
     }
 }

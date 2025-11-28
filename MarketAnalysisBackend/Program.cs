@@ -69,12 +69,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection"))
 );
 
-// AI Settings
-builder.Services.Configure<OpenAISettings>(
-    builder.Configuration.GetSection("OpenAI")
+// AI Settings - Using Google Gemini
+builder.Services.Configure<GeminiSettings>(
+    builder.Configuration.GetSection("Gemini")
 );
 builder.Services.AddMemoryCache();
-builder.Services.AddScoped<IAiAnalysisService, AiAnalysisService>();
+builder.Services.AddScoped<IAiAnalysisService, GeminiAiAnalysisService>();
 builder.Services.AddSingleton<IActiveUserService, ActiveUserService>();
 
 
