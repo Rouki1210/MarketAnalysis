@@ -7,8 +7,6 @@ import '../../widgets/loading_shimmer.dart';
 import '../../widgets/profile_button.dart';
 import '../../widgets/user_menu_drawer.dart';
 import '../../widgets/fear_greed_gauge.dart';
-import '../../widgets/market_ai_fab.dart';
-import '../../widgets/market_overview_sheet.dart';
 import '../../views/market/coin_detail_screen.dart';
 import '../../views/market/coin_search_delegate.dart';
 
@@ -23,7 +21,6 @@ class MarketsScreen extends StatefulWidget {
 class _MarketsScreenState extends State<MarketsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _showMarketOverview = false;
 
   final List<String> _tabs = const [
     'Top',
@@ -71,11 +68,7 @@ class _MarketsScreenState extends State<MarketsScreen>
             icon: const Icon(Icons.filter_list),
             tooltip: 'Filter',
             onSelected: (value) {
-              if (value == 'clear') {
-                context.read<MarketViewModel>().clearFilters();
-              } else {
-                context.read<MarketViewModel>().sortBy(value);
-              }
+              context.read<MarketViewModel>().sortBy(value);
             },
             itemBuilder: (BuildContext context) {
               final vm = context.read<MarketViewModel>();
@@ -136,31 +129,6 @@ class _MarketsScreenState extends State<MarketsScreen>
                     ],
                   ),
                 ),
-                // Divider if filter is active
-                if (vm.sortField != 'rank' || !vm.sortAscending)
-                  const PopupMenuDivider(),
-                // Clear Filters
-                if (vm.sortField != 'rank' || !vm.sortAscending)
-                  PopupMenuItem(
-                    value: 'clear',
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.clear,
-                          size: 16,
-                          color: AppColors.error,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Clear Filters',
-                          style: TextStyle(
-                            color: AppColors.error,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
               ];
             },
           ),
@@ -284,25 +252,6 @@ class _MarketsScreenState extends State<MarketsScreen>
           ),
         ],
       ),
-      floatingActionButton: !_showMarketOverview
-          ? MarketAiFab(
-              onPressed: () {
-                setState(() => _showMarketOverview = true);
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => DraggableScrollableSheet(
-                    initialChildSize: 0.9,
-                    minChildSize: 0.5,
-                    maxChildSize: 0.95,
-                    builder: (context, scrollController) =>
-                        const MarketOverviewSheet(),
-                  ),
-                ).then((_) => setState(() => _showMarketOverview = false));
-              },
-            )
-          : null,
     );
   }
 
@@ -478,10 +427,9 @@ class _MarketsScreenState extends State<MarketsScreen>
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white70,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSecondary,
             fontSize: 11,
-            fontWeight: FontWeight.w500,
           ),
           overflow: TextOverflow.ellipsis,
         ),
@@ -491,11 +439,7 @@ class _MarketsScreenState extends State<MarketsScreen>
           alignment: Alignment.centerLeft,
           child: Text(
             value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 15,
-              color: Colors.white,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
         ),
         const SizedBox(height: 2),
@@ -505,7 +449,6 @@ class _MarketsScreenState extends State<MarketsScreen>
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: isPositive ? AppColors.success : AppColors.error,
               fontSize: 11,
-              fontWeight: FontWeight.w600,
             ),
             overflow: TextOverflow.ellipsis,
           ),

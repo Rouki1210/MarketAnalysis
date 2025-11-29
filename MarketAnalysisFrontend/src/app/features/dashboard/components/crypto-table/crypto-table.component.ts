@@ -24,7 +24,8 @@ interface Network {
 }
 
 interface MenuPosition {
-  left: number;
+  left?: number;
+  right?: number;
   top: number;
 }
 
@@ -37,6 +38,7 @@ interface MenuPosition {
 })
 export class CryptoTableComponent implements OnInit {
   @ViewChild('moreButton') moreButton!: ElementRef<HTMLButtonElement>;
+  @ViewChild('filterButton') filterButton!: ElementRef<HTMLButtonElement>;
 
   // Make Math available in template
   Math = Math;
@@ -57,13 +59,20 @@ export class CryptoTableComponent implements OnInit {
   selectedNetwork = 'All Networks';
   selectedTab = 'Top';
   showNetworkMenu = signal(false);
+  showFilterMenu = signal(false);
   menuPosition: MenuPosition = { left: 0, top: 0 };
+  filterMenuPosition: MenuPosition = { left: 0, top: 0 };
   watchlistIds: number[] = [];
   isLoading: boolean = true;
 
   // Sorting
   sortField: 'rank' | 'marketCap' | 'volume' = 'rank';
   sortDirection: 'asc' | 'desc' = 'asc';
+
+  // Getter for template
+  get sortAscending(): boolean {
+    return this.sortDirection === 'asc';
+  }
 
   // Constants
   readonly networks = [
@@ -155,6 +164,7 @@ export class CryptoTableComponent implements OnInit {
       this.sortField = field;
       this.sortDirection = 'desc'; // Default to desc for metrics
     }
+    this.showFilterMenu.set(false); // Close menu after selection
     this.applyFilter();
   }
 
@@ -163,6 +173,26 @@ export class CryptoTableComponent implements OnInit {
     this.sortDirection = 'asc';
     this.currentPage = 1; // Reset to first page
     this.applyFilter();
+  }
+
+  toggleFilterMenu(): void {
+    if (this.showFilterMenu()) {
+      this.showFilterMenu.set(false);
+      return;
+    }
+
+    if (this.filterButton?.nativeElement) {
+      const rect = this.filterButton.nativeElement.getBoundingClientRect();
+      const menuWidth = 224; // w-56 = 14rem = 224px
+
+      this.filterMenuPosition = {
+        right: window.innerWidth - rect.right,
+        top: rect.bottom + 8,
+      };
+    }
+
+    this.showFilterMenu.set(true);
+    this.showNetworkMenu.set(false); // Close other menu
   }
 
   private parseCurrency(value: string): number {
@@ -409,14 +439,27 @@ export class CryptoTableComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.showNetworkMenu()) return;
-
     const target = event.target as HTMLElement;
-    const isClickInsideButton = target.closest('.network-more-btn');
-    const isClickInsideMenu = target.closest('.network-menu-container');
 
-    if (!isClickInsideButton && !isClickInsideMenu) {
-      this.closeNetworkMenu();
+    // Handle network menu
+    if (this.showNetworkMenu()) {
+      const isClickInsideButton = target.closest('.network-more-btn');
+      const isClickInsideMenu = target.closest('.network-menu-container');
+
+      if (!isClickInsideButton && !isClickInsideMenu) {
+        this.closeNetworkMenu();
+      }
+    }
+
+    // Handle filter menu
+    if (this.showFilterMenu()) {
+      const isClickInsideFilterButton =
+        this.filterButton?.nativeElement.contains(target);
+      const isClickInsideFilterMenu = target.closest('.filter-menu-container'); // Filter menu container
+
+      if (!isClickInsideFilterButton && !isClickInsideFilterMenu) {
+        this.showFilterMenu.set(false);
+      }
     }
   }
 
@@ -425,6 +468,16 @@ export class CryptoTableComponent implements OnInit {
   onScrollOrResize(): void {
     if (this.showNetworkMenu()) {
       this.calculateMenuPosition();
+    }
+    if (this.showFilterMenu()) {
+      // Recalculate filter menu position on scroll/resize
+      if (this.filterButton?.nativeElement) {
+        const rect = this.filterButton.nativeElement.getBoundingClientRect();
+        this.filterMenuPosition = {
+          right: window.innerWidth - rect.right,
+          top: rect.bottom + 8,
+        };
+      }
     }
   }
 }

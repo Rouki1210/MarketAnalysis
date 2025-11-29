@@ -1,11 +1,11 @@
-<div class="mx-auto px-3 lg:px-4 xl:px-6 py-6 lg:py-8">
+<div class="mx-auto px-3 lg:px-4 xl:px-6 pt-0 pb-4 lg:pb-6">
   <!-- ==================== TAB NAVIGATION ==================== -->
-  <div class="flex items-center space-x-3 lg:space-x-4 mb-6 overflow-x-auto scrollbar-hide border-b border-border">
+  <div class="flex items-center space-x-1.5 lg:space-x-2 mb-4 overflow-x-auto scrollbar-hide border-b border-border">
     <app-button 
       *ngFor="let tab of tabs"
       variant="ghost"
       size="sm"
-      class="whitespace-nowrap rounded-none rounded-t-md pb-3 -mb-px"
+      class="whitespace-nowrap rounded-none rounded-t-md pb-2.5 -mb-px text-base lg:text-lg font-semibold"
       [class.border-b-2]="selectedTab === tab"
       [class.border-primary]="selectedTab === tab"
       [class.text-foreground]="selectedTab === tab"
@@ -18,14 +18,14 @@
   <!-- ==================== FILTERS & CONTROLS ==================== -->
   <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
     <!-- Network Filters -->
-    <div class="flex items-center space-x-2">
-      <div class="flex items-center space-x-2 overflow-x-auto scrollbar-hide">
+    <div class="flex items-center space-x-1.5">
+      <div class="flex items-center space-x-1.5 overflow-x-auto scrollbar-hide">
         <!-- Primary Network Buttons -->
         <app-button
           *ngFor="let network of networks"
           [variant]="selectedNetwork === network ? 'default' : 'ghost'"
           size="sm"
-          class="whitespace-nowrap"
+          class="whitespace-nowrap text-sm font-medium"
           (click)="selectNetwork(network)">
           {{ network }}
         </app-button>
@@ -34,7 +34,7 @@
         <button
           #moreButton
           (click)="toggleNetworkMenu()"
-          class="inline-flex items-center justify-center h-8 px-3 text-xs font-medium rounded-md transition-colors whitespace-nowrap flex-shrink-0 network-more-btn hover:bg-muted/50 hover:text-foreground">
+          class="inline-flex items-center justify-center h-8 px-3 text-sm font-medium rounded-md transition-colors whitespace-nowrap flex-shrink-0 network-more-btn hover:bg-muted/50 hover:text-foreground">
           More
           <svg 
             class="w-3 h-3 ml-1 transition-transform"
@@ -52,37 +52,6 @@
 
     <!-- Table Action Buttons -->
     <div class="flex items-center space-x-2">
-      <app-button 
-        variant="ghost" 
-        size="sm" 
-        [class.text-primary]="sortField === 'marketCap'"
-        [class.text-muted-foreground]="sortField !== 'marketCap'"
-        (click)="sortBy('marketCap')">
-        <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-        </svg>
-        <span class="hidden sm:inline">Market Cap</span>
-        <span *ngIf="sortField === 'marketCap'" class="ml-1 text-xs">
-          {{ sortDirection === 'asc' ? '↑' : '↓' }}
-        </span>
-      </app-button>
-      
-      <app-button 
-        variant="ghost" 
-        size="sm" 
-        class="hidden sm:flex"
-        [class.text-primary]="sortField === 'volume'"
-        [class.text-muted-foreground]="sortField !== 'volume'"
-        (click)="sortBy('volume')">
-        <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-        </svg>
-        <span class="hidden md:inline">Volume(24h)</span>
-        <span *ngIf="sortField === 'volume'" class="ml-1 text-xs">
-          {{ sortDirection === 'asc' ? '↑' : '↓' }}
-        </span>
-      </app-button>
-      
       <!-- Clear Filters Button -->
       <app-button 
         *ngIf="sortField !== 'rank' || sortDirection !== 'asc'"
@@ -97,12 +66,30 @@
         <span class="hidden md:inline">Clear</span>
       </app-button>
       
-      <app-button variant="ghost" size="sm" class="text-muted-foreground">
-        <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-        </svg>
-        <span class="hidden md:inline">Filters</span>
-      </app-button>
+      <!-- Filters Dropdown Button -->
+      <div class="relative">
+        <button
+          #filterButton
+          (click)="toggleFilterMenu()"
+          class="inline-flex items-center justify-center h-8 px-3 text-xs font-medium rounded-md transition-colors whitespace-nowrap hover:bg-muted/50 hover:text-foreground"
+          [class.text-primary]="sortField !== 'rank' || !sortAscending"
+          [class.text-muted-foreground]="sortField === 'rank' && sortAscending">
+          <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          <span class="hidden md:inline">Filters</span>
+          <svg 
+            class="w-3 h-3 ml-1 transition-transform"
+            [class.rotate-180]="showFilterMenu()"
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -293,5 +280,48 @@
         </span>
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ==================== FILTER DROPDOWN MENU ==================== -->
+<div 
+  *ngIf="showFilterMenu()" 
+  class="fixed w-56 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-[9999] filter-menu-container"
+  [style.right.px]="filterMenuPosition.right"
+  [style.top.px]="filterMenuPosition.top">
+  <div class="p-2">
+    <!-- Market Cap Sort -->
+    <button
+      (click)="sortBy('marketCap')"
+      class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-muted/40 transition-colors text-left">
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="21" y1="10" x2="3" y2="10"></line>
+          <line x1="21" y1="6" x2="3" y2="6"></line>
+          <line x1="21" y1="14" x2="3" y2="14"></line>
+          <line x1="21" y1="18" x2="3" y2="18"></line>
+        </svg>
+        <span class="text-sm font-medium" [class.text-primary]="sortField === 'marketCap'">Market Cap</span>
+      </div>
+      <span *ngIf="sortField === 'marketCap'" class="text-sm text-primary">
+        {{ sortDirection === 'asc' ? '↑' : '↓' }}
+      </span>
+    </button>
+
+    <!-- Volume 24h Sort -->
+    <button
+      (click)="sortBy('volume')"
+      class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-muted/40 transition-colors text-left">
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+          <polyline points="17 6 23 6 23 12"></polyline>
+        </svg>
+        <span class="text-sm font-medium" [class.text-primary]="sortField === 'volume'">Volume (24h)</span>
+      </div>
+      <span *ngIf="sortField === 'volume'" class="text-sm text-primary">
+        {{ sortDirection === 'asc' ? '↑' : '↓' }}
+      </span>
+    </button>
   </div>
 </div>
