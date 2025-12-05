@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
@@ -9,6 +10,7 @@ import '../../widgets/user_menu_drawer.dart';
 import '../../widgets/fear_greed_gauge.dart';
 import '../../views/market/coin_detail_screen.dart';
 import '../../views/market/coin_search_delegate.dart';
+import '../../widgets/market_overview_sheet.dart';
 
 /// Markets screen with tabs
 class MarketsScreen extends StatefulWidget {
@@ -251,6 +253,38 @@ class _MarketsScreenState extends State<MarketsScreen>
             ),
           ),
         ],
+      ),
+      floatingActionButton: Consumer<MarketViewModel>(
+        builder: (context, viewModel, child) {
+          // Hide FAB when bottom sheet is showing
+          if (viewModel.isMarketOverviewShown) {
+            return const SizedBox.shrink();
+          }
+
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  viewModel.setMarketOverviewShown(true);
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => const MarketOverviewSheet(),
+                  ).whenComplete(() {
+                    viewModel.setMarketOverviewShown(false);
+                  });
+                },
+                icon: const Text('🤖', style: TextStyle(fontSize: 20)),
+                label: const Text('Market AI'),
+                backgroundColor: AppColors.primaryAccent.withOpacity(0.3),
+                elevation: 0,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

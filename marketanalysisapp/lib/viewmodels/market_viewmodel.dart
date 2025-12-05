@@ -35,6 +35,7 @@ class MarketViewModel extends ChangeNotifier {
   String _selectedTab =
       'Top'; // Top, Trending, Most Visited, New, Gainers, Real-World Assets
   bool _isRealtimeConnected = false;
+  bool _isMarketOverviewShown = false;
 
   // Sorting
   String _sortField = 'rank'; // rank, marketCap, volume
@@ -51,6 +52,7 @@ class MarketViewModel extends ChangeNotifier {
   String get selectedTab => _selectedTab;
   String get sortField => _sortField;
   bool get sortAscending => _sortAscending;
+  bool get isMarketOverviewShown => _isMarketOverviewShown;
 
   /// Initialize SignalR real-time connections
   Future<void> _initializeRealtime() async {
@@ -300,6 +302,12 @@ class MarketViewModel extends ChangeNotifier {
     _sortField = 'rank';
     _sortAscending = true;
     _applyFilters();
+    notifyListeners();
+  }
+
+  /// Set market overview shown state
+  void setMarketOverviewShown(bool shown) {
+    _isMarketOverviewShown = shown;
     notifyListeners();
   }
 
