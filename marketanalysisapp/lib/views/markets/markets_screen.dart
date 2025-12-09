@@ -265,7 +265,7 @@ class _MarketsScreenState extends State<MarketsScreen>
             borderRadius: BorderRadius.circular(28),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: FloatingActionButton.extended(
+              child: FloatingActionButton(
                 onPressed: () {
                   viewModel.setMarketOverviewShown(true);
                   showModalBottomSheet(
@@ -277,10 +277,10 @@ class _MarketsScreenState extends State<MarketsScreen>
                     viewModel.setMarketOverviewShown(false);
                   });
                 },
-                icon: const Text('🤖', style: TextStyle(fontSize: 20)),
-                label: const Text('Market AI'),
+                tooltip: 'Market AI',
                 backgroundColor: AppColors.primaryAccent.withOpacity(0.3),
                 elevation: 0,
+                child: const Text('🤖', style: TextStyle(fontSize: 24)),
               ),
             ),
           );

@@ -59,15 +59,28 @@ namespace MarketAnalysisBackend.Repositories.Implementations
                 return Enumerable.Empty<OhlcDto>();
 
             // Group by timeframe with enhanced aggregation logic
+            // Fallback to Price field when OHLC values are 0 (for legacy data)
             var grouped = prices.GroupBy(p => GetTimeframePeriod(p.TimestampUtc, timeframe))
                 .Select(g => new OhlcDto
                 {
                     Symbol = symbol,
                     PeriodStart = g.Key,
-                    Open = g.First().Open != 0 ? g.First().Open : g.First().Close,
-                    High = g.Max(x => x.High != 0 ? x.High : x.Close),
-                    Low = g.Where(x => x.Low > 0).DefaultIfEmpty(g.First()).Min(x => x.Low != 0 ? x.Low : x.Close),
-                    Close = g.Last().Close,
+                    // Use Open, fallback to Close, then to Price
+                    Open = g.First().Open != 0 ? g.First().Open 
+                         : g.First().Close != 0 ? g.First().Close 
+                         : g.First().Price,
+                    // Use High, fallback to max of Close values, then to max of Price values
+                    High = g.Max(x => x.High != 0 ? x.High 
+                         : x.Close != 0 ? x.Close 
+                         : x.Price),
+                    // Use Low, fallback to min of Close values, then to min of Price values
+                    Low = g.Where(x => x.Low > 0 || x.Close > 0 || x.Price > 0)
+                           .DefaultIfEmpty(g.First())
+                           .Min(x => x.Low > 0 ? x.Low 
+                              : x.Close > 0 ? x.Close 
+                              : x.Price),
+                    // Use Close, fallback to Price
+                    Close = g.Last().Close != 0 ? g.Last().Close : g.Last().Price,
                     Volume = g.Sum(x => x.Volume)
                 })
                 .OrderBy(x => x.PeriodStart)

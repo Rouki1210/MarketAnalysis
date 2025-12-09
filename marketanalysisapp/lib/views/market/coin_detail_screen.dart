@@ -139,7 +139,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
         borderRadius: BorderRadius.circular(28),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: FloatingActionButton.extended(
+          child: FloatingActionButton(
             onPressed: () {
               showModalBottomSheet(
                 context: context,
@@ -154,10 +154,10 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 ),
               );
             },
-            icon: const Text('🤖', style: TextStyle(fontSize: 20)),
-            label: const Text('AI Analysis'),
+            tooltip: 'AI Analysis',
             backgroundColor: AppColors.primaryAccent.withOpacity(0.3),
             elevation: 0,
+            child: const Text('🤖', style: TextStyle(fontSize: 24)),
           ),
         ),
       ),
@@ -314,10 +314,11 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
 
           // Chart widget
           SizedBox(
-            height: 250,
+            height: 350,
             child: PriceChartWidget(
               coin: widget.coin,
               timeframe: _selectedTimeframe,
+              height: 350,
             ),
           ),
         ],
