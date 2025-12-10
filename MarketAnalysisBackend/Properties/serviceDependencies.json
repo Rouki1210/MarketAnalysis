@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "signalr1": {
+      "type": "signalr",
+      "connectionId": "ConnectionStrings:DbConnection",
+      "dynamicId": null
+    }
+  }
+}

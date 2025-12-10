@@ -82,7 +82,7 @@ namespace MarketAnalysisBackend.Controllers
         {
             var clientId = _config["Authentication:Google:ClientId"];
             var clientSecret = _config["Authentication:Google:ClientSecret"];
-            var redirectUri = _config["Authentication:Google:RedirectUri"];
+            var redirectUri = request.RedirectUri;
 
             var tokenRequestBody = new List<KeyValuePair<string, string>>
             {

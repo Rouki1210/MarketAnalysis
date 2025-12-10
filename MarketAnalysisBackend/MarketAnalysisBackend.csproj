@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.13.2" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Betalgo.OpenAI" Version="8.7.2" />
     <PackageReference Include="Google.Apis.Auth" Version="1.72.0" />
@@ -17,6 +18,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.20" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Azure.SignalR" Version="1.30.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
       <PrivateAssets>all</PrivateAssets>

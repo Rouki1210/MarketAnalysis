@@ -426,11 +426,7 @@ export class AuthService {
     signature: string,
     message: string
   ): Observable<any> {
-    return this.http.post(`${this.apiUrl}/wallet/login`, {
-      walletAddress,
-      signature,
-      message,
-    });
+    return this.http.post(`${this.apiUrl}/wallet/login`, {WalletAddress: walletAddress, Signature: signature, Message: message});
   }
 
   /**
