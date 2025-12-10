@@ -1,7 +1,22 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LeaderboardService, LeaderboardEntry } from '../../services/leaderboard.service';
+import {
+  LeaderboardService,
+  LeaderboardEntry,
+} from '../../services/leaderboard.service';
 
+/**
+ * LeaderboardComponent
+ *
+ * Displays top contributors leaderboard
+ *
+ * Features:
+ * - Table showing top 50 users
+ * - Rank, username, points, and change indicators
+ * - Badge display for top ranks
+ * - Verified user indicators
+ * - Empty state handling
+ */
 @Component({
   selector: 'app-leaderboard',
   standalone: true,
@@ -13,50 +28,86 @@ import { LeaderboardService, LeaderboardEntry } from '../../services/leaderboard
         <p class="text-gray-400">Top contributors in the community</p>
       </div>
 
-      <div class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl overflow-hidden">
+      <div
+        class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl overflow-hidden"
+      >
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead class="bg-white/5 border-b border-purple-500/20">
               <tr>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Rank</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">User</th>
-                <th class="px-6 py-4 text-right text-sm font-semibold text-gray-300">Points</th>
-                <th class="px-6 py-4 text-right text-sm font-semibold text-gray-300">Change</th>
+                <th
+                  class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+                >
+                  Rank
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+                >
+                  User
+                </th>
+                <th
+                  class="px-6 py-4 text-right text-sm font-semibold text-gray-300"
+                >
+                  Points
+                </th>
+                <th
+                  class="px-6 py-4 text-right text-sm font-semibold text-gray-300"
+                >
+                  Change
+                </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-purple-500/10">
-              <tr 
+              <tr
                 *ngFor="let entry of leaderboard()"
-                class="hover:bg-white/5 transition-colors">
+                class="hover:bg-white/5 transition-colors"
+              >
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
                     <span class="text-2xl">{{ entry.badge }}</span>
-                    <span class="text-white font-semibold">#{{ entry.rank }}</span>
+                    <span class="text-white font-semibold"
+                      >#{{ entry.rank }}</span
+                    >
                   </div>
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl">
+                    <div
+                      class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl"
+                    >
                       {{ entry.user.avatar || '👤' }}
                     </div>
                     <div>
                       <div class="flex items-center gap-2">
-                        <span class="text-white font-medium">{{ entry.user.username }}</span>
-                        <span *ngIf="entry.user.verified" class="text-blue-400 text-sm">✓</span>
+                        <span class="text-white font-medium">{{
+                          entry.user.username
+                        }}</span>
+                        <span
+                          *ngIf="entry.user.verified"
+                          class="text-blue-400 text-sm"
+                          >✓</span
+                        >
                       </div>
                     </div>
                   </div>
                 </td>
                 <td class="px-6 py-4 text-right">
-                  <span class="text-white font-semibold">{{ entry.points.toLocaleString() }}</span>
+                  <span class="text-white font-semibold">{{
+                    entry.points.toLocaleString()
+                  }}</span>
                 </td>
                 <td class="px-6 py-4 text-right">
-                  <span 
+                  <span
                     *ngIf="entry.change !== undefined"
-                    [class]="getChangeClasses(entry.change)">
+                    [class]="getChangeClasses(entry.change)"
+                  >
                     {{ entry.change > 0 ? '+' : '' }}{{ entry.change }}
                   </span>
-                  <span *ngIf="entry.change === undefined || entry.change === 0" class="text-gray-400">-</span>
+                  <span
+                    *ngIf="entry.change === undefined || entry.change === 0"
+                    class="text-gray-400"
+                    >-</span
+                  >
                 </td>
               </tr>
             </tbody>
@@ -71,7 +122,7 @@ import { LeaderboardService, LeaderboardEntry } from '../../services/leaderboard
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class LeaderboardComponent implements OnInit {
   leaderboard = signal<LeaderboardEntry[]>([]);
@@ -83,9 +134,9 @@ export class LeaderboardComponent implements OnInit {
   }
 
   loadLeaderboard(): void {
-    this.leaderboardService.getLeaderboard(50).subscribe(
-      data => this.leaderboard.set(data)
-    );
+    this.leaderboardService
+      .getLeaderboard(50)
+      .subscribe((data) => this.leaderboard.set(data));
   }
 
   getChangeClasses(change: number): string {
@@ -94,4 +145,3 @@ export class LeaderboardComponent implements OnInit {
     return 'text-gray-400';
   }
 }
-

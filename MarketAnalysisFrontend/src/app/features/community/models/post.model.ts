@@ -1,11 +1,19 @@
+/**
+ * Community Post Models
+ *
+ * Data structures for community posts, articles, and discussions
+ */
+
+/** User author information */
 export interface Author {
-  id: number; 
+  id: number;
   username: string;
   displayName: string;
   avatarEmoji?: string;
   verified?: boolean;
 }
 
+/** Discussion topic/category */
 export interface Topic {
   id: number;
   name: string;
@@ -16,6 +24,7 @@ export interface Topic {
   description?: string;
 }
 
+/** Community post with engagement metrics */
 export interface Post {
   id: string;
   title: string;
@@ -35,6 +44,7 @@ export interface Post {
   isBookmarked?: boolean;
 }
 
+/** Article/news content */
 export interface Article {
   id: number;
   title: string;
@@ -50,6 +60,7 @@ export interface Article {
   createdAt: string;
 }
 
+/** DTO for creating new post */
 export interface CreatePostData {
   title: string;
   content: string;
@@ -57,6 +68,7 @@ export interface CreatePostData {
   topicIds?: number[];
 }
 
+/** Generic API response wrapper */
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -64,6 +76,7 @@ export interface ApiResponse<T> {
   errors?: string[];
 }
 
+/** Paginated API response */
 export interface PaginatedResponse<T> {
   data: T[];
   currentPage: number;

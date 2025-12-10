@@ -27,6 +27,7 @@ import {
 } from 'lightweight-charts';
 import { Subject, takeUntil } from 'rxjs';
 
+/** Tooltip data structure for price chart hover information */
 interface TooltipData {
   time: string;
   open?: number;
@@ -36,6 +37,32 @@ interface TooltipData {
   volume?: number;
 }
 
+/**
+ * PriceChartComponent
+ *
+ * Interactive cryptocurrency price chart using TradingView Lightweight Charts
+ *
+ * Features:
+ * - Dual chart types: Candlestick (OHLC) and Line chart
+ * - Multiple timeframes: 1D, 7D, 1M, 3M, 1Y, All
+ * - Volume bars displayed below price chart
+ * - Interactive crosshair with tooltip showing OHLCV data
+ * - Responsive to container resize
+ * - Dark/light theme support
+ * - Alert creation button (quick access to price alerts)
+ * - Real-time price updates via SignalR
+ *
+ * Chart Library: TradingView Lightweight Charts
+ * - High performance, smooth rendering
+ * - Professional trading chart appearance
+ * - Touch/mouse interaction support
+ *
+ * Data Flow:
+ * 1. Fetches historical data via ChartService
+ * 2. Real-time updates via ApiService SignalR connection
+ * 3. Automatically switches data granularity based on timeframe
+ * 4. Destroys/recreates chart on type or theme changes
+ */
 @Component({
   selector: 'app-price-chart',
   standalone: true,

@@ -5,6 +5,17 @@ import { PostService } from '../../services/post.service';
 import { Post } from '../../models/post.model';
 import { PostListComponent } from '../../components/feed/post-list.component';
 
+/**
+ * TrendingComponent
+ *
+ * Displays trending posts sorted by likes
+ *
+ * Features:
+ * - Shows posts sorted by popularity (likes)
+ * - Uses PostListComponent for display
+ * - Like/bookmark functionality
+ * - Navigate to post details
+ */
 @Component({
   selector: 'app-trending',
   standalone: true,
@@ -21,20 +32,18 @@ import { PostListComponent } from '../../components/feed/post-list.component';
         [loading]="loading()"
         (like)="onLike($event)"
         (bookmark)="onBookmark($event)"
-        (select)="onSelectPost($event)">
+        (select)="onSelectPost($event)"
+      >
       </app-post-list>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class TrendingComponent implements OnInit {
   posts = signal<Post[]>([]);
   loading = signal<boolean>(false);
 
-  constructor(
-    private postService: PostService,
-    private router: Router
-  ) {}
+  constructor(private postService: PostService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadPosts();
@@ -63,4 +72,3 @@ export class TrendingComponent implements OnInit {
     this.router.navigate(['/community/post', postId]);
   }
 }
-

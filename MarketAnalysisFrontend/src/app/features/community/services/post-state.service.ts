@@ -2,8 +2,21 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Post } from '../models/post.model';
 
+/**
+ * PostStateService
+ *
+ * Reactive state management for community posts
+ *
+ * Features:
+ * - Centralized post list state
+ * - Filter selection state (trending/new/top)
+ * - Add/update/remove post operations
+ * - Observable streams for reactive UI updates
+ *
+ * Used by post-related components for shared state
+ */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PostStateService {
   private postsSubject = new BehaviorSubject<Post[]>([]);
@@ -35,7 +48,7 @@ export class PostStateService {
 
   updatePost(id: string, updatedData: Partial<Post>): void {
     const currentPosts = this.postsSubject.value;
-    const updatedPosts = currentPosts.map(post => 
+    const updatedPosts = currentPosts.map((post) =>
       post.id === id ? { ...post, ...updatedData } : post
     );
     this.postsSubject.next(updatedPosts);
@@ -43,8 +56,7 @@ export class PostStateService {
 
   removePost(id: string): void {
     const currentPosts = this.postsSubject.value;
-    const filteredPosts = currentPosts.filter(post => post.id !== id);
+    const filteredPosts = currentPosts.filter((post) => post.id !== id);
     this.postsSubject.next(filteredPosts);
   }
 }
-

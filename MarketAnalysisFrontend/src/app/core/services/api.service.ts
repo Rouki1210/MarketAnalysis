@@ -3,45 +3,65 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import {
   BehaviorSubject,
   catchError,
-  filter,
-  first,
-  map,
   Observable,
   of,
-  switchMap,
   forkJoin,
+  map,
 } from 'rxjs';
 import { Coin, CoinDetail } from '../models/coin.model';
 import { Market, MarketOverview } from '../models/market.model';
-import { ChartData } from '../models/common.model';
 import * as signalR from '@microsoft/signalr';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { AuthService } from './auth.service';
 
+/**
+ * ApiService
+ *
+ * Central service for managing cryptocurrency market data including:
+ * - Fetching coin/asset information from backend API
+ * - Real-time price updates via SignalR WebSocket connections
+ * - Global market metrics and statistics
+ * - Coin detail information with latest prices
+ *
+ * This service maintains observable streams that components can subscribe to
+ * for reactive data updates.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  private readonly apiUrl = 'https://localhost:7175'; // Placeholder API
+  // Backend API base URL
+  private readonly apiUrl = 'https://localhost:7175';
 
+  // SignalR hub connections for real-time updates
   private hubConnection!: signalR.HubConnection;
   private globalMetricsHubConnection!: signalR.HubConnection;
+
+  // Observable streams for reactive data
   private coinsSource = new BehaviorSubject<Coin[]>([]);
   private globalMetricSource = new BehaviorSubject<MarketOverview | null>(null);
   public globalMetric$ = this.globalMetricSource.asObservable();
   public coins$ = this.coinsSource.asObservable();
+
+  // Cache for real-time data keyed by asset symbol
   private realtimeData: Record<string, any> = {};
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
+  /**
+   * Fetch all available coins/assets from the backend
+   * Initializes SignalR connection for real-time price updates
+   * @returns Observable stream of coins array
+   */
   getCoins(): Observable<Coin[]> {
     this.http.get<any[]>(`${this.apiUrl}/api/Asset`).subscribe({
       next: (assets) => {
+        // Transform backend Asset objects to frontend Coin model
         const coins: Coin[] = assets.map((a) => ({
           id: a.id || a.symbol, // Use symbol as fallback if id is missing
           name: a.name,
           symbol: a.symbol,
           description: a.description,
+          // Initial price data (will be updated by SignalR)
           price: '0',
           change1h: '0',
           change7d: '0',
@@ -61,6 +81,8 @@ export class ApiService {
         }));
 
         this.coinsSource.next(coins);
+
+        // Start real-time updates for all coins
         this.startSignalR(coins.map((c) => c.symbol));
       },
       error: (err) => console.error('❌ Error loading assets:', err),
@@ -69,16 +91,24 @@ export class ApiService {
     return this.coins$;
   }
 
-  // SignalR connection for real-time updates (not fully implemented)
+  // ==================== SignalR Real-Time Updates ====================
 
-  startSignalR(symbols: string[]) {
+  /**
+   * Initialize SignalR connection for real-time price updates
+   * Sets up automatic reconnection and message handlers
+   * @param symbols Array of coin symbols to track
+   */
+  startSignalR(symbols: string[]): void {
+    // Don't create multiple connections
     if (this.hubConnection) return;
 
+    // Configure SignalR hub connection
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(`${this.apiUrl}/pricehub`)
-      .withAutomaticReconnect([0, 2000, 5000, 10000])
+      .withAutomaticReconnect([0, 2000, 5000, 10000]) // Retry intervals in ms
       .build();
 
+    // Establish connection
     this.hubConnection
       .start()
       .then(async () => {
@@ -86,15 +116,23 @@ export class ApiService {
       })
       .catch((err) => console.error('❌ SignalR PriceHub Error:', err));
 
+    // Handle incoming price update messages
     this.hubConnection.on('ReceiveMessage', (message: any) => {
       const data = message.data;
       if (!data || !data.asset) return;
 
+      // Cache the latest data
       this.realtimeData[data.asset] = data;
+
+      // Update coin in the observable stream
       this.updateCoinRealTime(data);
     });
   }
 
+  /**
+   * Join SignalR groups to receive updates for specific assets
+   * @param symbols Array of coin symbols to subscribe to
+   */
   async joinAssetGroup(symbols: string[]): Promise<void> {
     if (!this.hubConnection) return;
 
@@ -107,6 +145,10 @@ export class ApiService {
     }
   }
 
+  /**
+   * Leave SignalR groups to stop receiving updates
+   * @param symbols Array of coin symbols to unsubscribe from
+   */
   async leaveAssetGroups(symbols: string[]): Promise<void> {
     if (!this.hubConnection) return;
 
@@ -119,18 +161,25 @@ export class ApiService {
     }
   }
 
-  private updateCoinRealTime(update: any) {
+  /**
+   * Update a coin's data in the observable stream with real-time data
+   * Includes visual flash effect for price changes
+   * @param update Real-time update data from SignalR
+   * @private
+   */
+  private updateCoinRealTime(update: any): void {
     const coins = this.coinsSource.value;
     const index = coins.findIndex(
       (c) => c.symbol === update.asset.toUpperCase()
     );
+
     if (index === -1) return;
 
     const coin = coins[index];
     const oldPrice = parseFloat(coin.price?.replace(/[^0-9.-]+/g, '') || '0');
     const newPrice = update.price;
 
-    // Format helper
+    // Number formatting helper functions
     const formatNumber = (num: number, digits: number = 2) =>
       num?.toLocaleString(undefined, {
         minimumFractionDigits: digits,
@@ -142,6 +191,7 @@ export class ApiService {
       return `${sign}${val.toFixed(2)}%`;
     };
 
+    // Update coin data with formatted values
     coin.price = `$${formatNumber(newPrice)}`;
     coin.change1h = formatPercent(update.change1h);
     coin.change24h = formatPercent(update.change24h);
@@ -150,27 +200,34 @@ export class ApiService {
     coin.volume = `$${formatNumber(update.volume, 0)}`;
     coin.supply = `${formatNumber(update.supply, 0)} ${coin.symbol}`;
 
+    // Update trend indicators
     coin.isPositive1h = Number(update.change1h) >= 0;
     coin.isPositive24h = Number(update.change24h) >= 0;
     coin.isPositive7d = Number(update.change7d) >= 0;
 
-    // Set highlight class based on price change
+    // Add visual flash effect based on price movement
     const isPriceUp = newPrice > oldPrice;
     coins[index].highlightClass = isPriceUp ? 'flash-green' : 'flash-red';
 
-    // Remove highlight after animation
+    // Remove flash effect after animation completes
     setTimeout(() => {
       coins[index].highlightClass = '';
       this.coinsSource.next([...coins]);
     }, 1500);
 
+    // Emit updated coins array
     this.coinsSource.next([...coins]);
   }
 
+  /**
+   * Load coins and join SignalR groups
+   * Convenience method for initializing coin data with real-time updates
+   */
   loadCoins(): void {
     this.getCoins().subscribe((coins) => {
       this.coinsSource.next(coins);
 
+      // Subscribe to real-time updates for each coin
       coins.forEach((c) => {
         if (
           this.hubConnection?.state === signalR.HubConnectionState.Connected
@@ -181,16 +238,19 @@ export class ApiService {
     });
   }
 
+  // ==================== Coin Detail Information ====================
+
+  /**
+   * Fetch detailed information for a specific coin
+   * Combines asset metadata with latest price data
+   * @param symbol Coin symbol (e.g., 'BTC', 'ETH')
+   * @returns Observable with complete coin detail information
+   */
   getCoinBySymbol(symbol: string): Observable<CoinDetail> {
-    // Fetch asset details and latest price in parallel
+    // Fetch asset details and recent prices in parallel
     return forkJoin({
       asset: this.http.get<any>(`${this.apiUrl}/api/Asset/${symbol}`),
-      // Get price history for the last 24h to calculate changes if needed,
-      // or just use the asset's price points if the backend returns them.
-      // However, the backend Asset model has a PricePoints collection.
-      // Let's assume the Asset endpoint returns the Asset object which might include PricePoints.
-      // If not, we fetch prices separately.
-      // Based on the plan, we call /api/Prices/{symbol}
+      // Get price history for the last 24 hours
       prices: this.http.get<any[]>(
         `${this.apiUrl}/api/Prices/${symbol}?from=${new Date(
           Date.now() - 24 * 60 * 60 * 1000
@@ -202,8 +262,7 @@ export class ApiService {
           throw new Error(`Coin with symbol ${symbol} not found`);
         }
 
-        // Get latest price point
-        // Sort prices by timestamp descending to get the latest
+        // Get the most recent price point
         const sortedPrices = prices.sort(
           (a, b) =>
             new Date(b.timestampUtc).getTime() -
@@ -211,13 +270,7 @@ export class ApiService {
         );
         const latestPrice = sortedPrices.length > 0 ? sortedPrices[0] : null;
 
-        // Helper function to parse numeric values from formatted strings
-        const parseValue = (val: any): number => {
-          if (typeof val === 'number') return val;
-          if (!val) return 0;
-          return parseFloat(val.toString().replace(/[$,]/g, ''));
-        };
-
+        // Extract numeric values from latest price data
         const price = latestPrice ? latestPrice.price : 0;
         const marketCap = latestPrice ? latestPrice.marketCap : 0;
         const volume = latestPrice ? latestPrice.volume : 0;
@@ -226,11 +279,11 @@ export class ApiService {
         const change7d = latestPrice ? latestPrice.percentChange7d : 0;
         const supply = latestPrice ? latestPrice.supply : 0;
 
-        // Calculate volume/market cap ratio
+        // Calculate volume/market cap ratio (indicator of trading activity)
         const volMktCapRatio =
           marketCap > 0 ? ((volume / marketCap) * 100).toFixed(2) : '0.00';
 
-        // Format helper
+        // Number formatting helpers
         const formatNumber = (num: number, digits: number = 2) =>
           num?.toLocaleString(undefined, {
             minimumFractionDigits: digits,
@@ -242,6 +295,7 @@ export class ApiService {
           return `${sign}${val.toFixed(2)}%`;
         };
 
+        // Build Coin object
         const coin: Coin = {
           id: asset.id.toString(),
           name: asset.name,
@@ -260,9 +314,10 @@ export class ApiService {
           isPositive7d: change7d >= 0,
           icon: asset.logoUrl,
           network: asset.network,
-          sparklineData: [], // Sparkline can be fetched separately if needed
+          sparklineData: [], // Can be fetched separately if needed
         };
 
+        // Build detailed coin information
         const detail: CoinDetail = {
           coin: coin,
           stats: {
@@ -282,8 +337,8 @@ export class ApiService {
             totalSupply: coin.supply ?? '0',
           },
           links: {
-            website: 'https://bitcoin.org', // Placeholder
-            whitepaper: 'https://bitcoin.org/bitcoin.pdf', // Placeholder
+            website: 'https://bitcoin.org', // TODO: Get from backend
+            whitepaper: 'https://bitcoin.org/bitcoin.pdf', // TODO: Get from backend
           },
         };
 
@@ -296,33 +351,34 @@ export class ApiService {
     );
   }
 
+  /**
+   * Get trading pairs for a specific coin
+   * @param symbol Coin symbol
+   * @returns Observable with array of market pairs
+   * @todo Implement when backend endpoint is available
+   */
   getMarketPairs(symbol: string): Observable<Market[]> {
-    // Backend doesn't have this endpoint yet, return empty array
+    // Backend endpoint not yet implemented
     return of([]);
   }
 
-  getChartData(symbol: string, timeframe: string): Observable<ChartData[]> {
-    const mockChartData: ChartData[] = [
-      { time: '00:00', price: 111000 },
-      { time: '04:00', price: 112500 },
-      { time: '08:00', price: 111800 },
-      { time: '12:00', price: 113200 },
-      { time: '16:00', price: 112100 },
-      { time: '20:00', price: 122234 },
-    ];
+  // ==================== Global Market Metrics ====================
 
-    return of(mockChartData);
-  }
-
-  startGlobalMetricSignalR() {
-    // Placeholder for future implementation
+  /**
+   * Initialize SignalR connection for global market metrics
+   * Receives real-time updates on total market cap, volume, dominance, etc.
+   */
+  startGlobalMetricSignalR(): void {
+    // Don't create multiple connections
     if (this.globalMetricsHubConnection) return;
 
+    // Configure SignalR hub connection
     this.globalMetricsHubConnection = new signalR.HubConnectionBuilder()
       .withUrl(`${this.apiUrl}/globalmetrichub`)
       .withAutomaticReconnect([0, 2000, 5000, 10000])
       .build();
 
+    // Establish connection
     this.globalMetricsHubConnection
       .start()
       .then(() => {
@@ -330,18 +386,21 @@ export class ApiService {
       })
       .catch((err) => console.error('❌ Global Metrics SignalR Error:', err));
 
+    // Handle incoming global metric updates
     this.globalMetricsHubConnection.on(
       'ReceiveGlobalMetric',
       (message: any) => {
         const data = message.data;
         if (!data) return;
 
+        // Number formatting helper
         const formatNumber = (num: number, digits: number = 0) =>
           num?.toLocaleString(undefined, {
             minimumFractionDigits: digits,
             maximumFractionDigits: digits,
           }) ?? '0';
 
+        // Transform backend data to MarketOverview model
         const overview: MarketOverview = {
           totalMarketCap: `$${formatNumber(data.total_market_cap_usd, 0)}`,
           totalMarketCapChange24h: (
@@ -364,11 +423,17 @@ export class ApiService {
           ).toString(),
           altcoinSeasonIndex: data.altcoin_season_score,
         };
+
         this.globalMetricSource.next(overview);
       }
     );
   }
 
+  /**
+   * Get observable stream of global market metrics
+   * Automatically starts SignalR connection if not already started
+   * @returns Observable with market overview data
+   */
   getMarketOverview(): Observable<MarketOverview | null> {
     this.startGlobalMetricSignalR();
     return this.globalMetric$;

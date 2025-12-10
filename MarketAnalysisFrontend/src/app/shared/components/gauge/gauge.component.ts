@@ -1,6 +1,36 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+/**
+ * GaugeComponent
+ *
+ * Circular gauge visualization for Fear & Greed Index
+ *
+ * Features:
+ * - SVG-based semi-circular gauge (180° arc)
+ * - 5 color-coded segments:
+ *   * 0-20: Extreme Fear (Red #ea3943)
+ *   * 20-40: Fear (Orange #f3a033)
+ *   * 40-60: Neutral (Yellow #f3d23e)
+ *   * 60-80: Greed (Light Green #93d900)
+ *   * 80-100: Extreme Greed (Green #16c784)
+ * - White pointer circle indicating current value
+ * - Central value display (0-100 scale)
+ * - Label text below value
+ * - Fully customizable size and stroke width
+ * - Responsive to value changes
+ *
+ * Usage:
+ * ```html
+ * <app-gauge [value]="fearGreedValue" [label]="'Fear & Greed'" [size]="200"></app-gauge>
+ * ```
+ *
+ * Mathematical Implementation:
+ * - Uses polar to Cartesian coordinate conversion
+ * - SVG arc path generation for segments
+ * - Angle calculations based on 0-100 value range
+ * - Pointer position calculated with trigonometry
+ */
 @Component({
   selector: 'app-gauge',
   standalone: true,
@@ -80,12 +110,22 @@ import { CommonModule } from '@angular/common';
   ],
 })
 export class GaugeComponent implements OnChanges {
+  /** Current gauge value (0-100) */
   @Input() value: number = 0;
+
+  /** Label text displayed below value */
   @Input() label: string = '';
+
+  /** SVG width/height in pixels */
   @Input() size: number = 200;
+
+  /** Thickness of gauge arc */
   @Input() strokeWidth: number = 16;
 
+  /** Calculated SVG path segments for each color range */
   segments: { path: string; color: string }[] = [];
+
+  /** Calculated pointer position */
   pointerPosition: { x: number; y: number } = { x: 0, y: 0 };
 
   ngOnChanges(): void {
@@ -93,6 +133,11 @@ export class GaugeComponent implements OnChanges {
     this.calculatePointerPosition();
   }
 
+  /**
+   * Calculate SVG paths for all gauge segments
+   * Generates 5 colored arcs representing fear/greed ranges
+   * @private
+   */
   private calculatePaths(): void {
     const centerX = this.size / 2;
     const centerY = this.size * 0.5;
@@ -134,6 +179,10 @@ export class GaugeComponent implements OnChanges {
     });
   }
 
+  /**
+   * Calculate white pointer circle position based on current value
+   * @private
+   */
   private calculatePointerPosition(): void {
     const centerX = this.size / 2;
     const centerY = this.size * 0.5;
@@ -158,6 +207,10 @@ export class GaugeComponent implements OnChanges {
     );
   }
 
+  /**
+   * Generate SVG arc path string
+   * @private
+   */
   private describeArc(
     x: number,
     y: number,
@@ -186,6 +239,10 @@ export class GaugeComponent implements OnChanges {
     ].join(' ');
   }
 
+  /**
+   * Convert polar coordinates (angle, radius) to Cartesian (x, y)
+   * @private
+   */
   private polarToCartesian(
     centerX: number,
     centerY: number,

@@ -1,6 +1,18 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+/**
+ * ButtonComponent
+ *
+ * Reusable button for community UI
+ *
+ * Features:
+ * - 4 style variants (primary/secondary/outline/ghost)
+ * - 3 sizes (sm/md/lg)
+ * - Disabled state support
+ * - Click event emission
+ * - Gradient styling for primary variant
+ */
 @Component({
   selector: 'app-button',
   standalone: true,
@@ -9,11 +21,12 @@ import { CommonModule } from '@angular/common';
     <button
       [disabled]="disabled"
       [class]="getButtonClasses()"
-      (click)="onClick.emit($event)">
+      (click)="onClick.emit($event)"
+    >
       <ng-content></ng-content>
     </button>
   `,
-  styles: []
+  styles: [],
 })
 export class ButtonComponent {
   @Input() variant: 'primary' | 'secondary' | 'outline' | 'ghost' = 'primary';
@@ -23,12 +36,15 @@ export class ButtonComponent {
   @Output() onClick = new EventEmitter<Event>();
 
   getButtonClasses(): string {
-    const baseStyles = 'font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
-    
+    const baseStyles =
+      'font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
+
     const variants = {
-      primary: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/50',
+      primary:
+        'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/50',
       secondary: 'bg-white/10 text-white hover:bg-white/20',
-      outline: 'border-2 border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white',
+      outline:
+        'border-2 border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white',
       ghost: 'text-gray-300 hover:text-white hover:bg-white/10',
     };
 
@@ -38,7 +54,8 @@ export class ButtonComponent {
       lg: 'px-8 py-3 text-lg',
     };
 
-    return `${baseStyles} ${variants[this.variant]} ${sizes[this.size]} ${this.className}`;
+    return `${baseStyles} ${variants[this.variant]} ${sizes[this.size]} ${
+      this.className
+    }`;
   }
 }
-

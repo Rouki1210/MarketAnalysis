@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { CommunityApiService } from './community-api.service';
 
+/** Leaderboard entry with user rankings and points */
 export interface LeaderboardEntry {
   rank: number;
   user: {
@@ -15,8 +16,21 @@ export interface LeaderboardEntry {
   change?: number;
 }
 
+/**
+ * LeaderboardService
+ *
+ * Manages community user rankings and leaderboard
+ *
+ * Features:
+ * - User ranking by points
+ * - Top contributors list
+ * - Rank change tracking
+ * - Badge/achievement display
+ *
+ * Currently uses mock data - ready for API integration
+ */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LeaderboardService {
   constructor(private apiService: CommunityApiService) {}
@@ -32,44 +46,58 @@ export class LeaderboardService {
 
   private getMockLeaderboard(limit: number): LeaderboardEntry[] {
     const mockData: LeaderboardEntry[] = [
-      { 
-        rank: 1, 
-        user: { id: '1', username: 'CryptoGuru', avatar: '🏆', verified: true }, 
-        points: 15420, 
+      {
+        rank: 1,
+        user: { id: '1', username: 'CryptoGuru', avatar: '🏆', verified: true },
+        points: 15420,
         badge: '🏆',
-        change: 2
+        change: 2,
       },
-      { 
-        rank: 2, 
-        user: { id: '2', username: 'BlockchainPro', avatar: '🥈', verified: true }, 
-        points: 12350, 
+      {
+        rank: 2,
+        user: {
+          id: '2',
+          username: 'BlockchainPro',
+          avatar: '🥈',
+          verified: true,
+        },
+        points: 12350,
         badge: '🥈',
-        change: -1
+        change: -1,
       },
-      { 
-        rank: 3, 
-        user: { id: '3', username: 'TokenMaster', avatar: '🥉', verified: false }, 
-        points: 9870, 
+      {
+        rank: 3,
+        user: {
+          id: '3',
+          username: 'TokenMaster',
+          avatar: '🥉',
+          verified: false,
+        },
+        points: 9870,
         badge: '🥉',
-        change: 1
+        change: 1,
       },
-      { 
-        rank: 4, 
-        user: { id: '4', username: 'DeFiExpert', avatar: '🟦', verified: true }, 
-        points: 8540, 
+      {
+        rank: 4,
+        user: { id: '4', username: 'DeFiExpert', avatar: '🟦', verified: true },
+        points: 8540,
         badge: '🎖️',
-        change: 0
+        change: 0,
       },
-      { 
-        rank: 5, 
-        user: { id: '5', username: 'NFTCollector', avatar: '🟪', verified: false }, 
-        points: 7230, 
+      {
+        rank: 5,
+        user: {
+          id: '5',
+          username: 'NFTCollector',
+          avatar: '🟪',
+          verified: false,
+        },
+        points: 7230,
         badge: '🎖️',
-        change: 3
-      }
+        change: 3,
+      },
     ];
 
     return mockData.slice(0, limit);
   }
 }
-

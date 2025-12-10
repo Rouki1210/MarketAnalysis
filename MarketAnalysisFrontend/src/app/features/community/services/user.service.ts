@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { CommunityApiService } from './community-api.service';
 
+/** Community user profile information */
 export interface CommunityUser {
   id: string;
   username: string;
@@ -18,8 +19,21 @@ export interface CommunityUser {
   website?: string;
 }
 
+/**
+ * CommunityUserService (renamed from UserService)
+ *
+ * Manages community user profiles and interactions
+ *
+ * Features:
+ * - Get current user profile
+ * - Get user by ID
+ * - Update profile information
+ * - Follow/unfollow users
+ *
+ * Currently uses mock data - ready for API integration
+ */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CommunityUserService {
   constructor(private apiService: CommunityApiService) {}
@@ -39,7 +53,7 @@ export class CommunityUserService {
       joinedAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
       bio: 'Crypto enthusiast and blockchain developer',
       location: 'San Francisco, CA',
-      website: 'https://example.com'
+      website: 'https://example.com',
     });
   }
 
@@ -55,4 +69,3 @@ export class CommunityUserService {
     return this.apiService.post<CommunityUser>(`/users/${userId}/follow`, {});
   }
 }
-

@@ -4,6 +4,18 @@ import { Router } from '@angular/router';
 import { Article } from '../../models/post.model';
 import { CommunityService } from '../../services/community.service';
 
+/**
+ * ArticlesComponent
+ *
+ * Articles list page with category filtering
+ *
+ * Features:
+ * - Grid display of articles
+ * - Category filter (All/Coin/Market/Education)
+ * - Click to view article details
+ * - Empty state handling
+ * - Integration with CommunityService
+ */
 @Component({
   selector: 'app-articles',
   standalone: true,
@@ -14,7 +26,9 @@ import { CommunityService } from '../../services/community.service';
       <div class="flex items-center justify-between mb-6">
         <div>
           <h1 class="text-3xl font-bold text-foreground">Articles</h1>
-          <p class="text-muted-foreground mt-1">Latest insights on coins and the market</p>
+          <p class="text-muted-foreground mt-1">
+            Latest insights on coins and the market
+          </p>
         </div>
       </div>
 
@@ -42,12 +56,14 @@ import { CommunityService } from '../../services/community.service';
         >
           <!-- Category Badge -->
           <div class="flex items-center justify-between mb-4">
-            <span 
+            <span
               class="text-xs px-3 py-1 rounded-full font-medium"
               [ngClass]="{
                 'bg-blue-500/20 text-blue-400': article.category === 'Coin',
-                'bg-purple-500/20 text-purple-400': article.category === 'Market',
-                'bg-green-500/20 text-green-400': article.category === 'Education'
+                'bg-purple-500/20 text-purple-400':
+                  article.category === 'Market',
+                'bg-green-500/20 text-green-400':
+                  article.category === 'Education'
               }"
             >
               {{ article.category }}
@@ -55,7 +71,9 @@ import { CommunityService } from '../../services/community.service';
           </div>
 
           <!-- Article Content -->
-          <h3 class="text-lg font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+          <h3
+            class="text-lg font-bold text-foreground mb-3 group-hover:text-primary transition-colors"
+          >
             {{ article.title }}
           </h3>
           <p class="text-sm text-muted-foreground line-clamp-3">
@@ -65,7 +83,14 @@ import { CommunityService } from '../../services/community.service';
           <!-- Read More -->
           <div class="mt-4 flex items-center text-primary text-sm font-medium">
             <span>Read more</span>
-            <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </div>
@@ -74,25 +99,40 @@ import { CommunityService } from '../../services/community.service';
 
       <!-- Empty State -->
       <div *ngIf="filteredArticles().length === 0" class="text-center py-16">
-        <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <div
+          class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <svg
+            class="w-8 h-8 text-muted-foreground"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
-        <h3 class="text-lg font-semibold text-foreground mb-2">No articles found</h3>
+        <h3 class="text-lg font-semibold text-foreground mb-2">
+          No articles found
+        </h3>
         <p class="text-muted-foreground">Try selecting a different category</p>
       </div>
     </div>
   `,
-  styles: [`
-    .line-clamp-3 {
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-  `]
+  styles: [
+    `
+      .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    `,
+  ],
 })
 export class ArticlesComponent implements OnInit, DoCheck {
   selectedCategory = signal<string>('All');
@@ -125,7 +165,10 @@ export class ArticlesComponent implements OnInit, DoCheck {
     // },
   ];
 
-  constructor(private router: Router, private communityService: CommunityService) {}
+  constructor(
+    private router: Router,
+    private communityService: CommunityService
+  ) {}
 
   filteredArticles = signal<Article[]>(this.articles);
 
@@ -136,12 +179,11 @@ export class ArticlesComponent implements OnInit, DoCheck {
 
   loadArticles(): void {
     this.communityService.getArticles().subscribe({
-  next: (articles) => {
-    this.articles = articles.data;
-  },
-  error: (err) => console.error(err)
-});
-
+      next: (articles) => {
+        this.articles = articles.data;
+      },
+      error: (err) => console.error(err),
+    });
   }
 
   ngDoCheck(): void {
@@ -154,7 +196,7 @@ export class ArticlesComponent implements OnInit, DoCheck {
       this.filteredArticles.set(this.articles);
     } else {
       this.filteredArticles.set(
-        this.articles.filter(a => a.category === category)
+        this.articles.filter((a) => a.category === category)
       );
     }
   }
@@ -163,4 +205,3 @@ export class ArticlesComponent implements OnInit, DoCheck {
     this.router.navigate(['/community/articles', article.id]);
   }
 }
-

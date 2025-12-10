@@ -2,9 +2,23 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CommunitySidebarComponent } from './community-sidebar.component';
-import { LeaderboardEntry, LeaderboardService } from '../../services/leaderboard.service';
+import {
+  LeaderboardEntry,
+  LeaderboardService,
+} from '../../services/leaderboard.service';
 import { CommunityService } from '../../services/community.service';
 
+/**
+ * CommunityLayoutComponent
+ *
+ * Main layout wrapper for community section
+ *
+ * Features:
+ * - Sidebar + content area grid layout
+ * - Loads top 5 contributors for leaderboard
+ * - Manages SignalR notifications lifecycle
+ * - Router outlet for nested community pages
+ */
 @Component({
   selector: 'app-community-layout',
   standalone: true,
@@ -14,7 +28,9 @@ import { CommunityService } from '../../services/community.service';
       <div class="max-w-7xl mx-auto px-4 py-6">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div class="lg:col-span-1">
-            <app-community-sidebar [leaderboard]="leaderboard"></app-community-sidebar>
+            <app-community-sidebar
+              [leaderboard]="leaderboard"
+            ></app-community-sidebar>
           </div>
           <main class="lg:col-span-3">
             <router-outlet></router-outlet>
@@ -23,17 +39,20 @@ import { CommunityService } from '../../services/community.service';
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class CommunityLayoutComponent implements OnInit, OnDestroy {
   leaderboard: LeaderboardEntry[] = [];
 
-  constructor(private leaderboardService: LeaderboardService, private communityService: CommunityService) {}
+  constructor(
+    private leaderboardService: LeaderboardService,
+    private communityService: CommunityService
+  ) {}
 
   ngOnInit(): void {
-    this.leaderboardService.getTopContributors(5).subscribe(
-      data => this.leaderboard = data
-    );
+    this.leaderboardService
+      .getTopContributors(5)
+      .subscribe((data) => (this.leaderboard = data));
     this.communityService.startNotificationsRealtime();
   }
 
@@ -41,4 +60,3 @@ export class CommunityLayoutComponent implements OnInit, OnDestroy {
     this.communityService.stopNotificationsRealtime();
   }
 }
-

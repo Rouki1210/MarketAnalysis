@@ -6,6 +6,29 @@ import {
 } from '../../../../core/services/alert.service';
 import { Router } from '@angular/router';
 
+/**
+ * AlertDropdownComponent
+ *
+ * Dropdown panel displaying price alert notifications
+ *
+ * Features:
+ * - Lists triggered price alerts (global + user alerts)
+ * - Shows alert details (target price, actual price, difference %)
+ * - Unread indicator (highlighted background)
+ * - Mark all as read functionality
+ * - Click alert to mark as viewed
+ * - Real-time updates via AlertService observables
+ * - Scrollable list (max 400px height)
+ * - Time display for each alert
+ *
+ * Data displays:
+ * - Asset symbol (e.g., "BTC Price Alert")
+ * - Target vs actual price
+ * - Price difference percentage (green/red)
+ * - Trigger timestamp
+ *
+ * Opened by clicking AlertButtonComponent in header
+ */
 @Component({
   selector: 'app-alert-dropdown',
   standalone: true,
@@ -78,14 +101,22 @@ export class AlertDropdownComponent implements OnInit {
   private alertService = inject(AlertService);
   private router = inject(Router);
 
+  /** Observable stream of triggered alerts */
   alerts$ = this.alertService.autoAlerts$;
+
+  /** Observable stream of unread alert count */
   unreadCount$ = this.alertService.unreadCount$;
 
   ngOnInit() {
+    // Load alerts and unread count on component init
     this.alertService.loadAutoAlerts();
     this.alertService.loadUnreadCount();
   }
 
+  /**
+   * Mark all alerts as viewed/read
+   * Reloads alerts and updates unread count after operation
+   */
   markAllAsRead() {
     this.alertService.markAllAlertsAsViewed().subscribe(() => {
       this.alertService.loadAutoAlerts();
@@ -93,17 +124,24 @@ export class AlertDropdownComponent implements OnInit {
     });
   }
 
+  /**
+   * Handle clicking on an alert
+   * Marks alert as viewed if unread
+   * Optionally navigates to coin detail page
+   *
+   * @param alert Alert that was clicked
+   */
   handleAlertClick(alert: AutoAlert) {
     if (!alert.wasViewed) {
       this.alertService.markAlertAsViewed(alert.id).subscribe(() => {
-        // Optimistic update
+        // Optimistic update - immediately update UI
         this.alertService.updateLocalAlertStatus(alert.id, true);
         this.alertService.loadUnreadCount();
       });
     }
 
     // Navigate to detail page if needed, or just close dropdown
-    // For now, maybe navigate to the symbol detail?
+    // For now, leave navigation commented out
     // this.router.navigate(['/market', alert.assetSymbol]);
   }
 }

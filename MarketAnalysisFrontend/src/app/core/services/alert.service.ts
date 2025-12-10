@@ -1,4 +1,3 @@
-// File: src/app/services/alert.service.ts
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import * as signalR from '@microsoft/signalr';
@@ -10,6 +9,10 @@ import {
   UserAlertResponseDto,
 } from '../models/user-alert.model';
 
+/**
+ * Global market alert interface
+ * Represents system-wide alerts not tied to specific users
+ */
 export interface GlobalAlert {
   id?: number;
   assetSymbol: string;
@@ -18,6 +21,10 @@ export interface GlobalAlert {
   triggeredAt: string;
 }
 
+/**
+ * User-specific alert interface
+ * Represents custom alerts created by users
+ */
 export interface UserAlert {
   id: number;
   assetSymbol: string;
@@ -29,6 +36,10 @@ export interface UserAlert {
   triggeredAt: Date;
 }
 
+/**
+ * Automatic watchlist alert interface
+ * Represents auto-generated alerts for watchlist items
+ */
 export interface AutoAlert {
   id: number;
   assetSymbol: string;
@@ -41,17 +52,33 @@ export interface AutoAlert {
   viewedAt?: Date;
 }
 
+/**
+ * AlertService
+ *
+ * Manages cryptocurrency price alerts and notifications including:
+ * - Global market alerts (no authentication required)
+ * - User-created custom price alerts (requires authentication)
+ * - Automatic watchlist alerts (triggered when watchlist prices hit thresholds)
+ * - Real-time alert delivery via SignalR WebSocket connections
+ * - Browser notifications for desktop alerts
+ * - Alert history and management (create, update, delete, view)
+ *
+ * The service maintains two separate SignalR connections:
+ * - Global Hub: For system-wide market alerts
+ * - User Hub: For personalized user alerts (requires authentication)
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class AlertService {
+  // Backend API base URL
   private readonly apiUrl = 'https://localhost:7175';
 
-  // ✅ FIX: 2 connections riêng biệt
+  // Separate SignalR hub connections
   private globalHubConnection?: signalR.HubConnection;
   private userHubConnection?: signalR.HubConnection;
 
-  // Dòng dữ liệu reactive
+  // Observable streams for reactive alert data
   private globalAlertsSubject = new BehaviorSubject<GlobalAlert[]>([]);
   globalAlerts$ = this.globalAlertsSubject.asObservable();
 
@@ -64,30 +91,34 @@ export class AlertService {
   private unreadCountSubject = new BehaviorSubject<number>(0);
   unreadCount$ = this.unreadCountSubject.asObservable();
 
-  // Token key - chọn 1 và dùng nhất quán
-  private readonly TOKEN_KEY = 'token'; // Hoặc 'authToken'
+  // Authentication token key for localStorage
+  private readonly TOKEN_KEY = 'token';
 
   constructor(
     private http: HttpClient,
     private zone: NgZone,
     private authService: AuthService
   ) {
-    // Automatically manage connection based on auth state
+    // Automatically manage user alert connection based on authentication state
     this.authService.currentUser$.subscribe((user) => {
       if (user) {
+        // User logged in - connect to user alert hub
         this.startUserConnection();
       } else {
+        // User logged out - disconnect from user alert hub
         this.stopUserConnection();
       }
     });
   }
 
-  // =========================================
-  // GLOBAL ALERTS (Không cần auth)
-  // =========================================
+  // ==================== Global Alerts (No Authentication Required) ====================
 
-  /** Kết nối tới Global Alert Hub */
+  /**
+   * Connect to Global Alert Hub for system-wide market alerts
+   * Global alerts are broadcast to all users regardless of authentication
+   */
   public startGlobalConnection(): void {
+    // Check if already connected
     if (
       this.globalHubConnection?.state === signalR.HubConnectionState.Connected
     ) {
@@ -95,24 +126,26 @@ export class AlertService {
       return;
     }
 
+    // Create and configure SignalR connection
     this.globalHubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.apiUrl}/alerthub`) // Global alerts hub
-      .withAutomaticReconnect([0, 2000, 5000, 10000])
+      .withUrl(`${this.apiUrl}/alerthub`) // Global alerts hub endpoint
+      .withAutomaticReconnect([0, 2000, 5000, 10000]) // Retry intervals in ms
       .configureLogging(signalR.LogLevel.Information)
       .build();
 
+    // Establish connection
     this.globalHubConnection
       .start()
       .then(() => console.log('✅ Connected to Global Alert Hub'))
       .catch((err) => console.error('❌ Global SignalR error:', err));
 
-    // Listen for global alerts
+    // Listen for incoming global alerts
     this.globalHubConnection.on('ReceiveGlobalAlert', (alert: GlobalAlert) => {
       console.log('🌍 Global alert received:', alert);
       this.zone.run(() => this.handleIncomingGlobalAlert(alert));
     });
 
-    // Reconnection handlers
+    // Handle reconnection events
     this.globalHubConnection.onreconnected(() => {
       console.log('✅ Reconnected to Global Hub');
     });
@@ -126,19 +159,29 @@ export class AlertService {
     });
   }
 
+  /**
+   * Handle incoming global alert from SignalR
+   * Updates observable stream and limits to 20 most recent alerts
+   * @param alert Incoming global alert
+   * @private
+   */
   private handleIncomingGlobalAlert(alert: GlobalAlert): void {
     const current = this.globalAlertsSubject.value;
+    // Add new alert to beginning and keep only 20 most recent
     const updated = [alert, ...current].slice(0, 20);
     this.globalAlertsSubject.next(updated);
     console.log(`📢 [GLOBAL] ${alert.assetSymbol}: ${alert.message}`);
   }
 
-  // =========================================
-  // USER ALERTS (Cần auth)
-  // =========================================
+  // ==================== User Alerts (Authentication Required) ====================
 
-  /** Kết nối tới User Alert Hub */
+  /**
+   * Connect to User Alert Hub for personalized alerts
+   * Requires valid authentication token
+   * Automatically loads unread count on connection
+   */
   public startUserConnection(): void {
+    // Check if already connected
     if (
       this.userHubConnection?.state === signalR.HubConnectionState.Connected
     ) {
@@ -146,17 +189,17 @@ export class AlertService {
       return;
     }
 
-    // Check token
+    // Verify authentication token exists
     const token = localStorage.getItem('token');
-
     if (!token) {
       console.error('❌ No auth token! Please login first.');
       return;
     }
 
+    // Create and configure SignalR connection with authentication
     this.userHubConnection = new signalR.HubConnectionBuilder()
       .withUrl(`${this.apiUrl}/useralerthub`, {
-        // ✅ FIX: Đúng URL
+        // Token factory provides fresh token for each connection attempt
         accessTokenFactory: () => {
           const currentToken = localStorage.getItem('token');
           if (currentToken) {
@@ -169,13 +212,16 @@ export class AlertService {
       .configureLogging(signalR.LogLevel.Information)
       .build();
 
+    // Establish connection
     this.userHubConnection
       .start()
       .then(() => {
         console.log('✅ Connected to User Alert Hub');
-        this.loadUnreadCount(); // Load initial count
 
-        // Test ping
+        // Load initial unread count
+        this.loadUnreadCount();
+
+        // Send test ping to verify connection
         this.userHubConnection
           ?.invoke('Ping')
           .then(() => console.log('📤 Ping sent'))
@@ -184,25 +230,26 @@ export class AlertService {
       .catch((err) => {
         console.error('❌ User SignalR error:', err);
 
+        // Handle authentication errors
         if (err.toString().includes('401')) {
           console.error('🔐 Unauthorized. Token invalid or expired.');
           this.authService.logout();
-          // Optionally redirect to login
         }
       });
 
+    // Listen for incoming user alerts
     this.userHubConnection.on('ReceiveAlert', (alert: any) => {
       console.log('🔔 User alert received:', alert);
       this.zone.run(() => this.handleIncomingAutoAlert(alert));
     });
 
-    // Listen for UnreadCount
+    // Listen for unread count updates
     this.userHubConnection.on('UnreadCount', (count: number) => {
       console.log('📊 Unread count:', count);
       this.zone.run(() => this.unreadCountSubject.next(count));
     });
 
-    // Reconnection handlers
+    // Handle reconnection events
     this.userHubConnection.onreconnected(() => {
       console.log('✅ Reconnected to User Hub');
     });
@@ -216,8 +263,15 @@ export class AlertService {
     });
   }
 
+  /**
+   * Handle incoming automatic alert from SignalR
+   * Updates alert list, increments unread count, and shows browser notification
+   * @param alert Incoming auto alert data
+   * @private
+   */
   private handleIncomingAutoAlert(alert: any): void {
     this.zone.run(() => {
+      // Transform to AutoAlert format
       const autoAlert: AutoAlert = {
         id: alert.id,
         assetSymbol: alert.assetSymbol,
@@ -229,23 +283,35 @@ export class AlertService {
         wasViewed: false,
       };
 
+      // Add to beginning of alert list
       const current = this.autoAlertsSubject.value;
       this.autoAlertsSubject.next([autoAlert, ...current]);
 
+      // Increment unread count
       const currentCount = this.unreadCountSubject.value;
       this.unreadCountSubject.next(currentCount + 1);
 
+      // Show browser notification if permission granted
       this.showBrowserNotification(autoAlert);
     });
   }
 
+  /**
+   * Display browser notification for alert
+   * Requires notification permission to be granted
+   * @param alert Alert to display
+   * @private
+   */
   private showBrowserNotification(alert: AutoAlert): void {
     if ('Notification' in window && Notification.permission === 'granted') {
+      // Format price change percentage
       const priceChange = alert.priceDifference
         ? `${
             alert.priceDifference > 0 ? '+' : ''
           }${alert.priceDifference.toFixed(2)}%`
         : '';
+
+      // Create browser notification
       new Notification(`${alert.assetSymbol} Price Alert`, {
         body: `Target: $${alert.targetPrice.toFixed(
           2
@@ -255,45 +321,76 @@ export class AlertService {
     }
   }
 
-  public getRecentGlobalAlerts() {
+  // ==================== Alert Data Fetching ====================
+
+  /**
+   * Fetch recent global alerts from backend
+   * @returns Observable with array of recent global alerts
+   */
+  public getRecentGlobalAlerts(): Observable<GlobalAlert[]> {
     return this.http.get<GlobalAlert[]>(
       `${this.apiUrl}/api/global-alerts/recent`
     );
   }
 
-  public getRecentUserAlerts() {
+  /**
+   * Fetch recent user alerts from backend
+   * @returns Observable with array of recent user alerts
+   */
+  public getRecentUserAlerts(): Observable<UserAlert[]> {
     return this.http.get<UserAlert[]>(
       `${this.apiUrl}/api/watchlist/auto-alerts/recent`
     );
   }
 
-  // Auto Alerts Methods
-  public getAutoAlerts(limit: number = 50) {
+  /**
+   * Fetch automatic watchlist alerts
+   * @param limit Maximum number of alerts to fetch
+   * @returns Observable with array of auto alerts
+   */
+  public getAutoAlerts(limit: number = 50): Observable<AutoAlert[]> {
     return this.http.get<AutoAlert[]>(
       `${this.apiUrl}/api/watchlist/auto-alerts?limit=${limit}`
     );
   }
 
-  public getUnreadCount() {
+  /**
+   * Fetch unread alert count
+   * @returns Observable with unread count
+   */
+  public getUnreadCount(): Observable<{ count: number }> {
     return this.http.get<{ count: number }>(
       `${this.apiUrl}/api/watchlist/auto-alerts/unread-count`
     );
   }
 
-  public markAlertAsViewed(alertId: number) {
+  /**
+   * Mark a specific alert as viewed
+   * @param alertId Alert ID to mark
+   * @returns Observable for the HTTP request
+   */
+  public markAlertAsViewed(alertId: number): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/api/watchlist/auto-alerts/${alertId}/mark-viewed`,
       {}
     );
   }
 
-  public markAllAlertsAsViewed() {
+  /**
+   * Mark all alerts as viewed
+   * Resets unread count to zero
+   * @returns Observable for the HTTP request
+   */
+  public markAllAlertsAsViewed(): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/api/watchlist/auto-alerts/mark-all-viewed`,
       {}
     );
   }
 
+  /**
+   * Load automatic alerts and update observable stream
+   */
   public loadAutoAlerts(): void {
     this.getAutoAlerts().subscribe({
       next: (alerts) => {
@@ -303,6 +400,9 @@ export class AlertService {
     });
   }
 
+  /**
+   * Load unread alert count and update observable stream
+   */
   public loadUnreadCount(): void {
     this.getUnreadCount().subscribe({
       next: (response) => {
@@ -312,6 +412,11 @@ export class AlertService {
     });
   }
 
+  // ==================== Connection Management ====================
+
+  /**
+   * Disconnect from Global Alert Hub
+   */
   public stopGlobalConnection(): void {
     if (this.globalHubConnection) {
       this.globalHubConnection
@@ -320,6 +425,9 @@ export class AlertService {
     }
   }
 
+  /**
+   * Disconnect from User Alert Hub
+   */
   public stopUserConnection(): void {
     if (this.userHubConnection) {
       this.userHubConnection
@@ -328,11 +436,31 @@ export class AlertService {
     }
   }
 
+  /**
+   * Disconnect from all alert hubs
+   */
   public stopAllConnections(): void {
     this.stopGlobalConnection();
     this.stopUserConnection();
   }
 
+  /**
+   * Get current connection status for both hubs
+   * @returns Object with connection states
+   */
+  public getConnectionStatus(): { global: string; user: string } {
+    return {
+      global: this.globalHubConnection?.state || 'Disconnected',
+      user: this.userHubConnection?.state || 'Disconnected',
+    };
+  }
+
+  // ==================== Browser Notification Permission ====================
+
+  /**
+   * Request permission for browser notifications
+   * Should be called when user first interacts with alert features
+   */
   public requestNotificationPermission(): void {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission().then((permission) => {
@@ -341,6 +469,14 @@ export class AlertService {
     }
   }
 
+  // ==================== Local State Management ====================
+
+  /**
+   * Update alert viewed status in local observable stream
+   * Used for optimistic UI updates
+   * @param alertId Alert ID to update
+   * @param wasViewed New viewed status
+   */
   public updateLocalAlertStatus(alertId: number, wasViewed: boolean): void {
     const current = this.autoAlertsSubject.value;
     const updated = current.map((a) =>
@@ -349,17 +485,13 @@ export class AlertService {
     this.autoAlertsSubject.next(updated);
   }
 
-  public getConnectionStatus(): { global: string; user: string } {
-    return {
-      global: this.globalHubConnection?.state || 'Disconnected',
-      user: this.userHubConnection?.state || 'Disconnected',
-    };
-  }
+  // ==================== User Custom Alerts CRUD ====================
 
-  // =========================================
-  // USER CUSTOM ALERTS CRUD
-  // =========================================
-
+  /**
+   * Create a new custom price alert
+   * @param dto Alert creation data (symbol, target price, alert type, etc.)
+   * @returns Observable with created alert response
+   */
   public createUserAlert(
     dto: CreateUserAlertDto
   ): Observable<UserAlertResponseDto> {
@@ -369,16 +501,31 @@ export class AlertService {
     );
   }
 
+  /**
+   * Get all user-created alerts for current user
+   * @returns Observable with array of user alerts
+   */
   public getUserAlerts(): Observable<UserAlertResponseDto[]> {
     return this.http.get<UserAlertResponseDto[]>(`${this.apiUrl}/api/alert`);
   }
 
+  /**
+   * Get specific alert by ID
+   * @param id Alert ID
+   * @returns Observable with alert details
+   */
   public getAlertById(id: number): Observable<UserAlertResponseDto> {
     return this.http.get<UserAlertResponseDto>(
       `${this.apiUrl}/api/alert/${id}`
     );
   }
 
+  /**
+   * Update existing alert
+   * @param id Alert ID to update
+   * @param dto Updated alert data
+   * @returns Observable with updated alert response
+   */
   public updateUserAlert(
     id: number,
     dto: UpdateUserAlertDto
@@ -389,10 +536,21 @@ export class AlertService {
     );
   }
 
+  /**
+   * Delete an alert
+   * @param id Alert ID to delete
+   * @returns Observable for delete request
+   */
   public deleteUserAlert(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/api/alert/${id}`);
   }
 
+  /**
+   * Toggle alert active/inactive status
+   * @param id Alert ID
+   * @param isActive New active status
+   * @returns Observable with updated alert
+   */
   public toggleAlertActive(
     id: number,
     isActive: boolean
@@ -400,10 +558,21 @@ export class AlertService {
     return this.updateUserAlert(id, { isActive });
   }
 
+  /**
+   * Get trigger history for a specific alert
+   * Shows when alert was triggered in the past
+   * @param alertId Alert ID
+   * @returns Observable with alert history
+   */
   public getAlertHistory(alertId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/api/alert/${alertId}/history`);
   }
 
+  /**
+   * Get all alert trigger history for current user
+   * @param limit Maximum number of history entries
+   * @returns Observable with user's alert history
+   */
   public getUserHistory(limit: number = 50): Observable<any[]> {
     return this.http.get<any[]>(
       `${this.apiUrl}/api/alert/history?limit=${limit}`

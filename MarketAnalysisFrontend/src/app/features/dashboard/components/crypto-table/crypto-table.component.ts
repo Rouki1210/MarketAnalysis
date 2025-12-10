@@ -17,18 +17,53 @@ import { CardComponent } from '../../../../shared/components/card/card.component
 import { SparklineComponent } from '../../../../shared/components/sparkline/sparkline.component';
 import { MarketOverview } from '@app/core/models/market.model';
 
+/** Network filter option with icon and styling */
 interface Network {
   name: string;
   icon: string;
   color: string;
 }
 
+/** Position coordinates for dropdown menus */
 interface MenuPosition {
   left?: number;
   right?: number;
   top: number;
 }
 
+/**
+ * CryptoTableComponent
+ *
+ * Main cryptocurrency table with comprehensive features:
+ *
+ * **Data Features:**
+ * - Real-time price updates via SignalR WebSocket
+ * - Paginated display with configurable items per page
+ * - Sparkline mini-charts for price trends
+ * - Market metrics display (price, volume, market cap, etc.)
+ *
+ * **Filtering & Sorting:**
+ * - Network filter (All, Bitcoin, Ethereum, BSC, Solana, Base, + more)
+ * - Tab categories (Top, Trending, Most Visited, New, Gainers)
+ * - Column sorting (Rank, Market Cap, Volume)
+ * - Ascending/descending sort direction
+ *
+ * **User Interactions:**
+ * - Watchlist add/remove (requires authentication)
+ * - Click row to navigate to coin detail page
+ * - Dropdown menus with click-outside handling
+ * - Responsive menu positioning
+ *
+ * **Real-time Updates:**
+ * - Subscribes to SignalR for live price changes
+ * - Automatically joins/leaves asset groups based on pagination
+ * - Visual price change indicators (flash green/red)
+ *
+ * **Performance:**
+ * - Lazy loads data for current page only
+ * - Efficient SignalR group management
+ * - Optimized change detection with signals
+ */
 @Component({
   selector: 'app-crypto-table',
   standalone: true,
@@ -110,6 +145,12 @@ export class CryptoTableComponent implements OnInit {
     private router: Router
   ) {}
 
+  /**
+   * Initialize component
+   * - Loads initial coin data
+   * - Starts SignalR connections for real-time updates
+   * - Subscribes to watchlist changes
+   */
   ngOnInit(): void {
     this.loadCoins();
     this.apiService.startGlobalMetricSignalR();
@@ -123,6 +164,11 @@ export class CryptoTableComponent implements OnInit {
     });
   }
 
+  /**
+   * Load cryptocurrency data from API
+   * Subscribes to both initial data and real-time updates
+   * @private
+   */
   private loadCoins(): void {
     this.apiService.getCoins().subscribe({
       next: (coins) => {
@@ -199,13 +245,24 @@ export class CryptoTableComponent implements OnInit {
     return Number(value.replace(/[^0-9.-]+/g, ''));
   }
 
+  /**
+   * Apply filters and sorting to coin list
+   *
+   * Process:
+   * 1. Filter by network (if not 'All Networks')
+   * 2. Apply tab-specific sorting (Trending, Most Visited, New, Gainers, Top)
+   * 3. Apply column-based sorting if user clicked headers
+   * 4. Update pagination
+   *
+   * @private
+   */
   private applyFilter(): void {
     let result =
       this.selectedNetwork === 'All Networks'
         ? [...this.coins]
         : this.coins.filter((coin) => coin.network === this.selectedNetwork);
 
-    // Apply Tab Filtering/Sorting Logic
+    // Step 1: Apply tab-specific filtering/sorting logic
     switch (this.selectedTab) {
       case 'Trending':
         // Sort by 24h Volume (highest to lowest)
@@ -309,7 +366,19 @@ export class CryptoTableComponent implements OnInit {
     this.updatePagination();
   }
 
+  /**
+   * Update pagination and manage SignalR asset groups
+   *
+   * Handles:
+   * - Leave old SignalR asset groups (for previous page)
+   * - Calculate pagination
+   * - Join new SignalR asset groups (for current page)
+   *
+   * This ensures only coins on current page receive real-time updates
+   * @private
+   */
   private async updatePagination(): Promise<void> {
+    // Leave previous page's SignalR groups to reduce bandwidth
     if (this.currentGroup.length > 0) {
       await this.apiService.leaveAssetGroups(this.currentGroup);
     }
@@ -392,7 +461,15 @@ export class CryptoTableComponent implements OnInit {
     return isPositive ? 'text-secondary' : 'text-accent';
   }
 
-  // Watchlist Methods
+  // ==================== Watchlist Management ====================
+
+  /**
+   * Toggle coin in user's watchlist
+   * Opens authentication modal if user not logged in
+   *
+   * @param coinId Asset ID to add/remove
+   * @param event Mouse event (stopped to prevent row navigation)
+   */
   toggleWatchlist(coinId: string, event: MouseEvent): void {
     event.stopPropagation(); // Prevent row click navigation
 
