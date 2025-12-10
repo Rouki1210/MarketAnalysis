@@ -6,15 +6,33 @@ import { Post } from '../../models/post.model';
 import { PostService } from '../../services/post.service';
 import { CreatePostDto } from '../../services/community.service';
 
+/**
+ * CreatePostComponent
+ *
+ * Modal form for creating new community posts
+ *
+ * Features:
+ * - Title and content inputs
+ * - Tag support (comma-separated)
+ * - Form validation
+ * - API integration via PostService
+ * - Automatic form reset after submission
+ */
 @Component({
   selector: 'app-create-post',
   standalone: true,
   imports: [CommonModule, FormsModule, ButtonComponent],
   template: `
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" (click)="close.emit()">
-      <div class="bg-slate-800 border border-purple-500/20 rounded-xl p-6 w-full max-w-md mx-4" (click)="$event.stopPropagation()">
+    <div
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+      (click)="close.emit()"
+    >
+      <div
+        class="bg-slate-800 border border-purple-500/20 rounded-xl p-6 w-full max-w-md mx-4"
+        (click)="$event.stopPropagation()"
+      >
         <h2 class="text-white font-semibold mb-4">Create New Post</h2>
-        
+
         <form (ngSubmit)="onSubmit()">
           <div class="mb-4">
             <label class="block text-gray-300 text-sm mb-2">Title</label>
@@ -24,9 +42,10 @@ import { CreatePostDto } from '../../services/community.service';
               type="text"
               class="w-full bg-white/10 border border-purple-500/30 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
               placeholder="Post title"
-              required>
+              required
+            />
           </div>
-          
+
           <div class="mb-4">
             <label class="block text-gray-300 text-sm mb-2">Content</label>
             <textarea
@@ -35,21 +54,28 @@ import { CreatePostDto } from '../../services/community.service';
               rows="4"
               class="w-full bg-white/10 border border-purple-500/30 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
               placeholder="What's on your mind?"
-              required></textarea>
+              required
+            ></textarea>
           </div>
-          
+
           <div class="mb-6">
-            <label class="block text-gray-300 text-sm mb-2">Tags (comma separated)</label>
+            <label class="block text-gray-300 text-sm mb-2"
+              >Tags (comma separated)</label
+            >
             <input
               [(ngModel)]="tagsInput"
               name="tags"
               type="text"
               class="w-full bg-white/10 border border-purple-500/30 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
-              placeholder="BTC, ETH, Analysis">
+              placeholder="BTC, ETH, Analysis"
+            />
           </div>
-          
+
           <div class="flex gap-3">
-            <app-button type="submit" [disabled]="!postData.title || !postData.content">
+            <app-button
+              type="submit"
+              [disabled]="!postData.title || !postData.content"
+            >
               Create Post
             </app-button>
             <app-button type="button" variant="ghost" (onClick)="close.emit()">
@@ -60,7 +86,7 @@ import { CreatePostDto } from '../../services/community.service';
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class CreatePostComponent {
   @Output() close = new EventEmitter<void>();
@@ -69,7 +95,7 @@ export class CreatePostComponent {
   postData: Partial<Post> = {
     title: '',
     content: '',
-    tags: []
+    tags: [],
   };
   tagsInput = '';
 
@@ -79,12 +105,15 @@ export class CreatePostComponent {
     if (!this.postData.title || !this.postData.content) {
       return;
     }
-    this.postData.tags = this.tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag);
+    this.postData.tags = this.tagsInput
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
     this.submit.emit(this.postData);
-    const payload : CreatePostDto ={
+    const payload: CreatePostDto = {
       title: this.postData.title || '',
       content: this.postData.content || '',
-      topicIds: []
+      topicIds: [],
     };
     this.postService.createPost(payload).subscribe({
       next: (post) => {
@@ -94,7 +123,7 @@ export class CreatePostComponent {
       },
       error: (error) => {
         console.error('❌ Error creating post:', error);
-      }
+      },
     });
     // Close modal after submitting
   }
@@ -103,9 +132,8 @@ export class CreatePostComponent {
     this.postData = {
       title: '',
       content: '',
-      tags: []
+      tags: [],
     };
     this.tagsInput = '';
   }
 }
-

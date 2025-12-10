@@ -21,17 +21,29 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 /**
  * WatchlistService
- * Manages cryptocurrency watchlist functionality including:
+ *
+ * Manages user's cryptocurrency watchlist functionality including:
  * - Adding/removing coins from watchlist (requires authentication)
- * - Persisting watchlist to database per user
+ * - Persisting watchlist to backend database per user
  * - Providing real-time coin data for watchlist items
+ * - Automatic synchronization between watchlist and live market data
+ *
+ * The service maintains two observable streams:
+ * - watchlistIds$: Array of asset IDs in watchlist
+ * - watchlistCoins$: Full coin data for watchlist items with live prices
  */
 @Injectable({
   providedIn: 'root',
 })
 export class WatchlistService {
+  // Backend API endpoint for watchlist operations
   private readonly apiUrl = 'https://localhost:7175/api/Watchlist';
 
+  /**
+   * Generate HTTP headers with authentication token
+   * @returns HttpHeaders with Content-Type and Authorization (if logged in)
+   * @private
+   */
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     let headers = new HttpHeaders({
@@ -45,11 +57,10 @@ export class WatchlistService {
     return headers;
   }
 
-  // Observable state for watchlist coin IDs (asset IDs from backend)
+  // Observable streams for watchlist state
   private watchlistIdsSubject = new BehaviorSubject<number[]>([]);
   public watchlistIds$ = this.watchlistIdsSubject.asObservable();
 
-  // Observable state for full watchlist coin data
   private watchlistCoinsSubject = new BehaviorSubject<WatchlistCoin[]>([]);
   public watchlistCoins$ = this.watchlistCoinsSubject.asObservable();
 
@@ -58,15 +69,17 @@ export class WatchlistService {
     private apiService: ApiService,
     private authService: AuthService
   ) {
-    // Subscribe to coin updates and merge with watchlist
+    // Set up automatic synchronization between watchlist IDs and coin data
     this.setupWatchlistDataSync();
 
-    // Watch for user info changes (better than isAuthenticated signal)
+    // Watch for authentication state changes
+    // When user logs in, load their watchlist from database
+    // When user logs out, clear watchlist from memory
     this.authService.currentUser$.subscribe((userInfo) => {
       console.log('🔄 User info changed:', userInfo);
 
       if (userInfo && userInfo.id) {
-        // User logged in and we have user ID
+        // User logged in - load their watchlist
         console.log(
           '👤 User logged in with ID:',
           userInfo.id,
@@ -74,7 +87,7 @@ export class WatchlistService {
         );
         this.loadWatchlistFromDatabase(userInfo.id);
       } else {
-        // User logged out or no user info
+        // User logged out - clear watchlist
         console.log('👋 No user info, clearing watchlist...');
         this.clearWatchlistOnLogout();
       }
@@ -83,13 +96,19 @@ export class WatchlistService {
 
   /**
    * Get current user ID from AuthService
+   * @returns User ID or null if not authenticated
+   * @private
    */
   private getUserId(): number | null {
     return this.authService.getCurrentUserId();
   }
 
   /**
-   * Load watchlist from database for current user
+   * Load watchlist from backend database for authenticated user
+   * Fetches the user's default watchlist and updates local state
+   *
+   * @param userId Current user's ID
+   * @private
    */
   private loadWatchlistFromDatabase(userId: number): void {
     this.http
@@ -97,6 +116,7 @@ export class WatchlistService {
       .pipe(
         tap((response) => {
           if (response.success && response.data) {
+            // Extract asset IDs from watchlist
             const assetIds = response.data.assets.map((a) => a.id);
             this.watchlistIdsSubject.next(assetIds);
           }
@@ -111,11 +131,15 @@ export class WatchlistService {
   }
 
   /**
-   * Toggle a coin in the watchlist (add if not present, remove if present)
-   * Requires user to be authenticated
+   * Toggle a coin in the watchlist
+   * If coin is in watchlist, removes it. If not in watchlist, adds it.
+   * Requires user authentication - opens login modal if not logged in.
+   *
+   * @param coinId Asset ID to toggle
+   * @returns True if toggle was attempted, false if user not authenticated
    */
   toggleWatchlist(coinId: number): boolean {
-    // Check if user is authenticated
+    // Check authentication
     if (!this.authService.isAuthenticated()) {
       this.authService.openAuthModal('login');
       return false;
@@ -127,7 +151,7 @@ export class WatchlistService {
       return false;
     }
 
-    // Call API to toggle asset
+    // Call backend API to toggle asset in watchlist
     this.http
       .post<ToggleAssetResponse>(
         `${this.apiUrl}/user/${userId}/toggle/${coinId}`,
@@ -136,6 +160,7 @@ export class WatchlistService {
       .pipe(
         tap((response) => {
           if (response.success) {
+            // Update local state with new watchlist
             const assetIds = response.watchlist.assets.map((a) => a.id);
             this.watchlistIdsSubject.next(assetIds);
           }
@@ -151,7 +176,9 @@ export class WatchlistService {
   }
 
   /**
-   * Check if a coin is in the watchlist
+   * Check if a coin is currently in the watchlist
+   * @param coinId Asset ID to check
+   * @returns True if coin is in watchlist
    */
   isInWatchlist(coinId: number): boolean {
     return this.watchlistIdsSubject.value.includes(coinId);
@@ -159,13 +186,16 @@ export class WatchlistService {
 
   /**
    * Get current watchlist coin IDs
+   * @returns Array of asset IDs in watchlist
    */
   getWatchlistIds(): number[] {
     return this.watchlistIdsSubject.value;
   }
 
   /**
-   * Clear watchlist in memory when user logs out
+   * Clear watchlist from memory when user logs out
+   * Does not delete from database - just clears local state
+   * @private
    */
   private clearWatchlistOnLogout(): void {
     this.watchlistIdsSubject.next([]);
@@ -173,23 +203,27 @@ export class WatchlistService {
   }
 
   /**
-   * Setup real-time sync between watchlist IDs and coin data
+   * Set up automatic synchronization between watchlist IDs and full coin data
+   * Combines watchlist IDs with live coin data from ApiService to provide
+   * always-up-to-date coin information for watchlist items
+   * @private
    */
   private setupWatchlistDataSync(): void {
-    // Combine watchlist IDs with coin data from API
+    // Combine watchlist IDs with all available coins
     combineLatest([this.watchlistIds$, this.apiService.coins$])
       .pipe(
         map(([watchlistIds, allCoins]) => {
           // Filter coins that are in the watchlist
           const watchlistCoins: WatchlistCoin[] = watchlistIds
             .map((assetId) => {
-              // Find coin by asset ID (which matches coin.id from backend)
+              // Find coin by asset ID
               const coin = allCoins.find((c) => Number(c.id) === assetId);
 
               if (!coin) {
                 return null;
               }
 
+              // Transform to WatchlistCoin format
               return {
                 id: coin.id,
                 name: coin.name,
@@ -209,24 +243,29 @@ export class WatchlistService {
         })
       )
       .subscribe((watchlistCoins) => {
+        // Emit updated watchlist coins with live data
         this.watchlistCoinsSubject.next(watchlistCoins);
       });
   }
 
   /**
    * Clear entire watchlist for current user
+   * Note: This only clears local state. To delete from database,
+   * call backend API to remove all items individually
    */
   clearWatchlist(): void {
     if (!this.authService.isAuthenticated()) {
       return;
     }
 
-    // Clear in memory - could also call API to delete all items
+    // Clear local state
+    // TODO: Add backend API call to delete all watchlist items
     this.watchlistIdsSubject.next([]);
   }
 
   /**
-   * Check if user is authenticated (for UI state)
+   * Check if user is authenticated (helper for UI state)
+   * @returns True if user is logged in
    */
   isUserAuthenticated(): boolean {
     return this.authService.isAuthenticated();

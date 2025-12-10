@@ -2,6 +2,26 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AlertListComponent } from '../../../../features/profile/components/alert-list/alert-list.component';
 
+/**
+ * AlertManagementModalComponent
+ *
+ * Full-screen modal for managing user price alerts
+ *
+ * Features:
+ * - Modal overlay with backdrop blur
+ * - Contains AlertListComponent for full alert management
+ * - Close button and backdrop click to dismiss
+ * - Scrollable content area
+ * - Responsive design (max-width 2xl)
+ * - Smooth animations (fade + zoom in)
+ *
+ * Provides access to:
+ * - View all user alerts
+ * - Delete alerts
+ * - Toggle alert active/inactive status
+ *
+ * Opened from header "All Alerts" link in AlertDropdownComponent
+ */
 @Component({
   selector: 'app-alert-management-modal',
   standalone: true,
@@ -51,9 +71,16 @@ import { AlertListComponent } from '../../../../features/profile/components/aler
   `,
 })
 export class AlertManagementModalComponent {
+  /** Controls modal visibility */
   @Input() isOpen = false;
+
+  /** Emitted when modal should close */
   @Output() close = new EventEmitter<void>();
 
+  /**
+   * Handle backdrop click to close modal
+   * Only closes if clicking outside the modal content
+   */
   onBackdropClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
       this.close.emit();

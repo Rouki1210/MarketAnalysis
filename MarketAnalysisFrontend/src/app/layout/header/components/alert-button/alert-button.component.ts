@@ -3,6 +3,20 @@ import { CommonModule } from '@angular/common';
 import { AlertService } from '../../../../core/services/alert.service';
 import { AsyncPipe } from '@angular/common';
 
+/**
+ * AlertButtonComponent
+ *
+ * Notification bell icon button for header
+ *
+ * Features:
+ * - Bell icon with unread count badge
+ * - Red notification badge (shows count up to 99+)
+ * - Emits toggle event to open/close dropdown
+ * - Real-time unread count from AlertService
+ * - Hover effects for better UX
+ *
+ * Used in HeaderComponent to display alert notifications
+ */
 @Component({
   selector: 'app-alert-button',
   standalone: true,
@@ -39,7 +53,11 @@ import { AsyncPipe } from '@angular/common';
   styles: [],
 })
 export class AlertButtonComponent {
+  /** Emitted when button clicked to toggle dropdown */
   @Output() toggle = new EventEmitter<void>();
+
   private alertService = inject(AlertService);
+
+  /** Observable stream of unread alert count */
   unreadCount$ = this.alertService.unreadCount$;
 }

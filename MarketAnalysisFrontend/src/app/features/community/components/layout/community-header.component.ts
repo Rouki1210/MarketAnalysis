@@ -6,22 +6,37 @@ import { SearchBarComponent } from '../common/search-bar.component';
 import { ButtonComponent } from '../common/button.component';
 import { ModalService } from '../../services/modal.service';
 
+/**
+ * CommunityHeaderComponent
+ *
+ * Header navigation for community section
+ *
+ * Features:
+ * - Community branding and logo
+ * - Search bar for discussions
+ * - Create Post button (opens modal via ModalService)
+ * - Auto-navigation to feed page when creating post
+ */
 @Component({
   selector: 'app-community-header',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
-    FormsModule, 
-    SearchBarComponent, 
-    ButtonComponent
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    SearchBarComponent,
+    ButtonComponent,
   ],
   template: `
-    <header class="bg-black/30 backdrop-blur-md border-b border-purple-500/20 sticky top-0 z-50">
+    <header
+      class="bg-black/30 backdrop-blur-md border-b border-purple-500/20 sticky top-0 z-50"
+    >
       <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
           <a routerLink="/community" class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <div
+              class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center"
+            >
               <span class="text-white text-xl">📈</span>
             </div>
             <h1 class="text-2xl font-bold text-white">CMC Community</h1>
@@ -32,7 +47,8 @@ import { ModalService } from '../../services/modal.service';
               [value]="searchQuery"
               (valueChange)="onSearchChange($event)"
               placeholder="Search discussions..."
-              className="w-64">
+              className="w-64"
+            >
             </app-search-bar>
 
             <app-button (onClick)="onCreatePost()">Create Post</app-button>
@@ -41,15 +57,12 @@ import { ModalService } from '../../services/modal.service';
       </div>
     </header>
   `,
-  styles: []
+  styles: [],
 })
 export class CommunityHeaderComponent implements OnInit {
   searchQuery = '';
 
-  constructor(
-    private modalService: ModalService,
-    private router: Router
-  ) {}
+  constructor(private modalService: ModalService, private router: Router) {}
 
   ngOnInit(): void {
     // No authentication needed
@@ -73,4 +86,3 @@ export class CommunityHeaderComponent implements OnInit {
     }
   }
 }
-

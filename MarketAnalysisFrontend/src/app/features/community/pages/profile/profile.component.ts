@@ -1,8 +1,24 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { CommunityUserService, CommunityUser } from '../../services/user.service';
+import {
+  CommunityUserService,
+  CommunityUser,
+} from '../../services/user.service';
 
+/**
+ * CommunityProfileComponent
+ *
+ * User profile page displaying stats and activity
+ *
+ * Features:
+ * - User profile header with avatar and bio
+ * - Stats display (posts, followers, following, points)
+ * - Location and website information
+ * - Join date formatting
+ * - Recent activity section
+ * - Support for viewing other users via route param
+ */
 @Component({
   selector: 'app-community-profile',
   standalone: true,
@@ -10,30 +26,50 @@ import { CommunityUserService, CommunityUser } from '../../services/user.service
   template: `
     <div *ngIf="user()" class="space-y-6">
       <!-- Profile Header -->
-      <div class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-8">
+      <div
+        class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-8"
+      >
         <div class="flex items-start gap-6">
-          <div class="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-5xl flex-shrink-0">
+          <div
+            class="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-5xl flex-shrink-0"
+          >
             {{ user()?.avatar || '👤' }}
           </div>
-          
+
           <div class="flex-1">
             <div class="flex items-center gap-3 mb-2">
-              <h1 class="text-3xl font-bold text-white">{{ user()?.username }}</h1>
-              <span *ngIf="user()?.verified" class="text-blue-400 text-xl">✓</span>
+              <h1 class="text-3xl font-bold text-white">
+                {{ user()?.username }}
+              </h1>
+              <span *ngIf="user()?.verified" class="text-blue-400 text-xl"
+                >✓</span
+              >
             </div>
-            
+
             <p class="text-gray-400 mb-4">{{ user()?.email }}</p>
-            
-            <p *ngIf="user()?.bio" class="text-gray-300 mb-4">{{ user()?.bio }}</p>
-            
+
+            <p *ngIf="user()?.bio" class="text-gray-300 mb-4">
+              {{ user()?.bio }}
+            </p>
+
             <div class="flex items-center gap-6 text-sm">
-              <div *ngIf="user()?.location" class="flex items-center gap-2 text-gray-400">
+              <div
+                *ngIf="user()?.location"
+                class="flex items-center gap-2 text-gray-400"
+              >
                 <span>📍</span>
                 {{ user()?.location }}
               </div>
-              <div *ngIf="user()?.website" class="flex items-center gap-2 text-gray-400">
+              <div
+                *ngIf="user()?.website"
+                class="flex items-center gap-2 text-gray-400"
+              >
                 <span>🔗</span>
-                <a [href]="user()?.website" target="_blank" class="hover:text-purple-400 transition-colors">
+                <a
+                  [href]="user()?.website"
+                  target="_blank"
+                  class="hover:text-purple-400 transition-colors"
+                >
                   {{ user()?.website }}
                 </a>
               </div>
@@ -48,29 +84,47 @@ import { CommunityUserService, CommunityUser } from '../../services/user.service
 
       <!-- Stats -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 text-center">
-          <div class="text-3xl font-bold text-white mb-1">{{ user()?.posts }}</div>
+        <div
+          class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 text-center"
+        >
+          <div class="text-3xl font-bold text-white mb-1">
+            {{ user()?.posts }}
+          </div>
           <div class="text-gray-400 text-sm">Posts</div>
         </div>
-        
-        <div class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 text-center">
-          <div class="text-3xl font-bold text-white mb-1">{{ (user()?.followers || 0).toLocaleString() }}</div>
+
+        <div
+          class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 text-center"
+        >
+          <div class="text-3xl font-bold text-white mb-1">
+            {{ (user()?.followers || 0).toLocaleString() }}
+          </div>
           <div class="text-gray-400 text-sm">Followers</div>
         </div>
 
-        <div class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 text-center">
-          <div class="text-3xl font-bold text-white mb-1">{{ user()?.following || 0 }}</div>
+        <div
+          class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 text-center"
+        >
+          <div class="text-3xl font-bold text-white mb-1">
+            {{ user()?.following || 0 }}
+          </div>
           <div class="text-gray-400 text-sm">Following</div>
         </div>
 
-        <div class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 text-center">
-          <div class="text-3xl font-bold text-white mb-1">{{ (user()?.points || 0).toLocaleString() }}</div>
+        <div
+          class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 text-center"
+        >
+          <div class="text-3xl font-bold text-white mb-1">
+            {{ (user()?.points || 0).toLocaleString() }}
+          </div>
           <div class="text-gray-400 text-sm">Points</div>
         </div>
       </div>
 
       <!-- Recent Activity -->
-      <div class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6">
+      <div
+        class="bg-white/5 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6"
+      >
         <h2 class="text-xl font-bold text-white mb-4">Recent Activity</h2>
         <p class="text-gray-400 text-center py-8">No recent activity</p>
       </div>
@@ -82,7 +136,7 @@ import { CommunityUserService, CommunityUser } from '../../services/user.service
       <p class="text-gray-400">The user you're looking for doesn't exist</p>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class CommunityProfileComponent implements OnInit {
   user = signal<CommunityUser | null>(null);
@@ -94,7 +148,7 @@ export class CommunityProfileComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       this.userId = params['userId'] || null;
       this.loadUser();
     });
@@ -103,14 +157,14 @@ export class CommunityProfileComponent implements OnInit {
   loadUser(): void {
     if (this.userId) {
       this.userService.getUserById(this.userId).subscribe(
-        user => this.user.set(user),
-        error => this.user.set(null)
+        (user) => this.user.set(user),
+        (error) => this.user.set(null)
       );
     } else {
       // Load current user
       this.userService.getCurrentUser().subscribe(
-        user => this.user.set(user),
-        error => this.user.set(null)
+        (user) => this.user.set(user),
+        (error) => this.user.set(null)
       );
     }
   }
@@ -119,11 +173,12 @@ export class CommunityProfileComponent implements OnInit {
     if (!dateString) return '';
     const date = new Date(dateString);
     const now = new Date();
-    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
+    const diffInDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
     if (diffInDays < 30) return `${diffInDays} days ago`;
     if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`;
     return `${Math.floor(diffInDays / 365)} years ago`;
   }
 }
-

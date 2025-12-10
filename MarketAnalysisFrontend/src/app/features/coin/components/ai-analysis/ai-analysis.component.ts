@@ -16,6 +16,26 @@ import {
 } from '../../../../core/models/ai-analysis.model';
 import { Subject, takeUntil } from 'rxjs';
 
+/**
+ * AiAnalysisComponent
+ *
+ * Modal displaying AI-powered cryptocurrency analysis
+ *
+ * Features:
+ * - Fetches AI analysis from Gemini API via AiAnalysisService
+ * - Displays insights categorized as positive, negative, or neutral
+ * - Shows current price and 7-day change
+ * - Loading and error states
+ * - Refresh analysis functionality
+ * - Icon indicators for insight types
+ * - Formatted timestamp display
+ *
+ * Analysis includes:
+ * - Technical analysis insights
+ * - Fundamental analysis
+ * - Sentiment indicators
+ * - Market trends
+ */
 @Component({
   selector: 'app-ai-analysis',
   standalone: true,
@@ -24,29 +44,43 @@ import { Subject, takeUntil } from 'rxjs';
   styleUrls: ['./ai-analysis.component.css'],
 })
 export class AiAnalysisComponent implements OnInit, OnDestroy, OnChanges {
+  /** Cryptocurrency symbol to analyze */
   @Input() symbol: string = '';
+
+  /** Controls modal visibility */
   @Input() isOpen: boolean = false;
+
+  /** Emitted when modal should close */
   @Output() close = new EventEmitter<void>();
 
+  /** AI analysis response data */
   analysis: CoinAnalysisResponse | null = null;
+
+  /** Loading state indicator */
   loading = false;
+
+  /** Error message if analysis fails */
   error: string | null = null;
+
+  /** RxJS cleanup subject */
   private destroy$ = new Subject<void>();
 
   constructor(private aiService: AiAnalysisService) {}
 
   ngOnInit(): void {
-    // Subscribe to loading and error states
+    // Subscribe to service loading state
     this.aiService.loading$
       .pipe(takeUntil(this.destroy$))
       .subscribe((loading) => (this.loading = loading));
 
+    // Subscribe to service error state
     this.aiService.error$
       .pipe(takeUntil(this.destroy$))
       .subscribe((error) => (this.error = error));
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    // Load analysis when modal opens for first time
     if (
       changes['isOpen'] &&
       this.isOpen &&
@@ -63,6 +97,9 @@ export class AiAnalysisComponent implements OnInit, OnDestroy, OnChanges {
     this.destroy$.complete();
   }
 
+  /**
+   * Load AI analysis for current symbol
+   */
   loadAnalysis(): void {
     if (!this.symbol) return;
 
@@ -76,15 +113,24 @@ export class AiAnalysisComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
+  /**
+   * Refresh analysis (fetch new data)
+   */
   refreshAnalysis(): void {
     this.analysis = null;
     this.loadAnalysis();
   }
 
+  /** Close modal */
   closeModal(): void {
     this.close.emit();
   }
 
+  /**
+   * Get emoji icon for insight type
+   * @param type Insight type (positive/negative/neutral)
+   * @returns Emoji string
+   */
   getInsightIcon(type: string): string {
     switch (type) {
       case 'positive':
@@ -98,10 +144,20 @@ export class AiAnalysisComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  /**
+   * Get CSS class for insight type
+   * @param type Insight type
+   * @returns CSS class name
+   */
   getInsightClass(type: string): string {
     return `insight-${type}`;
   }
 
+  /**
+   * Format timestamp for display
+   * @param dateString ISO date string
+   * @returns Formatted date/time string (Vietnamese locale)
+   */
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleString('vi-VN', {

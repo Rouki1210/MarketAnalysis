@@ -18,6 +18,55 @@ import { AlertButtonComponent } from './components/alert-button/alert-button.com
 import { AlertDropdownComponent } from './components/alert-dropdown/alert-dropdown.component';
 import { AlertManagementModalComponent } from './components/alert-management-modal/alert-management-modal.component';
 
+/**
+ * HeaderComponent
+ *
+ * Main application header with navigation and user controls
+ *
+ * **Features:**
+ *
+ * **Navigation:**
+ * - Logo and brand link to home
+ * - Cryptocurrency menu (Markets, Exchanges, NFT, DeFi)
+ * - Exchange listings
+ * - Community links (Feed, Topics, Articles, Leaderboard)
+ * - Watchlist dropdown with price summaries
+ *
+ * **Search:**
+ * - Global cryptocurrency search
+ * - Real-time search results dropdown
+ * - Navigate to coin detail from results
+ * - Debounced search with loading states
+ *
+ * **User Controls:**
+ * - Authentication (Login/Signup buttons when not authenticated)
+ * - User profile menu (Profile, Settings, Logout)
+ * - Alert notifications bell with unread count
+ * - Alert management modal
+ *
+ * **Settings:**
+ * - Currency selection (USD, EUR, GBP, etc.)
+ * - Theme selection (Light/Dark/System)
+ * - Language selection (English, Vietnamese, Chinese, Japanese, Spanish)
+ * - System theme auto-sync with OS preference
+ *
+ * **Watchlist:**
+ * - Quick view of watchlist coins
+ * - Hover to show dropdown
+ * - Live price updates
+ * - 24h change indicators
+ * - Navigate to coin details
+ *
+ * **Responsive Design:**
+ * - Hover-based mega menus on desktop
+ * - Click-outside handling to close dropdowns
+ * - Mobile-friendly collapsible menus
+ *
+ * **Real-time Features:**
+ * - Alert notifications via SignalR
+ * - Live watchlist price updates
+ * - System theme preference monitoring
+ */
 @Component({
   selector: 'app-header',
   standalone: true,

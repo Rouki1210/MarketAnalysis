@@ -8,6 +8,22 @@ import { CoinStatsComponent } from './components/coin-stats/coin-stats.component
 import { PriceChartComponent } from './components/price-chart/price-chart.component';
 import { AiAnalysisComponent } from './components/ai-analysis/ai-analysis.component';
 
+/**
+ * CoinPage
+ *
+ * Detailed view page for individual cryptocurrency
+ *
+ * Features:
+ * - Comprehensive coin statistics and market metrics
+ * - Interactive price charts (candlestick and line)
+ * - AI-powered analysis and insights
+ * - Multiple tabs for different data views (Chart, Markets, News, etc.)
+ * - Real-time price updates via SignalR
+ * - Market pairs trading information
+ *
+ * The page subscribes to real-time coin updates and automatically
+ * refreshes displayed data when price changes occur.
+ */
 @Component({
   selector: 'app-coin',
   standalone: true,
@@ -21,15 +37,29 @@ import { AiAnalysisComponent } from './components/ai-analysis/ai-analysis.compon
   styleUrls: ['./coin.page.css'],
 })
 export class CoinPage implements OnInit {
+  /** Full coin detail including stats and metadata */
   coinDetail?: CoinDetail;
+
+  /** Trading pairs across different exchanges */
   markets: Market[] = [];
+
+  /** Currently selected tab */
   selectedTab = 'Chart';
+
+  /** Available tabs for different views */
   tabs = ['Chart', 'Markets', 'News', 'Yield', 'Market Cycles', 'About'];
+
+  /** Loading state indicator */
   isLoading = true;
+
+  /** Controls AI modal visibility */
   showAiModal = false;
 
   constructor(private route: ActivatedRoute, private apiService: ApiService) {}
 
+  /**
+   * Initialize component and load coin data based on route parameter
+   */
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       const symbol = params['symbol']?.toUpperCase();
@@ -40,9 +70,19 @@ export class CoinPage implements OnInit {
     });
   }
 
+  /**
+   * Load comprehensive coin data including details and market pairs
+   *
+   * Fetches:
+   * - Coin detail (stats, about, contracts, links)
+   * - Market pairs (trading information across exchanges)
+   *
+   * @param symbol Cryptocurrency symbol (e.g., 'BTC', 'ETH')
+   */
   loadCoinData(symbol: string): void {
     this.isLoading = true;
 
+    // Fetch coin details
     this.apiService.getCoinBySymbol(symbol).subscribe({
       next: (detail) => {
         this.coinDetail = detail;
@@ -54,6 +94,7 @@ export class CoinPage implements OnInit {
       },
     });
 
+    // Fetch market pairs
     this.apiService.getMarketPairs(symbol).subscribe({
       next: (markets) => {
         this.markets = markets;
@@ -64,6 +105,17 @@ export class CoinPage implements OnInit {
     });
   }
 
+  /**
+   * Subscribe to real-time coin updates from SignalR
+   *
+   * Updates displayed data when price changes occur including:
+   * - Current price
+   * - Market cap and 24h change
+   * - Volume and 24h change
+   * - Price trend indicators
+   *
+   * @param symbol Cryptocurrency symbol to monitor
+   */
   subscribeToRealtimeUpdates(symbol: string): void {
     // Subscribe to realtime coin updates from SignalR
     this.apiService.coins$.subscribe((coins) => {
@@ -95,6 +147,10 @@ export class CoinPage implements OnInit {
     });
   }
 
+  /**
+   * Switch between different information tabs
+   * @param tab Tab name to display
+   */
   selectTab(tab: string): void {
     this.selectedTab = tab;
   }

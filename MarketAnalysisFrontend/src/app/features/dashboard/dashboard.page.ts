@@ -4,6 +4,21 @@ import { CryptoTableComponent } from './components/crypto-table/crypto-table.com
 import { MarketAiButtonComponent } from '../../shared/components/market-ai-button/market-ai-button.component';
 import { MarketOverviewChatComponent } from './components/market-overview-chat/market-overview-chat.component';
 
+/**
+ * DashboardPage
+ *
+ * Main dashboard view for cryptocurrency market overview
+ *
+ * Features:
+ * - Cryptocurrency table with sorting, filtering, and search
+ * - Floating AI chatbot button for market insights
+ * - AI-powered market overview chat interface
+ *
+ * Layout:
+ * - Full-screen cryptocurrency table as primary content
+ * - Floating action button for AI chat (bottom-right)
+ * - Slide-in chat panel when AI button clicked
+ */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -15,15 +30,16 @@ import { MarketOverviewChatComponent } from './components/market-overview-chat/m
   ],
   template: `
     <div class="min-h-screen p-4 lg:p-6">
+      <!-- Main cryptocurrency data table -->
       <app-crypto-table></app-crypto-table>
 
-      <!-- Floating AI Button -->
+      <!-- Floating AI Button (shown when chat is closed) -->
       <app-market-ai-button
         *ngIf="!showMarketChat"
         (buttonClick)="showMarketChat = true"
       ></app-market-ai-button>
 
-      <!-- Market Overview Chat -->
+      <!-- Market Overview AI Chat Panel -->
       <app-market-overview-chat
         [isOpen]="showMarketChat"
         (close)="showMarketChat = false"
@@ -33,5 +49,6 @@ import { MarketOverviewChatComponent } from './components/market-overview-chat/m
   `,
 })
 export class DashboardPage {
+  /** Controls visibility of AI chat panel */
   showMarketChat = false;
 }
