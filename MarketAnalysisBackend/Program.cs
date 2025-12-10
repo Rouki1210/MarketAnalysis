@@ -21,6 +21,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OpenAI.Interfaces;
 using System.Text;
+using Microsoft.Azure.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -78,7 +80,7 @@ builder.Services.AddScoped<IAiAnalysisService, GeminiAiAnalysisService>();
 builder.Services.AddSingleton<IActiveUserService, ActiveUserService>();
 
 
-builder.Services.AddSignalR();
+//builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
 
 // Repositories
@@ -238,12 +240,14 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200", "https://localhost:4200") // Angular dev server
+            policy.WithOrigins("http://localhost:4200", "https://localhost:4200", "https://market-analyst-front-end.vercel.app") // Angular dev server
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
 });
+//builder.Services.AddSignalR().AddAzureSignalR(builder.Configuration["ConnectionStrings:AzureSignalR"]!);
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -277,7 +281,7 @@ app.UseWebSockets();
 
 app.MapHub<PriceHub>("/pricehub");
 app.MapHub<GlobalMetric>("/globalmetrichub");
-app.MapHub <AlertHub>("/alerthub");
+app.MapHub<AlertHub>("/alerthub");
 app.MapHub<UserAlertHub>("/useralerthub");
 app.MapHub<NotificationHub>("/notificationhub");
 

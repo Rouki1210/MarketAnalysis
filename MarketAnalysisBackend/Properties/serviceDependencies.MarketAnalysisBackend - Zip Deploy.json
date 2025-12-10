@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "signalr1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.Web/sites/MarketAnalysisBackend/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsDbConnection_785F8C878E",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.SignalRService/SignalR/MarketAnalysisBackend",
+      "type": "signalr.azure",
+      "connectionId": "ConnectionStrings:DbConnection",
+      "dynamicId": null
+    }
+  }
+}
