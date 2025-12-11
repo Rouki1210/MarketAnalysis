@@ -330,7 +330,11 @@ export class AuthService {
     console.log('Sending OAuth code to backend:', code);
 
     this.http
-      .post<any>(`${this.apiUrl}/google`, { code }, { withCredentials: true })
+      .post<any>(
+        `${this.apiUrl}/google`,
+        { code, redirectUri: environment.googleRedirectUri },
+        { withCredentials: true }
+      )
       .subscribe({
         next: (res: any) => {
           console.log('✅ Login success', res);
@@ -426,7 +430,11 @@ export class AuthService {
     signature: string,
     message: string
   ): Observable<any> {
-    return this.http.post(`${this.apiUrl}/wallet/login`, {WalletAddress: walletAddress, Signature: signature, Message: message});
+    return this.http.post(`${this.apiUrl}/wallet/login`, {
+      WalletAddress: walletAddress,
+      Signature: signature,
+      Message: message,
+    });
   }
 
   /**
